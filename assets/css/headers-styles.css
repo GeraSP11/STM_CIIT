@@ -1,0 +1,103 @@
+/*---Estilos del Header de Login---*/
+.encabezado-principal {
+    background-color: #F7F7F7;
+    padding: 15px 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.contenedor-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.imagen-encabezado {
+    max-width: 600px;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .encabezado-principal {
+        padding: 10px 15px;
+    }
+
+    .imagen-encabezado {
+        max-width: 100%;
+    }
+}
+
+/*---Estilos del Header dinamico---*/
+.barra-titulo {
+    background: #4D2132;
+    padding: 15px 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.contenedor-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.texto-titulo {
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    flex: 1;
+}
+
+.logo-circular {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    margin-left: 30px;
+}
+
+.logo-circular img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .barra-titulo {
+        padding: 15px 20px;
+    }
+
+    .contenedor-titulo {
+        flex-direction: row;
+        gap: 15px;
+    }
+
+    .texto-titulo {
+        font-size: 20px;
+    }
+
+    .logo-circular {
+        width: 60px;
+        height: 60px;
+        margin-left: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .texto-titulo {
+        font-size: 18px;
+    }
+
+    .logo-circular {
+        width: 50px;
+        height: 50px;
+        margin-left: 10px;
+    }
+}
