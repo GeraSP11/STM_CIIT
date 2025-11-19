@@ -1,10 +1,14 @@
+<!-- Archivo: login.php -->
+<?php
+    $page_title = 'MARINA Corredor Interoceánico';
+?>
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MARINA Corredor Interoceánico</title>
+    <title><?php echo $page_title; ?></title>
     <style>
         * {
             margin: 0;
@@ -16,18 +20,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #541C33 0%, #4B0000 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
 
+        /* Estilos del contenedor principal */
         .container {
             width: 100%;
             max-width: 1200px;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 40px 20px;
+            margin: 0 auto;
+            min-height: calc(100vh - 100px);
         }
 
         .login-box {
@@ -37,22 +41,6 @@
             padding: 50px 60px;
             width: 100%;
             max-width: 450px;
-            position: relative;
-        }
-
-        .login-box::before {
-            content: '';
-            position: absolute;
-            top: -120px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 100px;
-            background-image: url('path/to/logos.png');
-            /* Aquí va la ruta de tu logo */
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
         }
 
         h1 {
@@ -61,7 +49,6 @@
             font-weight: 400;
             text-align: center;
             margin-bottom: 40px;
-            margin-top: 20px;
         }
 
         .input-group {
@@ -100,10 +87,6 @@
             color: #949494;
             pointer-events: none;
             transition: all 0.3s ease;
-        }
-
-        .input-group:last-of-type {
-            position: relative;
         }
 
         .input-group .toggle-password {
@@ -192,24 +175,6 @@
             text-decoration: underline;
         }
 
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .login-box {
-                padding: 40px 30px;
-                margin-top: 100px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .footer-links {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
-
         /* Animación de entrada */
         .login-box {
             animation: fadeInUp 0.6s ease-out;
@@ -236,16 +201,43 @@
             border-bottom-color: #DEC26F;
         }
 
-        /* Estilos para el ícono del ojo */
         .input-group .eye-icon {
             width: 20px;
             height: 20px;
             cursor: pointer;
         }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                min-height: calc(100vh - 80px);
+            }
+
+            .login-box {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Incluir el header -->
+    <?php include('includes/header-login.php'); ?>
+
+
+
+    <!-- Contenido del Login -->
     <div class="container">
         <div class="login-box">
             <h1>Inicio de sesión</h1>
@@ -283,8 +275,8 @@
             </div>
         </div>
     </div>
-
-
 </body>
 
 </html>
+
+
