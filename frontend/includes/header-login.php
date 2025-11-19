@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,51 +11,50 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
         }
-        
-        .header-container {
-            background-color: #ffffff;
+
+        .encabezado-principal {
+            background-color: #F7F7F7;
             padding: 15px 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        
-        .header-content {
+
+        .contenedor-encabezado {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             max-width: 1200px;
             margin: 0 auto;
         }
-        
-        .logo-marina {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+
+        .imagen-encabezado {
+            max-width: 600px;
+            width: 100%;
+            height: auto;
+            display: block;
         }
-        
-        .logo-marina img {
-            height: 70px;
-            width: auto;
-        }
-        
+
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
+            .encabezado-principal {
+                padding: 10px 15px;
+            }
+
+            .imagen-encabezado {
+                max-width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
-    <header class="header-container">
-        <div class="header-content">
-            <div class="logo-marina">
-                <!-- Escudo de México -->
-                <img src="<?php echo isset($base_url) ? $base_url : ''; ?>../../../../assets/img/encabezado.jpeg" alt="Encabezado MARINA-CIIT">
-            </div>
+    <header class="encabezado-principal">
+        <div class="contenedor-encabezado">
+            <img src="<?php echo isset($base_url) ? $base_url : ''; ?>../../../../assets/img/encabezado.jpeg"
+                alt="Encabezado MARINA-CIIT"
+                class="imagen-encabezado">
         </div>
     </header>
