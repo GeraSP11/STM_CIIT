@@ -17,6 +17,7 @@ services:
     build: ./php
     container_name: php_app
     volumes:
+      - ./frontend:/var/www/html/frontend
       - ./backend:/var/www/html/backend
     networks:
       - appnet
