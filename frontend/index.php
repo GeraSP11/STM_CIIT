@@ -235,8 +235,6 @@
     <!-- Incluir el header -->
     <?php include('includes/header-login.php'); ?>
 
-
-
     <!-- Contenido del Login -->
     <div class="container">
         <div class="login-box">
