@@ -1,5 +1,6 @@
 <?php
 $page_title = 'MARINA Corredor Interoceánico';
+$seccion = 'Misión y Visión';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -10,6 +11,7 @@ $page_title = 'MARINA Corredor Interoceánico';
     <title><?php echo $page_title; ?></title>
     <!-- Bootstrap CSS local -->
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
         * {
@@ -18,7 +20,8 @@ $page_title = 'MARINA Corredor Interoceánico';
             padding: 0;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             width: 100%;
             overflow: hidden;
@@ -123,7 +126,9 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         /* Móviles */
         @media screen and (max-width: 768px) {
-            html, body {
+
+            html,
+            body {
                 overflow-y: auto;
                 overflow-x: hidden;
             }
@@ -210,16 +215,46 @@ $page_title = 'MARINA Corredor Interoceánico';
         </div>
     </nav>
 
-    <!-- CONTENIDO -->
-    <div class="section-links d-flex justify-content-between">
-        <a href="#" class="section-link">Documentos</a>
-        <a href="/mision-y-vision.php" class="section-link">Misión y Visión</a>
+    <!-- Breadcrumb inline -->
+    <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <?php echo $seccion; ?>
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container my-4">
+        <h1 class="text-center text-purple"><?php echo $seccion; ?></h1>
+
+        <h2 class="text-purple">MISIÓN</h2>
+        <p>
+            Instrumentar una Plataforma Logística multimodal que integre la prestación de servicios
+            de las Administraciones del Sistema Portuario Nacional Coatzacoalcos S.A. de C.V.,
+            Salina Cruz S.A. de C.V., Dos Bocas S.A. de C.V. y Puerto Chiapas S.A. de C.V., y su
+            interconexión mediante transporte ferroviario, por conducto del Ferrocarril del Istmo
+            de Tehuantepec, S.A. de C.V.; mediante las acciones que le permitan armonizar la
+            plataforma multimodal, así como la adquisición, concesión, o en su caso, enajenación
+            de los inmuebles denominados Polos de Desarrollo para el Bienestar, para el desarrollo
+            económico, social y cultural, desde el ámbito sustentable e incluyente, en beneficio de
+            la población de la Región del Istmo de Tehuantepec y su Área de Influencia.
+        </p>
+
+        <h2 class="text-purple">VISIÓN</h2>
+        <p>
+            Ser un organismo que consolide el desarrollo integral, sustentable, sostenible e incluyente
+            en el Istmo de Tehuantepec, a través de la plataforma logística, conformada por la
+            prestación de servicios de administración portuaria y su interconexión mediante transporte
+            ferroviario, y de las demás actividades que concrete el desarrollo de la región del Istmo
+            de Tehuantepec y en las áreas de influencia, a fin de que genere un crecimiento económico
+            e integral para la población desde el ámbito social y cultural.
+        </p>
     </div>
 
-    <!-- Logo centrado -->
-    <div class="logo-container">
-        <img src="/assets/img/logo_principal.jpeg" alt="Encabezado MARINA-CIIT" class="imagen-encabezado">
-    </div>
 
     <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
