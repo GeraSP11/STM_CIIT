@@ -21,6 +21,7 @@ services:
     volumes:
       - ./frontend:/var/www/html/frontend
       - ./backend:/var/www/html/backend
+      - ./ajax:/var/www/html/ajax 
       
     networks:
       - appnet

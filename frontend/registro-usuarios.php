@@ -13,11 +13,12 @@
             --secondary: #4B0000;
         }
 
-        html,body {
+        html,
+        body {
             height: 100%;
             width: 100%;
         }
-        
+
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             min-height: 100vh;
@@ -86,11 +87,19 @@
             color: var(--primary);
             border: 2px solid var(--primary);
             background: transparent;
+            transition: all 0.3s;
         }
 
         .btn-outline-custom:hover {
-            background: var(--secondary);
-            color: white;
+            border: 2px solid var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(84, 28, 51, 0.3);
+            
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
         }
 
         .password-toggle {
@@ -144,25 +153,29 @@
             <form action="procesar_login.php" method="POST">
 
                 <div class="form-floating mb-2">
-                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" placeholder="Usuario" required pattern="^[a-zA-Z0-9]{3,20}$" title="3-20 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required title="3-20 caracteres, solo letras y números">
                     <label for="nombre_usuario">Nombre de usuario</label>
+                    <div></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="form-floating mb-2">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Introduce un correo electrónico válido">
+                    <input type="email" class="form-control" id="email" name="email" required title="Introduce un correo electrónico válido">
                     <label for="email">Correo Electrónico</label>
+                    <div></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="form-floating mb-2">
-                    <input type="text" class="form-control" id="clave_personal" name="clave_personal" placeholder="Clave" required pattern="^[a-zA-Z0-9]{3,20}$" title="18 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="clave_personal" name="clave_personal" required  title="18 caracteres, solo letras y números">
                     <label for="clave_personal">Clave de Identificación de Personal</label>
+                    <div></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="position-relative mb-2">
                     <input type="checkbox" id="showPassword" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating">
-                        <input type="password" class="form-control pe-5" id="password" name="password" placeholder="Contraseña" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                        <input type="password" class="form-control pe-5" id="password" name="password" required title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="password">Contraseña</label>
+                        <div></div> <!-- aquí va el mensaje de error -->
                     </div> <label for="showPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -171,8 +184,9 @@
                 </div>
 
                 <div class="position-relative mb-2"> <input type="checkbox" id="showConfirmPassword" onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'confirm_password'">
-                    <div class="form-floating"> <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" placeholder="Confirmar Contraseña" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                    <div class="form-floating"> <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" required title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="confirm_password">Confirmar contraseña</label>
+                        <div></div> <!-- aquí va el mensaje de error -->
                     </div> <label for="showConfirmPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -182,7 +196,7 @@
 
                 <div class="d-flex gap-3">
                     <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Registrar Usuario</button>
-                    <button type="button" class="btn btn-outline-custom w-100 py-3 fw-semibold">Cancelar</button>
+                    <button type="button" class="btn btn-outline-custom w-100 py-3 fw-semibold"><a href="index.php">Cancelar</a></button>
                 </div>
 
                 <div class="d-flex justify-content-center pt-4 mt-2 border-top">
@@ -190,8 +204,10 @@
                 </div>
             </form>
         </div>
-    </div> <!-- Bootstrap JS local -->
+    </div>
+    <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/usuarios.js"></script>
 </body>
 
 </html>
