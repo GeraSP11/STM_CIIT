@@ -1,6 +1,6 @@
 <!-- Archivo: login.php -->
 <?php
-    $page_title = 'MARINA Corredor Interoceánico';
+$page_title = 'MARINA Corredor Interoceánico';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -30,8 +30,15 @@
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-control {
@@ -47,15 +54,15 @@
             background: transparent;
         }
 
-        .form-floating > label {
+        .form-floating>label {
             color: #6c757d;
         }
 
-        .form-floating > .form-control:focus ~ label {
+        .form-floating>.form-control:focus~label {
             color: var(--primary);
         }
 
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        .form-floating>.form-control:not(:placeholder-shown)~label {
             color: #6c757d;
         }
 
@@ -116,28 +123,32 @@
 <body>
     <?php include('includes/header-login.php'); ?>
 
-    <div class="container d-flex align-items-center justify-content-center py-3" style="min-height: calc(100vh - 100px);">
+    <div class="container d-flex align-items-center justify-content-center py-3"
+        style="min-height: calc(100vh - 100px);">
         <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
             <h1 class="text-center fw-normal mb-4">Inicio de sesión</h1>
-            
+
             <form action="procesar_login.php" method="POST">
                 <div class="form-floating mb-4">
-                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" placeholder="Usuario" required
-                        pattern="^[a-zA-Z0-9]{3,20}$" title="3-20 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                        placeholder="Usuario" required pattern="^[a-zA-Z0-9]{3,20}$"
+                        title="3-20 caracteres, solo letras y números">
                     <label for="nombre_usuario">Nombre de usuario</label>
                 </div>
 
                 <div class="form-floating mb-4">
                     <input type="email" class="form-control" id="email" name="email" placeholder="Email" required
-                        pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" 
+                        pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                         title="Introduce un correo electrónico válido">
                     <label for="email">Correo Electrónico</label>
                 </div>
 
                 <div class="position-relative mb-4">
-                    <input type="checkbox" id="showPassword" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
+                    <input type="checkbox" id="showPassword"
+                        onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating">
-                        <input type="password" class="form-control pe-5" id="password" name="password" placeholder="Contraseña" required
+                        <input type="password" class="form-control pe-5" id="password" name="password"
+                            placeholder="Contraseña" required
                             pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
                             title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="password">Contraseña</label>
@@ -153,7 +164,8 @@
                 <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Entrar</button>
 
                 <div class="d-flex justify-content-between pt-4 mt-3 border-top">
-                    <a href="recuperar_password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu contraseña?</a>
+                    <a href="recuperar_password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu
+                        contraseña?</a>
                     <a href="registro_usuario.php" class="link-secondary text-decoration-none small">Registrarte</a>
                 </div>
             </form>
