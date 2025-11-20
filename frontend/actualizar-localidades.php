@@ -25,7 +25,7 @@ $seccion = 'Actualizar Localidades';
     <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="#"><i class="fas fa-home" style="color: #4D2132;"></i></a>
+                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 <?php echo $seccion; ?>

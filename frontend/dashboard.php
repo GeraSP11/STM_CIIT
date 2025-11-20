@@ -160,10 +160,10 @@ $page_title = 'MARINA Corredor Interoceánico';
                         <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Personal</a>
                         <ul class="dropdown-menu" aria-labelledby="personalDropdown">
-                            <li><a class="dropdown-item" href="#">Registrar</a></li>
-                            <li><a class="dropdown-item" href="#">Consultar</a></li>
-                            <li><a class="dropdown-item" href="#">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            <li><a class="dropdown-item" href="/registro-personal.php">Registrar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-personal.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-personal.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-personal.php">Eliminar</a></li>
                         </ul>
                     </li>
 
@@ -172,9 +172,9 @@ $page_title = 'MARINA Corredor Interoceánico';
                         <a class="nav-link dropdown-toggle" href="#" id="usuariosDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Usuarios</a>
                         <ul class="dropdown-menu" aria-labelledby="usuariosDropdown">
-                            <li><a class="dropdown-item" href="#">Consultar</a></li>
-                            <li><a class="dropdown-item" href="#">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-usuarios.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-usuarios.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-usuarios.php">Eliminar</a></li>
                         </ul>
                     </li>
 
@@ -183,10 +183,10 @@ $page_title = 'MARINA Corredor Interoceánico';
                         <a class="nav-link dropdown-toggle" href="#" id="productosDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Productos</a>
                         <ul class="dropdown-menu" aria-labelledby="productosDropdown">
-                            <li><a class="dropdown-item" href="#">Registrar</a></li>
-                            <li><a class="dropdown-item" href="#">Consultar</a></li>
-                            <li><a class="dropdown-item" href="#">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-productos.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
                         </ul>
                     </li>
 
@@ -195,10 +195,10 @@ $page_title = 'MARINA Corredor Interoceánico';
                         <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">Localidades</a>
                         <ul class="dropdown-menu" aria-labelledby="localidadesDropdown">
-                            <li><a class="dropdown-item" href="#">Registrar</a></li>
-                            <li><a class="dropdown-item" href="#">Consultar</a></li>
-                            <li><a class="dropdown-item" href="#">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            <li><a class="dropdown-item" href="/registro-localidades.php">Registrar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-localidades.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-localidades.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-localidades.php">Eliminar</a></li>
                         </ul>
                     </li>
                 </ul>

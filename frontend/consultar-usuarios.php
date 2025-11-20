@@ -1,7 +1,7 @@
 <?php
 $page_title = 'MARINA Corredor Interoceánico';
-$titulo_seccion = 'Gestión de Personal';
-$seccion = 'Eliminar Personal';
+$titulo_seccion = 'Gestión de Usuarios';
+$seccion = 'Consultar Usuario';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -11,11 +11,17 @@ $seccion = 'Eliminar Personal';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
 
+    <!-- Bootstrap -->
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Estilos institucionales del header -->
     <link rel="stylesheet" href="/assets/css/headers-styles.css">
+
+    <!-- Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
+        /* Área principal */
         .content-area {
             padding: 30px;
             width: 55%;
@@ -24,8 +30,9 @@ $seccion = 'Eliminar Personal';
             border-radius: 5px;
         }
 
+        /* Etiqueta del título pequeño */
         .search-label {
-            background-color: #4a1026;
+            background-color: #4D2132;
             color: white;
             padding: 10px 20px;
             font-weight: bold;
@@ -34,6 +41,7 @@ $seccion = 'Eliminar Personal';
             margin-bottom: 20px;
         }
 
+        /* Inputs */
         .form-control-custom {
             width: 100%;
             padding: 12px;
@@ -42,9 +50,10 @@ $seccion = 'Eliminar Personal';
             font-size: 15px;
         }
 
+        /* Botón */
         .btn-custom {
             display: block;
-            background-color: #4a1026;
+            background-color: #4D2132;
             color: white;
             padding: 12px 35px;
             border: none;
@@ -55,16 +64,18 @@ $seccion = 'Eliminar Personal';
         }
 
         .btn-custom:hover {
-            background-color: #3b0d20;
+            background-color: #3b1826;
         }
 
+        /* Título principal */
         h2 {
             text-align: center;
-            color: #4a1026;
+            color: #4D2132;
             margin-top: 10px;
             font-weight: bold;
         }
 
+        /* Breadcrumb */
         .breadcrumb-container {
             padding-left: 15px;
             font-size: 18px;
@@ -78,7 +89,7 @@ $seccion = 'Eliminar Personal';
 
 <body>
 
-    <!-- Header dinámico -->
+    <!-- Header dinámico con variables -->
     <?php include('includes/header-dinamico.php'); ?>
 
     <!-- Breadcrumb -->
@@ -96,17 +107,20 @@ $seccion = 'Eliminar Personal';
     <!-- Título -->
     <h2><?php echo $seccion; ?></h2>
 
-    <!-- Contenedor principal -->
+    <!-- Contenido -->
     <div class="content-area">
 
-        <div class="search-label">Filtro de búsqueda: *</div>
+        <div class="search-label">Clave: *</div>
 
-        <input type="text" placeholder="Ingrese la CURP del usuario" class="form-control-custom">
+        <input type="text" placeholder="Clave de Identificación de Personal" class="form-control-custom">
 
-        <button class="btn btn-custom">Buscar</button>
+        <small style="color: gray;">*Campos obligatorios</small>
+
+        <button class="btn btn-custom">Consultar</button>
 
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

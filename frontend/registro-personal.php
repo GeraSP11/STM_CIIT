@@ -41,7 +41,7 @@ $seccion = 'Registro de personal';
     <nav aria-label="breadcrumb" class="mt-2">
         <ol class="breadcrumb" style="padding-left: 15px;">
             <li class="breadcrumb-item">
-                <a href="#"><i class="fas fa-home" style="color: #4D2132;"></i></a> <!-- casita color vino -->
+                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a> <!-- casita color vino -->
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 <?php echo $seccion ?>
