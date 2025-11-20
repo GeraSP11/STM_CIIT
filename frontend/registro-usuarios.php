@@ -22,11 +22,24 @@ $page_title = 'MARINA Corredor Interoceánico';
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .login-card {
             animation: fadeInUp 0.6s;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 0.75rem;
+            padding: 2rem;
+        }
+
+        /* Ajustes para pantallas medianas */
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 1.5rem;
+            }
         }
 
         @keyframes fadeInUp {
