@@ -13,6 +13,11 @@
             --secondary: #4B0000;
         }
 
+        html,body {
+            height: 100%;
+            width: 100%;
+        }
+        
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             min-height: 100vh;
