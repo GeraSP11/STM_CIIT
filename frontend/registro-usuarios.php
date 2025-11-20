@@ -1,62 +1,26 @@
-<!-- Archivo: login.php -->
-<?php
-$page_title = 'MARINA Corredor Interoceánico';
-?>
+<?php $page_title = 'MARINA Corredor Interoceánico'; ?>
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $page_title; ?></title>
-
-    <!-- Bootstrap local -->
+    <title><?php echo $page_title; ?></title> <!-- Bootstrap local -->
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
         :root {
             --primary: #541C33;
             --secondary: #4B0000;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-        }
-
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            overflow-x: hidden;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-            width: 100%;
         }
 
         .login-card {
             animation: fadeInUp 0.6s;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
         }
 
         @keyframes fadeInUp {
@@ -76,8 +40,6 @@ $page_title = 'MARINA Corredor Interoceánico';
             border-bottom: 2px solid #dee2e6;
             border-radius: 0;
             background: transparent;
-            font-size: 1rem;
-            padding: 1rem 0.75rem;
         }
 
         .form-control:focus {
@@ -88,7 +50,6 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         .form-floating>label {
             color: #6c757d;
-            padding: 1rem 0.75rem;
         }
 
         .form-floating>.form-control:focus~label {
@@ -103,8 +64,6 @@ $page_title = 'MARINA Corredor Interoceánico';
             background: var(--primary);
             border: none;
             transition: all 0.3s;
-            font-size: 1rem;
-            padding: 0.75rem 1rem;
         }
 
         .btn-primary:hover {
@@ -140,7 +99,6 @@ $page_title = 'MARINA Corredor Interoceánico';
             cursor: pointer;
             z-index: 10;
             transition: color 0.3s;
-            padding: 0.5rem;
         }
 
         .password-toggle:hover {
@@ -150,7 +108,6 @@ $page_title = 'MARINA Corredor Interoceánico';
         .password-toggle svg {
             width: 20px;
             height: 20px;
-            display: block;
         }
 
         #showPassword {
@@ -164,133 +121,58 @@ $page_title = 'MARINA Corredor Interoceánico';
         .link-secondary {
             color: #6c757d;
             transition: color 0.3s;
-            font-size: 0.875rem;
         }
 
         .link-secondary:hover {
             color: var(--primary);
         }
-
-        h1 {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            font-weight: 400;
-        }
-
-        /* Responsive adjustments */
-        @media screen and (max-height: 700px) {
-            .main-container {
-                padding: 1rem;
-            }
-
-            .login-card {
-                padding: 2rem 1.5rem !important;
-            }
-
-            h1 {
-                margin-bottom: 1.5rem !important;
-            }
-
-            .form-floating {
-                margin-bottom: 1rem !important;
-            }
-        }
-
-        @media screen and (max-width: 576px) {
-            .login-card {
-                padding: 2rem 1.5rem !important;
-            }
-
-            .d-flex.justify-content-between {
-                flex-direction: column;
-                gap: 0.5rem;
-                text-align: center;
-            }
-        }
-
-        /* Para pantallas muy grandes */
-        @media screen and (min-width: 1920px) {
-            .login-card {
-                max-width: 500px;
-            }
-        }
-
-        /* Asegurar que el contenido no se corte */
-        @media screen and (max-height: 600px) {
-            body {
-                overflow-y: auto;
-            }
-
-            .main-container {
-                min-height: 100vh;
-                padding: 1rem;
-            }
-        }
     </style>
 </head>
 
 <body>
+
     <?php include('includes/header-login.php'); ?>
 
-    <div class="main-container">
-        <div class="login-card bg-white rounded p-5">
-            <h1 class="text-center fw-normal mb-4">Inicio de sesión</h1>
-
+    <div class="container d-flex align-items-center justify-content-center py-3" style="min-height: calc(100vh - 100px);">
+        <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
+            <h1 class="text-center fw-normal mb-4">Registro de Usuario</h1>
             <form action="procesar_login.php" method="POST">
+
                 <div class="form-floating mb-4">
-                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
-                        placeholder="Usuario" required pattern="^[a-zA-Z0-9]{3,20}$"
-                        title="3-20 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" placeholder="Usuario" required pattern="^[a-zA-Z0-9]{3,20}$" title="3-20 caracteres, solo letras y números">
                     <label for="nombre_usuario">Nombre de usuario</label>
                 </div>
 
                 <div class="form-floating mb-4">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required
-                        pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                        title="Introduce un correo electrónico válido">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Email" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Introduce un correo electrónico válido">
                     <label for="email">Correo Electrónico</label>
                 </div>
 
                 <div class="form-floating mb-4">
-                    <input type="text" class="form-control" id="clave_personal" name="clave_personal"
-                        placeholder="Clave" required pattern="^[a-zA-Z0-9]{3,20}$"
-                        title="18 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="clave_personal" name="clave_personal" placeholder="Clave" required pattern="^[a-zA-Z0-9]{3,20}$" title="18 caracteres, solo letras y números">
                     <label for="clave_personal">Clave de Identificación de Personal</label>
                 </div>
 
                 <div class="position-relative mb-4">
-                    <input type="checkbox" id="showPassword"
-                        onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
+                    <input type="checkbox" id="showPassword" onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating">
-                        <input type="password" class="form-control pe-5" id="password" name="password"
-                            placeholder="Contraseña" required
-                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                            title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                        <input type="password" class="form-control pe-5" id="password" name="password" placeholder="Contraseña" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="password">Contraseña</label>
-                    </div>
-                    <label for="showPassword" class="password-toggle">
+                    </div> <label for="showPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </label>
+                        </svg> </label>
                 </div>
 
-                <div class="position-relative mb-4">
-                    <input type="checkbox" id="showConfirmPassword"
-                        onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'confirm_password'">
-                    <div class="form-floating">
-                        <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password"
-                            placeholder="Confirmar Contraseña" required
-                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                            title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                <div class="position-relative mb-4"> <input type="checkbox" id="showConfirmPassword" onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'confirm_password'">
+                    <div class="form-floating"> <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" placeholder="Confirmar Contraseña" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="confirm_password">Confirmar contraseña</label>
-                    </div>
-                    <label for="showConfirmPassword" class="password-toggle">
+                    </div> <label for="showConfirmPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </label>
+                        </svg> </label>
                 </div>
 
                 <div class="d-flex gap-3">
@@ -303,9 +185,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                 </div>
             </form>
         </div>
-    </div>
-
-    <!-- Bootstrap JS local -->
+    </div> <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 
