@@ -109,6 +109,10 @@ $page_title = 'MARINA Corredor Interoceánico';
             display: none;
         }
 
+        #showConfirmPassword {
+            display: none;
+        }
+
         .link-secondary {
             color: #6c757d;
             transition: color 0.3s;
@@ -126,7 +130,7 @@ $page_title = 'MARINA Corredor Interoceánico';
     <div class="container d-flex align-items-center justify-content-center py-3"
         style="min-height: calc(100vh - 100px);">
         <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
-            <h1 class="text-center fw-normal mb-4">Inicio de sesión</h1>
+            <h1 class="text-center fw-normal mb-4">Registro de Usuario</h1>
 
             <form action="procesar_login.php" method="POST">
                 <div class="form-floating mb-4">
@@ -141,6 +145,13 @@ $page_title = 'MARINA Corredor Interoceánico';
                         pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                         title="Introduce un correo electrónico válido">
                     <label for="email">Correo Electrónico</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="text" class="form-control" id="clave_personal" name="clave_personal"
+                        placeholder="Clave" required pattern="^[a-zA-Z0-9]{3,20}$"
+                        title="18 caracteres, solo letras y números">
+                    <label for="clave_personal">Clave de Identificación de Personal</label>
                 </div>
 
                 <div class="position-relative mb-4">
@@ -161,12 +172,31 @@ $page_title = 'MARINA Corredor Interoceánico';
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Entrar</button>
+                <div class="position-relative mb-4">
+                    <input type="checkbox" id="showConfirmPassword"
+                        onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'confirm_password'">
+                    <div class="form-floating">
+                        <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password"
+                            placeholder="Confirmar Contraseña" required
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                            title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                        <label for="confirm_password">Confirmar contraseña</label>
+                    </div>
+                    <label for="showConfirmPassword" class="password-toggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </label>
+                </div>
 
-                <div class="d-flex justify-content-between pt-4 mt-3 border-top">
-                    <a href="recuperar_password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu
-                        contraseña?</a>
-                    <a href="registro-usuarios.php" class="link-secondary text-decoration-none small">Registrarte</a>
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Registrar Usuario</button>
+                    <button type="button" class="btn btn-primary w-100 py-3 fw-semibold">Cancelar</button>
+                </div>
+
+                <div class="d-flex justify-content-center pt-4 mt-3 border-top">
+                    <a href="index.php" class="link-secondary text-decoration-none small">¿Ya tienes cuenta? Iniciar sesión</a>
                 </div>
             </form>
         </div>
