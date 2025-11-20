@@ -12,48 +12,129 @@ $page_title = 'MARINA Corredor Interoceánico';
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        /* Colores y fuentes */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header principal */
         .top-bar {
             background-color: #4a1026;
             color: white;
-            padding: 30px 0;
+            padding: 1.5vw 1vw;
             text-align: center;
             font-weight: 600;
-            font-size: 20px;
+            font-size: clamp(12px, 1.3vw, 20px);
+            flex-shrink: 0;
         }
 
+        /* Menú */
         .menu-bar {
             background-color: #3b0d20;
+            flex-shrink: 0;
         }
 
         .menu-bar .nav-link {
             color: white;
+            font-size: clamp(12px, 1.1vw, 16px);
+            padding: 0.5vw 1vw;
         }
 
         .menu-bar .nav-link:hover {
             text-decoration: underline;
         }
 
+        .menu-bar .navbar-text .nav-link {
+            color: white;
+        }
+
+        .dropdown-menu {
+            font-size: clamp(11px, 1vw, 15px);
+        }
+
+        /* Enlaces de sección */
+        .section-links {
+            padding: 0.5vw 1.5vw;
+            flex-shrink: 0;
+        }
+
         .section-link {
-            font-size: 22px;
+            font-size: clamp(14px, 1.4vw, 22px);
             color: #6b6b6b;
             text-decoration: none;
         }
 
         .section-link:hover {
             text-decoration: underline;
+            color: #4a1026;
         }
 
-        /* Logo centrado */
+        /* Logo centrado - ocupa el espacio restante */
         .logo-container {
+            flex: 1;
             display: flex;
             justify-content: center;
-            margin: 0px 0;
+            align-items: center;
+            min-height: 0;
+            padding: 1vw;
         }
 
         .imagen-encabezado {
             max-width: 40%;
+            max-height: 100%;
             height: auto;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Ajustes para pantallas pequeñas en altura */
+        @media screen and (max-height: 600px) {
+            .top-bar {
+                padding: 8px 10px;
+            }
+
+            .section-links {
+                padding: 5px 15px;
+            }
+
+            .imagen-encabezado {
+                max-width: 35%;
+            }
+        }
+
+        /* Ajustes para pantallas muy grandes */
+        @media screen and (min-width: 1920px) {
+            .imagen-encabezado {
+                max-width: 500px;
+            }
+        }
+
+        /* Móviles */
+        @media screen and (max-width: 768px) {
+            html, body {
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .imagen-encabezado {
+                max-width: 70%;
+            }
+
+            .logo-container {
+                min-height: 300px;
+            }
         }
     </style>
 </head>
@@ -130,11 +211,9 @@ $page_title = 'MARINA Corredor Interoceánico';
     </nav>
 
     <!-- CONTENIDO -->
-    <div class="container-fluid mt-2 px-3">
-        <div class="d-flex justify-content-between">
-            <a href="#" class="section-link">Documentos</a>
-            <a href="#" class="section-link">Misión y Visión</a>
-        </div>
+    <div class="section-links d-flex justify-content-between">
+        <a href="#" class="section-link">Documentos</a>
+        <a href="#" class="section-link">Misión y Visión</a>
     </div>
 
     <!-- Logo centrado -->
