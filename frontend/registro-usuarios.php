@@ -83,6 +83,17 @@ $page_title = 'MARINA Corredor Interoceánico';
             background: var(--secondary);
         }
 
+        .btn-outline-custom {
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline-custom:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -192,7 +203,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
                 <div class="d-flex gap-3">
                     <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Registrar Usuario</button>
-                    <button type="button" class="btn btn-primary w-100 py-3 fw-semibold">Cancelar</button>
+                    <button type="button" class="btn btn-outline-custom w-100 py-3 fw-semibold">Cancelar</button>
                 </div>
 
                 <div class="d-flex justify-content-center pt-4 mt-3 border-top">
