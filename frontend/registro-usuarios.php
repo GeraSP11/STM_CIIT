@@ -133,8 +133,8 @@
 
     <?php include('includes/header-login.php'); ?>
 
-    <div class="container d-flex align-items-center justify-content-center py-3" style="min-height: calc(100vh - 100px);">
-        <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
+    <div class="container d-flex align-items-center justify-content-center py-2" style="min-height: calc(100vh - 100px);">
+        <div class="login-card bg-white rounded p-2 w-100" style="max-width: 450px;">
             <h1 class="text-center fw-normal mb-2">Registro de Usuario</h1>
             <form action="procesar_login.php" method="POST">
 
