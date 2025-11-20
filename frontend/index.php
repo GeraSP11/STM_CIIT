@@ -21,7 +21,8 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .login-card {
