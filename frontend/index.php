@@ -7,7 +7,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
 
     <!-- Bootstrap local -->
@@ -21,26 +21,42 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        html {
-            font-size: 16px;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
+        html,
+        body {
+            height: 100%;
+            width: 100%;
         }
 
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            height: 100vh;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            font-size: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            width: 100%;
         }
 
         .login-card {
             animation: fadeInUp 0.6s;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
         }
 
         @keyframes fadeInUp {
@@ -60,6 +76,8 @@ $page_title = 'MARINA Corredor Interoceánico';
             border-bottom: 2px solid #dee2e6;
             border-radius: 0;
             background: transparent;
+            font-size: 1rem;
+            padding: 1rem 0.75rem;
         }
 
         .form-control:focus {
@@ -70,6 +88,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         .form-floating>label {
             color: #6c757d;
+            padding: 1rem 0.75rem;
         }
 
         .form-floating>.form-control:focus~label {
@@ -84,6 +103,8 @@ $page_title = 'MARINA Corredor Interoceánico';
             background: var(--primary);
             border: none;
             transition: all 0.3s;
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
         }
 
         .btn-primary:hover {
@@ -108,6 +129,7 @@ $page_title = 'MARINA Corredor Interoceánico';
             cursor: pointer;
             z-index: 10;
             transition: color 0.3s;
+            padding: 0.5rem;
         }
 
         .password-toggle:hover {
@@ -117,6 +139,7 @@ $page_title = 'MARINA Corredor Interoceánico';
         .password-toggle svg {
             width: 20px;
             height: 20px;
+            display: block;
         }
 
         #showPassword {
@@ -126,46 +149,65 @@ $page_title = 'MARINA Corredor Interoceánico';
         .link-secondary {
             color: #6c757d;
             transition: color 0.3s;
+            font-size: 0.875rem;
         }
 
         .link-secondary:hover {
             color: var(--primary);
         }
 
-        /* Normalización de zoom en diferentes resoluciones */
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 400;
+        }
+
+        /* Responsive adjustments */
+        @media screen and (max-height: 700px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .login-card {
+                padding: 2rem 1.5rem !important;
+            }
+
+            h1 {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .form-floating {
+                margin-bottom: 1rem !important;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            .login-card {
+                padding: 2rem 1.5rem !important;
+            }
+
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: center;
+            }
+        }
+
+        /* Para pantallas muy grandes */
         @media screen and (min-width: 1920px) {
-            html {
-                font-size: 16px;
+            .login-card {
+                max-width: 500px;
             }
         }
 
-        @media screen and (min-width: 1600px) and (max-width: 1919px) {
-            html {
-                font-size: 16px;
+        /* Asegurar que el contenido no se corte */
+        @media screen and (max-height: 600px) {
+            body {
+                overflow-y: auto;
             }
-        }
 
-        @media screen and (min-width: 1440px) and (max-width: 1599px) {
-            html {
-                font-size: 16px;
-            }
-        }
-
-        @media screen and (min-width: 1366px) and (max-width: 1439px) {
-            html {
-                font-size: 16px;
-            }
-        }
-
-        @media screen and (min-width: 1280px) and (max-width: 1365px) {
-            html {
-                font-size: 16px;
-            }
-        }
-
-        @media screen and (max-width: 1279px) {
-            html {
-                font-size: 16px;
+            .main-container {
+                min-height: 100vh;
+                padding: 1rem;
             }
         }
     </style>
@@ -174,9 +216,8 @@ $page_title = 'MARINA Corredor Interoceánico';
 <body>
     <?php include('includes/header-login.php'); ?>
 
-    <div class="container d-flex align-items-center justify-content-center py-3"
-        style="min-height: calc(100vh - 100px);">
-        <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
+    <div class="main-container">
+        <div class="login-card bg-white rounded p-5">
             <h1 class="text-center fw-normal mb-4">Inicio de sesión</h1>
 
             <form action="procesar_login.php" method="POST">
