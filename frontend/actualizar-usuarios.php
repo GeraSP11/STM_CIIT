@@ -1,246 +1,167 @@
+<?php
+$page_title = 'MARINA Corredor Interoceánico';
+$titulo_seccion = 'Gestión de Usuarios';
+$seccion = 'Consulta de Usuarios';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actualización de Usuarios</title>
+    <title><?php echo $page_title; ?></title>
+
+    <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/headers-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        /* RESET Y ESTILOS GENERALES */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #D9D9D9;
-            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
         }
 
-        /* HEADER PRINCIPAL */
-        .main-header {
-            background: #541C33;
-            color: #FFFFFF;
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .main-header h1 {
-            font-size: 1.8rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        .logo {
-            width: 60px;
-            height: 60px;
-            background: #FFFFFF;
-            border-radius: 50%;
+        
+        .breadcrumb-nav {
+            background-color: white;
+            padding: 15px 40px;
+            border-bottom: 1px solid #e0e0e0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #541C33;
+            gap: 10px;
+            font-size: 1.1rem;
         }
-
-        /* BREADCRUMB*/
-        .breadcrumb {
-            background: #FFFFFF;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-bottom: 1px solid #949494;
-        }
-
-        .breadcrumb a {
-            color: #4B0000;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        .breadcrumb span {
-            color: #7E7B7B;
-        }
-
-        /* SUBHEADER*/
-        .subheader {
-            background: #FFFFFF;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            border-bottom: 1px solid #949494;
-        }
-
-        .subheader h2 {
+        
+        .breadcrumb-nav i {
             font-size: 1.5rem;
-            font-weight: 400;
-            color: #843409;
-            letter-spacing: 1px;
+            color: #5c2e3e;
         }
-
-        /* CONTENEDOR PRINCIPAL*/
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        
+        .breadcrumb-nav span {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            background-color: #f5f5f5;
+            margin: 0;
             padding: 0;
         }
-
-        /* SECCIÓN DE BÚSQUEDA */
-        .search-section {
-            padding: 3rem 2rem 2rem 2rem;
-            background: #FFFFFF;
+        
+        .main-content h2 {
+            color: #8b4513;
+            font-size: 1.8rem;
+            font-weight: 400;
+            padding: 30px 0;
+            text-align: center;
+            background-color: white;
         }
-
+        
+        .search-section {
+            background-color: #f5f5f5;
+            padding: 40px;
+            margin-bottom: 0;
+        }
+        
         .search-box {
-            display: flex;
-            gap: 1rem;
-            align-items: flex-end;
-            max-width: 600px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 900px;
             margin: 0 auto;
         }
-
-        /* ==========================
-           GRUPOS DE FORMULARIO
-           ========================== */
-        .form-group {
-            flex: 1;
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
+        
+        .search-title {
+            background-color: #5c2e3e;
+            color: white;
+            padding: 10px 20px;
             font-weight: 500;
-            color: #000000;
-            font-size: 0.95rem;
-            background: #541C33;
-            color: #FFFFFF;
-            padding: 0.5rem 1rem;
-        }
-
-        .required {
-            color: #FFFFFF;
-            font-weight: 700;
-        }
-
-        .helper-text {
-            display: block;
-            font-size: 0.85rem;
-            color: #7E7B7B;
-            margin-top: 0.3rem;
-        }
-
-        /* ==========================
-           CAMPOS DEL FORMULARIO
-           ========================== */
-        input[type="text"],
-        input[type="number"],
-        input[type="email"],
-        input[type="password"],
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #949494;
-            border-radius: 0;
             font-size: 1rem;
-            background: #FFFFFF;
-            color: #000000;
-            font-family: inherit;
-            transition: border-color 0.3s;
+            margin-bottom: 30px;
+            display: inline-block;
         }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #541C33;
+        
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-
-        input[type="text"]:disabled,
-        input[type="number"]:disabled,
-        input[type="email"]:disabled,
-        input[type="password"]:disabled,
-        select:disabled {
-            background-color: #ffffffff;
-            cursor: not-allowed;
-            opacity: 0.6;
+        
+        .search-label {
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 600;
         }
-
-        /* ==========================
-           BOTONES
-           ========================== */
-        .btn {
-            padding: 0.7rem 1.5rem;
+        
+        .search-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+        
+        .search-input::placeholder {
+            color: #999;
+            text-transform: none;
+        }
+        
+        .search-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .search-button {
+            background-color: #5c2e3e;
+            color: white;
+            padding: 10px 35px;
             border: none;
-            border-radius: 0;
+            border-radius: 4px;
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s;
-            font-family: inherit;
+            transition: background-color 0.3s;
         }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        
+        .search-button:hover {
+            background-color: #4b0000;
         }
-
-        .btn-primary {
-            background: #541C33;
-            color: #FFFFFF;
+        
+        .search-hint {
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 5px;
         }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #4B0000;
-        }
-
-        .btn-submit {
-            background: #541C33;
-            color: #FFFFFF;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            background: #4B0000;
-        }
-
-        .btn-reset {
-            background: #7E7B7B;
-            color: #FFFFFF;
-        }
-
-        .btn-reset:hover:not(:disabled) {
-            background: #949494;
-        }
-
-        .btn-cancel {
-            background: #949494;
-            color: #FFFFFF;
-        }
-
-        .btn-cancel:hover:not(:disabled) {
-            background: #7E7B7B;
-        }
-
-        /* ==========================
-           SECCIÓN DEL FORMULARIO
-           ========================== */
-        .form-section {
-            padding: 3rem 2rem;
-            background: #FFFFFF;
+        
+        .update-form {
+            background-color: white;
+            padding: 40px;
+            margin: 40px auto;
+            max-width: 1200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: none;
         }
-
-        .form-section.active {
+        
+        .update-form.active {
             display: block;
             animation: fadeIn 0.3s ease-in;
         }
-
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -251,66 +172,163 @@
                 transform: translateY(0);
             }
         }
-
-        /* ==========================
-           INFO BOX (Personal Asociado)
-           ========================== */
+        
         .info-box {
-            background: #D9D9D9;
-            border: 2px solid #541C33;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border-radius: 0;
+            background-color: #e8e8e8;
+            border: 2px solid #5c2e3e;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
         }
-
+        
         .info-box h3 {
-            color: #541C33;
-            margin-bottom: 1rem;
-            font-size: 1rem;
+            color: #5c2e3e;
+            font-size: 1.2rem;
             font-weight: 500;
+            margin-bottom: 15px;
         }
-
+        
         .info-box p {
-            color: #000000;
-            margin: 0.5rem 0;
-            font-size: 0.95rem;
+            color: #333;
+            margin: 8px 0;
+            font-size: 1rem;
             line-height: 1.6;
         }
-
+        
         .info-box strong {
-            color: #4B0000;
+            color: #4b0000;
             font-weight: 600;
         }
-
-        /* ==========================
-           BOTONES DE ACCIÓN
-           ========================== */
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group label {
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group label .required {
+            color: red;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            background-color: #e8e8e8;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #5c2e3e;
+            background-color: white;
+        }
+        
+        .form-group input:disabled,
+        .form-group select:disabled {
+            background-color: #d0d0d0;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .helper-text {
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .form-footer {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
         .form-actions {
             display: flex;
-            gap: 1rem;
+            gap: 15px;
             justify-content: center;
-            padding-top: 2rem;
-            border-top: 2px solid #541C33;
-            margin-top: 2rem;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #5c2e3e;
         }
-
-        /* ==========================
-           ALERTAS
-           ========================== */
+        
+        .btn {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background-color: #5c2e3e;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4b0000;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #5a6268;
+        }
+        
+        .btn-cancel {
+            background-color: #999;
+            color: white;
+        }
+        
+        .btn-cancel:hover:not(:disabled) {
+            background-color: #777;
+        }
+        
         .alert {
-            padding: 1rem 1.5rem;
-            margin: 0 2rem 1.5rem 2rem;
-            border-radius: 0;
+            padding: 15px 20px;
+            margin: 20px auto;
+            max-width: 1200px;
+            border-radius: 4px;
             font-size: 0.95rem;
             display: none;
-            border: 2px solid #541C33;
         }
-
+        
         .alert.show {
             display: block;
             animation: slideDown 0.3s ease-out;
         }
-
+        
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -321,151 +339,126 @@
                 transform: translateY(0);
             }
         }
-
+        
         .alert-success {
-            background: #DEC26F;
-            color: #4B0000;
-            border-color: #843409;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
-
+        
         .alert-error {
-            background: #4B0000;
-            color: #FFFFFF;
-            border-color: #541C33;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-
+        
         .alert-info {
-            background: #D9D9D9;
-            color: #000000;
-            border-color: #949494;
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
-
-        /* ==========================
-           ESTADO DE CARGA
-           ========================== */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-            position: relative;
+        
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-
-        .loading::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 30px;
-            height: 30px;
-            margin: -15px 0 0 -15px;
-            border: 3px solid #D9D9D9;
-            border-top: 3px solid #541C33;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* ==========================
-           RESPONSIVO
-           ========================== */
+        
         @media (max-width: 768px) {
-            .main-header h1 {
-                font-size: 1.3rem;
+            .header {
+                padding: 20px;
             }
-
-            .logo {
-                width: 50px;
-                height: 50px;
+            
+            .header h1 {
+                font-size: 1.8rem;
             }
-
-            .subheader {
-                padding: 2rem 1rem;
+            
+            .header-logo {
+                width: 70px;
+                height: 70px;
             }
-
-            .subheader h2 {
-                font-size: 1.2rem;
+            
+            .breadcrumb-nav {
+                padding: 15px 20px;
             }
-
-            .search-section {
-                padding: 2rem 1rem;
+            
+            .main-content {
+                margin: 20px;
+                padding: 20px;
             }
-
-            .search-box {
+            
+            .search-container {
                 flex-direction: column;
                 align-items: stretch;
             }
-
-            .form-section {
-                padding: 2rem 1rem;
+            
+            .search-input {
+                flex: 1;
             }
-
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .form-actions {
                 flex-direction: column;
             }
-
+            
             .btn {
                 width: 100%;
-            }
-
-            .alert {
-                margin: 0 1rem 1rem 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header Principal -->
-    <header class="main-header">
-        <h1>Gestión de usuarios</h1>
-        <div class="logo">LOGO</div>
-    </header>
+    <!-- Header -->
+    <?php include('includes/header-dinamico.php'); ?>
 
     <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <a href="#">🏠</a>
-        <span>></span>
-        <span>Actualización de usuario</span>
+    <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="#"><i class="fas fa-home" style="color: #4D2132;"></i></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <?php echo $seccion; ?>
+            </li>
+        </ol>
     </nav>
 
-    <!-- Subheader -->
-    <section class="subheader">
-        <h2>Actualización de usuario</h2>
-    </section>
-
-    <div class="container">
-        <!-- Sección de Búsqueda -->
-        <section class="search-section">
+    <main class="main-content">
+        <h2>Actualizar Usuarios</h2>
+        
+        <div class="search-section">
             <div class="search-box">
-                <div class="form-group">
-                    <label for="curp_usuario">
-                        Clave: <span class="required">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="curp_usuario" 
-                        placeholder="Clave de Identificación de Personal"
-                        maxlength="18"
-                        style="text-transform: uppercase;"
-                        required>
-                    <small class="helper-text">*Campos obligatorios</small>
+                <div class="search-title">Actualización de Usuarios:</div>
+                
+                <div class="search-container">
+                    <div class="search-input-group">
+                        <label class="search-label">CURP del Usuario <span style="color: red;">*</span></label>
+                        <input 
+                            type="text" 
+                            id="curp_busqueda" 
+                            class="search-input"
+                            maxlength="18" 
+                            placeholder="Ingrese la CURP del usuario">
+                        <div class="search-hint">Presione ENTER o clic en Buscar</div>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button type="button" class="search-button" onclick="buscarUsuario()">
+                            Buscar
+                        </button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="buscarUsuario()">
-                    Consultar
-                </button>
             </div>
-        </section>
-    </div>
-
-    <!-- Mensaje de alerta -->
-    <div id="alertMessage" class="alert"></div>
-
-    <!-- Formulario de Actualización (Inicialmente oculto) -->
-    <section id="formSection" class="form-section">
-        <form id="updateForm">
-            <!-- Información del Usuario Encontrado -->
+        </div>
+        
+        <div id="alertMessage" class="alert"></div>
+        
+        <form id="updateForm" class="update-form">
+            <input type="hidden" id="id_usuario" name="id_usuario" value="">
+            
             <div class="info-box">
                 <h3>Información del Usuario</h3>
                 <p><strong>ID:</strong> <span id="info_id">-</span></p>
@@ -473,58 +466,55 @@
                 <p><strong>Personal Asociado:</strong> <span id="info_personal">-</span></p>
                 <p><strong>CURP:</strong> <span id="info_curp">-</span></p>
             </div>
-
-            <!-- Campos Editables -->
-            <div class="form-group">
-                <label for="correo_electronico">
-                    Correo Electrónico <span class="required">*</span>
-                </label>
-                <input 
-                    type="email" 
-                    id="correo_electronico" 
-                    name="correo_electronico"
-                    placeholder="ejemplo@correo.com"
-                    required>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="curp">CURP (Editable): <span class="required">*</span></label>
+                    <input type="text" id="curp" name="curp" maxlength="18" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre_usuario">Nombre de Usuario: <span class="required">*</span></label>
+                    <input type="text" id="nombre_usuario" name="nombre_usuario" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correo_electronico">Correo Electrónico: <span class="required">*</span></label>
+                    <input type="email" id="correo_electronico" name="correo_electronico" placeholder="ejemplo@correo.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="identificador_de_rh">Personal Asociado: <span class="required">*</span></label>
+                    <select id="identificador_de_rh" name="identificador_de_rh" required>
+                        <option value="">Seleccione una persona</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contrasena">Nueva Contraseña:</label>
+                    <input type="password" id="contrasena" name="contrasena" minlength="6" placeholder="Dejar en blanco para mantener actual">
+                    <small class="helper-text">Mínimo 6 caracteres. Opcional.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contrasena_confirmar">Confirmar Contraseña:</label>
+                    <input type="password" id="contrasena_confirmar" placeholder="Confirme la nueva contraseña" minlength="6">
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="identificador_de_rh">
-                    Personal Asociado <span class="required">*</span>
-                </label>
-                <select id="identificador_de_rh" name="identificador_de_rh" required>
-                    <option value="">Seleccione una persona</option>
-                </select>
+            
+            <div class="form-footer">
+                *Campos obligatorios
             </div>
-
-            <div class="form-group">
-                <label for="contrasena">Nueva Contraseña</label>
-                <input 
-                    type="password" 
-                    id="contrasena" 
-                    name="contrasena"
-                    placeholder="Dejar en blanco para mantener actual"
-                    minlength="6">
-                <small class="helper-text">Mínimo 6 caracteres. Opcional.</small>
-            </div>
-
-            <div class="form-group">
-                <label for="contrasena_confirmar">Confirmar Contraseña</label>
-                <input 
-                    type="password" 
-                    id="contrasena_confirmar"
-                    placeholder="Confirme la nueva contraseña"
-                    minlength="6">
-            </div>
-
-            <!-- Botones de Acción -->
+            
             <div class="form-actions">
-                <button type="submit" class="btn btn-submit">Actualizar</button>
-                <button type="button" class="btn btn-reset" onclick="limpiarFormulario()">Limpiar</button>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+                <button type="reset" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
                 <button type="button" class="btn btn-cancel" onclick="cancelar()">Cancelar</button>
             </div>
         </form>
-    </section>
+    </main>
 
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="./js/actualizarUsuarios.js"></script>
 </body>
 </html>
