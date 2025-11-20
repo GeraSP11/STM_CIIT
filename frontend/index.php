@@ -7,7 +7,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><?php echo $page_title; ?></title>
 
     <!-- Bootstrap local -->
@@ -19,10 +19,23 @@ $page_title = 'MARINA Corredor Interoceánico';
             --secondary: #4B0000;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
         body {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             height: 100vh;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
+            font-size: 1rem;
         }
 
         .login-card {
@@ -117,6 +130,43 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         .link-secondary:hover {
             color: var(--primary);
+        }
+
+        /* Normalización de zoom en diferentes resoluciones */
+        @media screen and (min-width: 1920px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 1600px) and (max-width: 1919px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 1440px) and (max-width: 1599px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 1366px) and (max-width: 1439px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (min-width: 1280px) and (max-width: 1365px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 1279px) {
+            html {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
