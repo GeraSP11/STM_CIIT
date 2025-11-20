@@ -256,7 +256,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                 <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Entrar</button>
 
                 <div class="d-flex justify-content-between pt-4 mt-3 border-top">
-                    <a href="recuperar_password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu
+                    <a href="recuperar-password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu
                         contraseña?</a>
                     <a href="registro-usuarios.php" class="link-secondary text-decoration-none small">Registrarte</a>
                 </div>
