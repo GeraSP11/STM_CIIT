@@ -38,11 +38,14 @@
 }
 
 .contenedor-titulo {
+    position: relative;
+    /* permite posicionar el texto */
+    max-width: 900px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: 600px;
-    margin: 0 auto;
+    justify-content: flex-end;
+    /* deja el logo en su lugar */
 }
 
 .texto-titulo {
@@ -50,7 +53,12 @@
     font-size: 32px;
     font-weight: 300;
     letter-spacing: 1px;
-    flex: 1;
+    position: absolute;
+    /* se coloca en medio */
+    left: 50%;
+    transform: translateX(-50%);
+    /* centrado perfecto */
+    white-space: nowrap;
 }
 
 .logo-circular {
@@ -60,7 +68,8 @@
     width: 80px;
     height: 80px;
     flex-shrink: 0;
-    margin-left: 30px;
+    margin-left: 90px;
+    /* se mantiene el último valor aplicado */
 }
 
 .logo-circular img {
