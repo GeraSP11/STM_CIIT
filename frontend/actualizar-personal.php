@@ -1,7 +1,6 @@
+
 <?php
-$page_title = 'MARINA Corredor Interoceánico';
-$titulo_seccion = 'Gestión de Personal';
-$seccion = 'Actualizar personal';
+$page_title = 'Actualizar Personal';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -11,9 +10,7 @@ $seccion = 'Actualizar personal';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actualizar Personal</title>
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/headers-styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <link href="/assets/bootstrap/icons/bootstrap-icons.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -26,7 +23,41 @@ $seccion = 'Actualizar personal';
             background-color: #f5f5f5;
         }
 
+        .header {
+            background: linear-gradient(#4b0000 100%);
+            color: white;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
 
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .header-logo {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
 
         .breadcrumb-nav {
             background-color: white;
@@ -155,19 +186,17 @@ $seccion = 'Actualizar personal';
 </head>
 
 <body>
-    <?php include('includes/header-dinamico.php'); ?>
-
-    <nav aria-label="breadcrumb" class="mt-2">
-        <ol class="breadcrumb" style="padding-left: 15px;">
-            <li class="breadcrumb-item">
-                <a href="/dashboard.php"><i class="fas fa-home" style="color:#4D2132;"></i></a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php echo $seccion; ?>
-            </li>
-        </ol>
-    </nav>
-
+    <div class="header">
+        <h1>Gestión de personal</h1>
+        <div class="header-logo">
+            <img src="/assets/img/logo_principal.jpeg" alt="Corredor Interoceánico">
+        </div>
+    </div>
+    <div class="breadcrumb-nav">
+        <i class="bi bi-house-door-fill"></i>
+        <span>></span>
+        <span>Actualizar Personal</span>
+    </div>
     <main class="main-content">
         <h2>Actualizar Registro de Personal</h2>
 
@@ -232,7 +261,6 @@ $seccion = 'Actualizar personal';
             </div>
         </form>
     </main>
-
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="./js/actualizarEliminarPersonal.js"></script>
 </body>
