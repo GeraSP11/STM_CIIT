@@ -41,7 +41,8 @@ $seccion = 'Registro de personal';
     <nav aria-label="breadcrumb" class="mt-2">
         <ol class="breadcrumb" style="padding-left: 15px;">
             <li class="breadcrumb-item">
-                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a> <!-- casita color vino -->
+                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
+                <!-- casita color vino -->
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 <?php echo $seccion ?>
@@ -61,43 +62,55 @@ $seccion = 'Registro de personal';
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Nombres</label>
-                            <input type="text" class="form-control" name="nombres" required>
+                            <label class="form-label">Nombre(s)</label>
+                            <input type="text" class="form-control" id="nombre_personal" name="nombre_personal" required
+                                pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$" placeholder="Ej. José Antonio"
+                                title="Solo letras">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Apellido Paterno</label>
-                            <input type="text" class="form-control" name="apellido_paterno" required>
+                            <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno"
+                                required pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$" placeholder="Ej. Pérez"
+                                title="Solo letras">
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Apellido Materno</label>
-                            <input type="text" class="form-control" name="apellido_materno" required>
+                            <input type="text" class="form-control" id="apellido_materno" name="apellido_materno"
+                                pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$" placeholder="Ej. López"
+                                title="Solo letras">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Cargo</label>
-                            <select class="form-select" name="cargo" required>
+                            <select class="form-select" id="cargo" name="cargo" required>
                                 <option value="">Seleccione un cargo</option>
-                                <option value="administrativo">Administrativo</option>
-                                <option value="operativo">Operativo</option>
-                                <option value="supervisor">Supervisor</option>
+                                <option value="Autoridad">Autoridad</option>
+                                <option value="Administrador del TMS">Administrador del TMS</option>
+                                <option value="Operador Logístico">Operador Logístico</option>
+                                <option value="Cliente">Cliente</option>
+                                <option value="Jefe de Almacén">Jefe de Almacén</option>
                             </select>
                         </div>
+
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label">Afiliación Laboral</label>
-                            <select class="form-select" name="localidad" required>
+                            <select class="form-select" id="afiliacion_laboral" name="afiliacion_laboral" required>
                                 <option value="">Seleccione una localidad</option>
-                                <option value="localidad1">Localidad 1</option>
-                                <option value="localidad2">Localidad 2</option>
+
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">CURP</label>
-                            <input type="text" class="form-control" name="curp" required>
+                            <input type="text" class="form-control" style="text-transform: uppercase;"
+                                oninput="this.value = this.value.toUpperCase()" id="curp" name="curp" required
+                                maxlength="18"
+                                pattern="([A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)"
+                                title="CURP válido de 18 caracteres">
                         </div>
                     </div>
 
@@ -115,6 +128,17 @@ $seccion = 'Registro de personal';
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- TU SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/personal.js"></script>
+
 </body>
 
 </html>
