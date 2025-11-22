@@ -86,51 +86,75 @@ $seccion = 'Registro de Localidades';
 
     <!-- Contenedor principal -->
     <div class="form-container">
+        <form id="formLocalidades">
+            <!-- Fila 1 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="nombre_centro" class="form-label">Nombre del centro de trabajo</label>
+                    <input type="text" id="nombre_centro" name="nombre_centro" class="form-input" placeholder="Ej. PUBIS"
+                        required maxlength="100" pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$"
+                        title="Solo letras, números y espacios">
+                </div>
+                <div class="col-md-4">
+                    <label for="ubicacionGeo" class="form-label">Ubicación Georreferenciada (Latitud, Longitud)</label>
+                    <input type="text" id="ubicacionGeo" name="ubicacionGeo" class="form-input"
+                        placeholder="Ej. 19.4326, -99.1332" required pattern="^-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+$"
+                        title="Formato correcto: latitud,longitud (ej. 19.4326, -99.1332)">
+                </div>
+                <div class="col-md-4">
+                    <label for="poblacion" class="form-label">Población</label>
+                    <input type="text" id="poblacion" name="poblacion" class="form-input"
+                        placeholder="Ej. San Pedro Mixtepec" required maxlength="100"
+                        pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$" title="Solo letras y espacios">
+                </div>
+            </div>
 
-        <!-- Fila 1 -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label class="form-label">Nombre del centro de trabajo</label>
-                <input type="text" class="form-input" placeholder="Ej. PUBIS">
+            <!-- Fila 2 -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label for="localidad" class="form-label">Localidad</label>
+                    <input type="text" id="localidad" name="localidad" class="form-input" placeholder="Ej. Centro"
+                        required maxlength="100" pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$"
+                        title="Solo letras y espacios">
+                </div>
+                <div class="col-md-4">
+                    <label for="estados" class="form-label">Estado</label>
+                    <select id="estados" name="estado" class="form-select" required>
+                        <option value="">Seleccione un estado</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="tipoInstalacion" class="form-label">Tipo de instalación</label>
+                    <select id="tipoInstalacion" name="tipoInstalacion" class="form-select" required>
+                        <option value="">Seleccione un tipo de instalación</option>
+                        <option value="Centro Productivo">Centro Productivo</option>
+                        <option value="Centro de Distribucion">Centro de Distribución</option>
+                        <option value="PODEBI">PODEBI</option>
+                        <option value="Almacen">Almacén</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Ubicación Georreferenciada (Latitud, Longitud)</label>
-                <input type="text" class="form-input" placeholder="Ej. 194.4326, -99.1332">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Población</label>
-                <input type="text" class="form-input" placeholder="Ej. San Luis Rio Colorado">
-            </div>
-        </div>
 
-        <!-- Fila 2 -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <label class="form-label">Localidad</label>
-                <input type="text" class="form-input" placeholder="Ej. Centro">
+            <!-- Botones -->
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-custom" type="submit">Guardar</button>
+                <button class="btn btn-outline-secondary" type="reset">Cancelar</button>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Estado</label>
-                <select class="form-select">
-                    <option>Seleccione un estado</option>
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Tipo de instalación</label>
-                <select class="form-select">
-                    <option>Seleccione un tipo de instalación</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="d-flex justify-content-center">
-            <button class="btn btn-custom">Guardar</button>
-            <button class="btn btn-outline-secondary">Cancelar</button>
-        </div>
-
+        </form>
     </div>
-
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- CRIPT DEL FORMULARIO -->
+
+    <script src="/assets/js/estados.js"></script>
+    <script src="/assets/js/localidades.js"></script>
 </body>
+
 </html>

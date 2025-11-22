@@ -136,7 +136,7 @@ $seccion = 'Registro de personal';
     <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
     <script src="/assets/js/alertas.js"></script>
 
-    <!-- TU SCRIPT DEL FORMULARIO -->
+    <!-- CRIPT DEL FORMULARIO -->
     <script src="/assets/js/personal.js"></script>
 
 </body>
