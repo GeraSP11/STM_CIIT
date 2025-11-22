@@ -86,17 +86,53 @@ $seccion = 'Consulta de Personal';
     <!-- Título de sección -->
     <h2><?php echo $seccion; ?></h2>
 
-    <!-- Cuadro principal -->
-    <div class="form-container">
-        <div class="form-label-box">CURP:</div>
-        <input type="text" placeholder="Clave Única de Registro de Población" class="form-control-custom">
+    <!-- Contenedor formulario consulta -->
+    <div id="consultaCurp" class="form-container">
+        <form id="formConsulta">
+            <div class="form-label-box">CURP:</div>
+            <input type="text" class="form-control-custom" style="text-transform: uppercase;"
+                oninput="this.value = this.value.toUpperCase()" id="curp" name="curp" required maxlength="18"
+                placeholder="Clave Única de Registro de Población"
+                pattern="([A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d])(\d)"
+                title="CURP válido de 18 caracteres">
+            <div class="d-flex justify-content-center">
+                <button id="btnConsultar" type="submit" class="btn btn-custom">Consultar</button>
+            </div>
+        </form>
+    </div>
 
+
+    <!-- Contenedor tabla resultados, oculto inicialmente -->
+    <div id="tablaResultados" class="form-container" style="display:none;">
+        <table id="tablaPersonal" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido Paterno</th>
+                    <th>Apellido Materno</th>
+                    <th>Afiliación Laboral</th>
+                    <th>Cargo</th>
+                    <th>CURP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
         <div class="d-flex justify-content-center">
-            <button class="btn btn-custom">Consultar</button>
+            <button id="btnVolver" class="btn btn-custom">Volver</button>
         </div>
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- TU SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/personal.js"></script>
 </body>
 
 </html>

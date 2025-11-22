@@ -14,7 +14,12 @@ switch ($action) {
         header('Content-Type: application/json');
         echo json_encode($localidades);
         break;
-
+    case 'consultar-personal':
+        $controller = new PersonalController();
+        $localidades = $controller->listarPersonal($_POST);
+        header('Content-Type: application/json');
+        echo json_encode($localidades);
+        break;
     default:
         echo "Acción no válida";
 }

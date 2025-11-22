@@ -61,4 +61,32 @@ class PersonalModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function listarPersonal($curp = null)
+    {
+        global $pdo;
+
+        $sql = "SELECT 
+                p.nombre_personal AS nombre,
+                p.apellido_paterno,
+                p.apellido_materno,
+                l.nombre_centro_trabajo AS afiliacion_laboral,
+                p.cargo,
+                p.curp
+            FROM personal p
+            JOIN localidades l ON p.afiliacion_laboral = l.id_localidad";
+
+        $params = [];
+
+        if ($curp) {
+            $sql .= " WHERE p.curp = :curp";
+            $params[':curp'] = $curp;
+        }
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
 }

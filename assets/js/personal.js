@@ -9,18 +9,14 @@
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", function () {
-
-    const formularioRegistro = document.querySelector("form");
-    const selectLocalidad = document.getElementById("afiliacion_laboral");
-
-    if (!formularioRegistro) return;
-
     // ---- 1. Registrar ----
-    cargarLocalidades(selectLocalidad);
-    configurarRegistro(formularioRegistro);
+    cargarLocalidades();
+    configurarRegistro(); // validaciones internas
 
     // ---- 2. Consultar ----
-    // cargarListadoPersonal();   // (Próximo)
+    consultarPersonal(); // validaciones internas
+
+
 
     // ---- 3. Actualizar ----
     // configurarEdicion();       // (Próximo)
@@ -37,8 +33,9 @@ document.addEventListener("DOMContentLoaded", function () {
 /**
  * Carga las localidades necesarias para registrar personal.
  */
-function cargarLocalidades(selectLocalidad) {
-
+function cargarLocalidades() {
+    const selectLocalidad = document.getElementById("afiliacion_laboral");
+    if (!selectLocalidad) return;
     apiRequest("obtener-localidades")
         .then(r => r.json())
         .then(localidades => {
@@ -49,14 +46,17 @@ function cargarLocalidades(selectLocalidad) {
                 opcion.textContent = loc.nombre_centro_trabajo;
                 selectLocalidad.appendChild(opcion);
             });
-        });
+        })
+        .catch(err => console.error("Error al cargar localidades:", err));
 }
 
 /**
  * Configura el envío del formulario de registro.
  */
-function configurarRegistro(formulario) {
+function configurarRegistro() {
 
+    const formulario = document.querySelector("#formRegistro");
+    if (!formulario) return;
     formulario.addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -68,9 +68,10 @@ function configurarRegistro(formulario) {
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(
                         resp,
-                        "Registrado correctamente.",
+                        "Personal registrado correctamente.",
                         "dashboard.php"
-                    ));
+                    ))
+                    .catch(() => alerta("Error", "Ocurrió un problema en la petición.", "error"));
             });
     });
 }
@@ -81,13 +82,74 @@ function configurarRegistro(formulario) {
    2. CONSULTAR (READ)
    ===================================================== */
 
-// function cargarListadoPersonal() {
-//     apiRequest("consultar")
-//         .then(r => r.json())
-//         .then(data => {
-//             // Pintar tabla...
-//         });
-// }
+function consultarPersonal() {
+    const formConsulta = document.getElementById("formConsulta");
+    const inputCurp = document.getElementById("curp");
+    const divConsulta = document.getElementById("consultaCurp");
+    const divTabla = document.getElementById("tablaResultados");
+    const tbody = document.querySelector("#tablaPersonal tbody");
+    const btnVolver = document.getElementById("btnVolver");
+
+    if (!formConsulta) return;
+
+    formConsulta.addEventListener("submit", (e) => {
+        e.preventDefault(); // Evita envío real
+        // Si llegó aquí, la validación HTML ya pasó
+        const curp = inputCurp.value.trim();
+
+        console.log(curp);
+        apiRequest("consultar-personal", { curp })
+            .then(r => r.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    alerta("Consulta Personal", "No se encontró información para esa CURP", "warning");
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                data.forEach(personal => {
+                    const fila = document.createElement("tr");
+                    fila.innerHTML = `
+                        <td>${personal.nombre}</td>
+                        <td>${personal.apellido_paterno}</td>
+                        <td>${personal.apellido_materno}</td>
+                        <td>${personal.afiliacion_laboral}</td>
+                        <td>${personal.cargo || ""}</td>
+                        <td>${personal.curp}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+
+                divConsulta.style.display = "none";
+                divTabla.style.display = "block";
+            })
+            .catch(() => alerta("Error", "Ocurrió un problema al consultar los datos", "error"));
+    });
+
+    /**
+     * console.log(curp);
+        apiRequest("consultar-personal", { curp })
+            .then(r => r.text())
+            .then(texto => {
+                console.log("Respuesta cruda:", texto);
+                try {
+                    const data = JSON.parse(texto);
+                    // procesar data...
+                } catch (e) {
+                    console.error("No es JSON válido:", e);
+                }
+            });
+        ;
+     */
+
+    btnVolver.addEventListener("click", () => {
+        divTabla.style.display = "none";
+        divConsulta.style.display = "block";
+        inputCurp.value = "";
+        tbody.innerHTML = "";
+    });
+}
+
 
 
 

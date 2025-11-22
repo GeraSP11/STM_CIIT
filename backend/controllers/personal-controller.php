@@ -37,4 +37,20 @@ class PersonalController
         $model = new PersonalModel();
         return $model->obtenerLocalidades();
     }
+
+    public function listarPersonal($data)
+    {
+        $curp = trim($data['curp']);
+        $model = new PersonalModel();
+
+        // Verifica si la CURP existe
+        if ($model->curpExiste($curp)) {
+            // Devuelve un array con la información del personal
+            return $model->listarPersonal($curp); // asegurarte de que listarPersonal acepte CURP como filtro
+        } else {
+            // Devuelve un array vacío para que el frontend maneje "no hay resultados"
+            return [];
+        }
+    }
+
 }
