@@ -52,6 +52,41 @@ $seccion = 'Consultar Localidades';
             color: #4a1026;
             margin-bottom: 30px;
         }
+
+        /* ESTILOS NECESARIOS PARA LOS FILTROS — NO MODIFICAN LOS TUYOS */
+        .filter-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .delete-btn {
+            border: none;
+            background: rgb(240, 79, 79);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: red;
+        }
+
+        .btn-custom {
+            background-color: #4a1026;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-custom:hover {
+            background-color: #3b0d20;
+        }
     </style>
 
 </head>
@@ -73,27 +108,74 @@ $seccion = 'Consultar Localidades';
 
     <div class="content-area shadow">
 
+        <!-- Título de sección -->
         <div class="section-title">
             <?php echo $seccion; ?>
         </div>
 
-        <div class="text-center">
+        <!-- Contenedor principal del formulario -->
+        <div id="formContainer">
+            <form id="formConsultarLocalidades" class="text-center">
 
-            <select class="form-select d-inline-block" style="width: 55%;">
-                <option>Selecciona un filtro</option>
-            </select>
+                <select id="selectFiltro" class="form-select d-inline-block" style="width: 55%;">
+                    <option value="">Selecciona un filtro</option>
+                    <option value="nombre_centro_trabajo">Nombre del centro de trabajo</option>
+                    <option value="localidad">Localidad</option>
+                    <option value="poblacion">Población</option>
+                    <option value="estado">Estado</option>
+                </select>
 
-            <button class="btn-add">
-                <i class="fas fa-plus"></i>
-            </button>
+                <button id="btnAddFiltro" type="button" class="btn-add">
+                    <i class="fas fa-plus"></i>
+                </button>
 
+                <!-- Contenedor de filtros dinámicos -->
+                <div id="filtrosContainer" class="mt-4"></div>
+
+                <!-- Botón CONSULTAR (se muestra dinámicamente) -->
+                <div id="contenedorConsultar" class="justify-content-center mt-4" style="display:none;">
+                    <button id="btnConsultar" type="submit" class="btn btn-custom">Consultar</button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Contenedor de resultados, separado del formulario -->
+        <div id="tablaResultados" class="mt-4" style="display:none;">
+            <table id="tablaLocalidades" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>ubicacion</th>
+                        <th>poblacion</th>
+                        <th>estado</th>
+                        <th>Tipo de instalacion</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="d-flex justify-content-center">
+                <button id="btnVolver" class="btn btn-custom">Volver</button>
+            </div>
         </div>
 
     </div>
 
-    <div class="footer-line"></div>
+
+
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- CRIPT DEL FORMULARIO -->
+    <script src="/assets/js/localidades.js"></script>
+
 </body>
 
 </html>

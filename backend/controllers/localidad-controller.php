@@ -3,7 +3,7 @@ require_once __DIR__ . "/../models/localidad-model.php";
 
 class LocalidadController
 {
-    public function registrarPersonal($data)
+    public function registrarLocalidad($data)
     {
         $nombreCentro = trim($data['nombre_centro']);
         $ubicacionGeo = trim($data['ubicacionGeo']);
@@ -28,4 +28,19 @@ class LocalidadController
         );
         return $resultado ? "OK" : "Error al registrar localidad";
     }
+    public function consultarLocalidad($data)
+    {
+        $nombre = isset($data['nombre_centro_trabajo']) ? trim($data['nombre_centro_trabajo']) : null;
+        $localidad = isset($data['localidad']) ? trim($data['localidad']) : null;
+        $poblacion = isset($data['poblacion']) ? trim($data['poblacion']) : null;
+        $estado = isset($data['estado']) ? trim($data['estado']) : null;
+        
+
+        $model = new LocalidadlModel();
+        // ORDEN CORRECTO: nombre, localidad, poblacion, estado
+        $resultado = $model->consultarLocalidad($nombre, $localidad, $poblacion, $estado);
+
+        return $resultado ?: [];
+    }
+
 }
