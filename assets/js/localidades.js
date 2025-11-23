@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ---- 3. Actualizar ----
-    // configurarEdicion();       // (Próximo)
+    actualizarLocalidades();
 
     // ---- 4. Eliminar ----
     // configurarEliminacion();   // (Próximo)
@@ -191,6 +191,118 @@ function consultarLocalidades() {
 /* =====================================================
    3. ACTUALIZAR (UPDATE)
    ===================================================== */
+
+/* =====================================================
+   3. ACTUALIZAR (UPDATE) - FUNCIONALIDAD LIMPIA
+   ===================================================== */
+
+function actualizarLocalidades() {
+    // Referencias a elementos
+    const inputBusqueda = document.getElementById('inputBuscarLocalidad');
+    const datalistLocalidades = document.getElementById('localidades');
+    const contenedorBusqueda = document.getElementById('contenedorBusqueda');
+    const contenedorBotones = document.getElementById('contenedorBotones');
+    const formulario = document.getElementById('formActualizarLocalidad');
+
+    const inputId = document.getElementById('inputIdLocalidad');
+    const inputIdDisplay = document.getElementById('inputIdLocalidadDisplay');
+    const inputNombreCentro = document.getElementById('inputNombreCentro');
+    const inputUbicacion = document.getElementById('inputUbicacion');
+    const inputPoblacion = document.getElementById('inputPoblacion');
+    const selectEstado = document.getElementById('estados');
+    const selectTipo = document.getElementById('selectTipoInstalacion');
+    const inputLocalidad = document.getElementById('inputLocalidad');
+
+    if (!inputBusqueda) return;
+
+    // Al escribir, buscar localidades
+    inputBusqueda.addEventListener('input', () => {
+        const texto = inputBusqueda.value.trim();
+        if (texto.length < 2) return;
+
+        apiRequest('buscar-localidades', { busqueda: texto })
+            .then(r => r.json())
+            .then(localidades => {
+                // Limpiar datalist
+                datalistLocalidades.innerHTML = '';
+                if (!localidades || localidades.length === 0) return;
+
+                localidades.forEach(loc => {
+                    const opcion = document.createElement('option');
+
+                    opcion.value = loc.localidad; // MOSTRAR la localidad real 
+
+                    opcion.dataset.id = loc.id_localidad;
+                    opcion.dataset.nombreCentro = loc.nombre;
+                    opcion.dataset.ubicacion = loc.ubicacion;
+                    opcion.dataset.poblacion = loc.poblacion;
+                    opcion.dataset.estado = loc.estado;
+                    opcion.dataset.tipoInstalacion = loc.tipo_instalacion;
+
+                    opcion.dataset.localidad = loc.localidad;
+
+                    datalistLocalidades.appendChild(opcion);
+                });
+
+
+            })
+            .catch(() => alerta("Error", "No se pudo buscar localidades", "error"));
+    });
+
+    // Al seleccionar un valor del datalist
+    inputBusqueda.addEventListener('change', () => {
+        const opcionSeleccionada = Array.from(datalistLocalidades.options)
+            .find(opt => opt.value === inputBusqueda.value);
+
+        if (!opcionSeleccionada) return;
+
+        // Llenar formulario con los datos
+        inputId.value = opcionSeleccionada.dataset.id;
+        inputIdDisplay.value = opcionSeleccionada.dataset.id;
+        inputNombreCentro.value = opcionSeleccionada.dataset.nombreCentro;
+        inputUbicacion.value = opcionSeleccionada.dataset.ubicacion;
+        inputPoblacion.value = opcionSeleccionada.dataset.poblacion;
+        inputLocalidad.value = opcionSeleccionada.dataset.localidad;
+
+
+
+        // Seleccionar estado
+        Array.from(selectEstado.options).forEach(opt => {
+            opt.selected = opt.value === opcionSeleccionada.dataset.estado || opt.text === opcionSeleccionada.dataset.estado;
+        });
+
+        // Seleccionar tipo de instalación
+        Array.from(selectTipo.options).forEach(opt => {
+            opt.selected = opt.value === opcionSeleccionada.dataset.tipoInstalacion || opt.text === opcionSeleccionada.dataset.tipoInstalacion;
+        });
+
+        // Mostrar botones y ocultar búsqueda
+        contenedorBusqueda.classList.add('oculto');
+        contenedorBotones.style.display = 'block';
+    });
+
+    // Enviar formulario
+    formulario.addEventListener('submit', e => {
+        // 🔹 Validación nativa del navegador ANTES de detener el envío
+        if (!formulario.checkValidity()) {
+            formulario.reportValidity(); // muestra los mensajes del navegador
+            return; // NO ejecuta AJAX si hay errores
+        }
+
+        e.preventDefault(); // ahora sí, detenemos el envío normal
+        e.preventDefault();
+
+        confirmar("¿Actualizar localidad?", "Se guardarán los cambios")
+            .then(r => {
+                if (!r.isConfirmed) return;
+
+                apiRequest("actualizar-localidad", formulario)
+                    .then(r => r.text())
+                    .then(resp => manejarRespuestaCRUD(resp, "Localidad actualizada correctamente.", "actualizar-localidades.php"))
+                    .catch(() => alerta("Error", "Ocurrió un problema al actualizar", "error"));
+            });
+    });
+}
 
 // function cargarDatosParaEditar(id) {
 //     apiRequest("obtener_uno", { id })

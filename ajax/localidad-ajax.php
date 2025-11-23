@@ -14,6 +14,18 @@ switch ($action) {
         header('Content-Type: application/json');
         echo json_encode($localidades);
         break;
+    case 'buscar-localidades':
+        $texto = $_POST['busqueda'] ?? '';
+        $controller = new LocalidadController();
+        $resultados = $controller->buscarLocalidades($texto);
+        header('Content-Type: application/json');
+        echo json_encode($resultados);
+        break;
+    case 'actualizar-localidad':
+        // id_localidad, nombre_centro_trabajo, ubicacion_georeferenciada, poblacion, estado, tipo_instalacion, localidad
+        $controller = new LocalidadController();
+        echo $controller->actualizarLocalidad($_POST);
+        break;
     default:
         echo "Acción no válida";
 }

@@ -47,7 +47,7 @@ class LocalidadlModel
     public function consultarLocalidad($nombreCentro = null, $localidad = null, $poblacion = null, $estado = null)
     {
         global $pdo;
-       
+
 
         $sql = "SELECT nombre_centro_trabajo AS nombre,
                ubicacion_georeferenciada AS ubicacion,
@@ -92,5 +92,50 @@ class LocalidadlModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function buscarLocalidades($texto)
+    {
+        global $pdo;
+        $texto = trim($texto);
+        if (strlen($texto) < 2)
+            return [];
+
+        $sql = "SELECT id_localidad, nombre_centro_trabajo AS nombre, localidad, ubicacion_georeferenciada AS ubicacion, 
+                       poblacion, estado, tipo_instalacion
+                FROM localidades
+                WHERE nombre_centro_trabajo ILIKE :texto OR localidad ILIKE :texto
+                ORDER BY nombre_centro_trabajo ASC
+                LIMIT 10";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':texto' => "%$texto%"]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function actualizarLocalidad($id, $nombreCentro, $ubicacionGeo, $poblacion, $localidad, $estado, $tipoInstalacion)
+    {
+        global $pdo;
+
+        $sql = "UPDATE localidades SET
+                    nombre_centro_trabajo = :nombreCentro,
+                    ubicacion_georeferenciada = :ubicacionGeo,
+                    poblacion = :poblacion,
+                    localidad = :localidad,
+                    estado = :estado,
+                    tipo_instalacion = :tipoInstalacion
+                WHERE id_localidad = :id";
+
+        $stmt = $pdo->prepare($sql);
+
+        return $stmt->execute([
+            ':nombreCentro' => $nombreCentro,
+            ':ubicacionGeo' => $ubicacionGeo,
+            ':poblacion' => $poblacion,
+            ':localidad' => $localidad,
+            ':estado' => $estado,
+            ':tipoInstalacion' => $tipoInstalacion,
+            ':id' => $id
+        ]);
+    }
 
 }
