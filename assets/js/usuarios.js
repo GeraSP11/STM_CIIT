@@ -275,16 +275,23 @@ if (inputs.confirm_password) inputs.confirm_password.addEventListener("input", c
 
 function apiRequestUsuarios(accion, datos = null) {
 
-    const formData = datos instanceof HTMLFormElement
-        ? new FormData(datos)
-        : new FormData();
+    let formData;
 
-    if (datos && !(datos instanceof HTMLFormElement)) {
-        for (const clave in datos) {
-            formData.append(clave, datos[clave]);
+    // Si datos es un formulario HTML, usar sus datos directamente
+    if (datos instanceof HTMLFormElement) {
+        formData = new FormData(datos);
+    } 
+    // Si datos es un objeto, crear FormData y agregar cada propiedad
+    else {
+        formData = new FormData();
+        if (datos && typeof datos === 'object') {
+            for (const clave in datos) {
+                formData.append(clave, datos[clave]);
+            }
         }
     }
 
+    // Siempre agregar la acción
     formData.append("action", accion);
 
     return fetch('/ajax/usuarios-ajax.php', {
@@ -312,29 +319,17 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
 function configurarEliminacionUsuarios() {
     
     const formEliminar = document.getElementById("formEliminarUsuario");
+    if (!formEliminar) return;
     
-    if (!formEliminar) {
-        console.log("No se encontró el formulario de eliminación");
-        return;
-    }
+    const inputCurp = document.getElementById("input_curp_eliminar");
+    const btnBuscar = formEliminar.querySelector('button[type="submit"]');
     
-    console.log("Formulario de eliminación encontrado:", formEliminar);
+    if (!btnBuscar || !inputCurp) return;
     
-    formEliminar.addEventListener("submit", function (e) {
-        e.preventDefault(); // ✅ Prevenir el envío tradicional del formulario
-        
-        console.log("Submit capturado - no debería recargar");
-        
-        const inputCurp = document.getElementById("input_curp_eliminar");
-        
-        if (!inputCurp) {
-            console.error("No se encontró el input de CURP");
-            return;
-        }
+    btnBuscar.addEventListener("click", function (e) {
+        e.preventDefault(); 
         
         const curp = inputCurp.value.trim();
-        
-        console.log("CURP ingresada:", curp);
         
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
@@ -343,26 +338,16 @@ function configurarEliminacionUsuarios() {
         
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
-                console.log("Respuesta de confirmación:", r);
-                
                 if (!r.isConfirmed) return;
                 
-                console.log("Usuario confirmó - enviando petición...");
-                
-                apiRequestUsuarios("eliminar", { curp })
+                apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
-                    .then(resp => {
-                        console.log("Respuesta del servidor:", resp);
-                        manejarRespuestaCRUD(
-                            resp,
-                            "Usuario eliminado correctamente.",
-                            "index.php"
-                        );
-                    })
-                    .catch(error => {
-                        console.error("Error en la petición:", error);
-                        alerta("Error", "Ocurrió un error al eliminar el usuario.", "error");
-                    });
+                    .then(resp => manejarRespuestaCRUD(
+                        resp,
+                        "Usuario eliminado correctamente.",
+                        "index.php"
+                    ))
+                    .catch(() => alerta("Error", "Ocurrió un error al eliminar el usuario.", "error"));
             });
     });
 }
