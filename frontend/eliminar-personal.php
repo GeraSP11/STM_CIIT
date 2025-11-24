@@ -1,5 +1,7 @@
 <?php
-$page_title = 'Eliminar Personal';
+$page_title = 'MARINA Corredor Interoceánico';
+$titulo_seccion = 'Gestión de Personal';
+$seccion = 'Eliminar Personal';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -7,9 +9,11 @@ $page_title = 'Eliminar Personal';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Personal</title>
+    <title><?php echo $page_title; ?></title>
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/bootstrap/icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/headers-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -20,62 +24,6 @@ $page_title = 'Eliminar Personal';
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f5f5f5;
-        }
-
-        .header {
-            background: linear-gradient(#4b0000 100%);
-            color: white;
-            padding: 25px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin: 0;
-        }
-
-        .header-logo {
-            width: 100px;
-            height: 100px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            padding: 10px;
-        }
-
-        .header-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .breadcrumb-nav {
-            background-color: white;
-            padding: 15px 40px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-        }
-
-        .breadcrumb-nav i {
-            font-size: 1.5rem;
-            color: #5c2e3e;
-        }
-
-        .breadcrumb-nav span {
-            color: #333;
-            font-weight: 500;
         }
 
         .main-content {
@@ -89,7 +37,7 @@ $page_title = 'Eliminar Personal';
         }
 
         .main-content h2 {
-            color: #8b4513;
+            color: #4a1026;
             font-size: 1.8rem;
             font-weight: 400;
             margin-bottom: 50px;
@@ -106,7 +54,7 @@ $page_title = 'Eliminar Personal';
         }
 
         .search-label {
-            background-color: #5c2e3e;
+            background-color: #4a1026;
             color: white;
             padding: 12px 40px;
             font-weight: 500;
@@ -133,11 +81,11 @@ $page_title = 'Eliminar Personal';
 
         .search-section input:focus {
             outline: none;
-            border-color: #5c2e3e;
+            border-color: #4a1026;
         }
 
         .btn-search {
-            background-color: #5c2e3e;
+            background-color: #4a1026;
             color: white;
             padding: 12px 50px;
             border: none;
@@ -149,7 +97,7 @@ $page_title = 'Eliminar Personal';
         }
 
         .btn-search:hover {
-            background-color: #7d3e54;
+            background-color: #3a0c1f;
         }
 
         .hidden {
@@ -190,7 +138,7 @@ $page_title = 'Eliminar Personal';
             font-size: 1.3rem;
             font-weight: 500;
             margin-bottom: 25px;
-            border-bottom: 2px solid #5c2e3e;
+            border-bottom: 2px solid #4a1026;
             padding-bottom: 10px;
         }
 
@@ -258,21 +206,23 @@ $page_title = 'Eliminar Personal';
 
 <body>
 
-    <div class="header">
-        <h1>Gestión de Personal</h1>
-        <div class="header-logo">
-            <img src="/assets/img/logo_principal.jpeg" alt="Corredor Interoceánico">
-        </div>
-    </div>
+    <!-- Header dinámico -->
+    <?php include('includes/header-dinamico.php'); ?>
 
-    <div class="breadcrumb-nav">
-        <i class="bi bi-house-door-fill"></i>
-        <span>></span>
-        <span>Eliminar Personal</span>
-    </div>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mt-2">
+        <ol class="breadcrumb" style="padding-left: 15px;">
+            <li class="breadcrumb-item">
+                <a href="/dashboard.php"><i class="fas fa-home" style="color:#4D2132;"></i></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <?php echo $seccion; ?>
+            </li>
+        </ol>
+    </nav>
 
     <main class="main-content">
-        <h2>Eliminar Personal</h2>
+        <h2><?php echo $seccion; ?></h2>
 
         <!-- Sección de búsqueda -->
         <div class="search-section">

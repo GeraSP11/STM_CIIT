@@ -20,10 +20,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById("formConsultaUsuarios")) {
         configurarConsultaUsuarios();
     }
-        if (document.querySelector('.form-control-custom')) {
+
+    // Solo activar eliminación si existe el formulario específico
+    if (document.getElementById("formEliminarUsuario")) {
         configurarEliminacionUsuarios();
     }
 
+    // Solo activar actualización si existe el formulario específico
+    if (document.getElementById("formActualizarUsuario")) {
+        configurarActualizacionUsuarios();
+    }
 
 });
 
@@ -189,7 +195,7 @@ function checkEmail() {
 
     if (!val) return showError(inputs.email, "El correo es obligatorio");
 
-    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  
+    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // ✅ CORREGIDO
     if (!reg.test(val)) return showError(inputs.email, "Correo inválido");
 }
 
@@ -269,16 +275,23 @@ if (inputs.confirm_password) inputs.confirm_password.addEventListener("input", c
 
 function apiRequestUsuarios(accion, datos = null) {
 
-    const formData = datos instanceof HTMLFormElement
-        ? new FormData(datos)
-        : new FormData();
+    let formData;
 
-    if (datos && !(datos instanceof HTMLFormElement)) {
-        for (const clave in datos) {
-            formData.append(clave, datos[clave]);
+    // Si datos es un formulario HTML, usar sus datos directamente
+    if (datos instanceof HTMLFormElement) {
+        formData = new FormData(datos);
+    } 
+    // Si datos es un objeto, crear FormData y agregar cada propiedad
+    else {
+        formData = new FormData();
+        if (datos && typeof datos === 'object') {
+            for (const clave in datos) {
+                formData.append(clave, datos[clave]);
+            }
         }
     }
 
+    // Siempre agregar la acción
     formData.append("action", accion);
 
     return fetch('/ajax/usuarios-ajax.php', {
@@ -302,13 +315,20 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
         alerta("Error", respuesta, "error");
     }
 }
+
 function configurarEliminacionUsuarios() {
-    const inputCurp = document.querySelector('.form-control-custom');
-    const btnBuscar = document.querySelector('.btn-custom');
     
-    if (!btnBuscar) return;
+    const formEliminar = document.getElementById("formEliminarUsuario");
+    if (!formEliminar) return;
     
-    btnBuscar.addEventListener("click", function () {
+    const inputCurp = document.getElementById("input_curp_eliminar");
+    const btnBuscar = formEliminar.querySelector('button[type="submit"]');
+    
+    if (!btnBuscar || !inputCurp) return;
+    
+    btnBuscar.addEventListener("click", function (e) {
+        e.preventDefault(); 
+        
         const curp = inputCurp.value.trim();
         
         if (curp === "") {
@@ -320,7 +340,7 @@ function configurarEliminacionUsuarios() {
             .then(r => {
                 if (!r.isConfirmed) return;
                 
-                apiRequestUsuarios("eliminar", { curp })
+                apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(
                         resp,

@@ -97,15 +97,24 @@ $seccion = 'Eliminar usuarios';
     <h2><?php echo $seccion; ?></h2>
 
     <!-- Contenedor principal -->
-    <div class="content-area">
+<!-- Contenedor principal -->
+<div class="content-area">
 
+    <form id="formEliminarUsuario">
         <div class="search-label">Filtro de búsqueda: *</div>
 
-        <input type="text" placeholder="Ingrese la CURP del usuario" class="form-control-custom">
+        <input 
+            type="text" 
+            name="curp" 
+            id="input_curp_eliminar"
+            placeholder="Ingrese la CURP del usuario" 
+            class="form-control-custom"
+        >
 
-        <button class="btn btn-custom">Buscar</button>
+        <button type="submit" class="btn btn-custom">Buscar y Eliminar</button>
+    </form>
 
-    </div>
+</div>
 
 
 <!-- Bootstrap -->
