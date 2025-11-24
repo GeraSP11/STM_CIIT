@@ -18,9 +18,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ---- 3. Actualizar ----
-    //actualizarLocalidades();
+    actualizarLocalidades();
 
     // ---- 4. Eliminar ----
+    configurarVistaEliminarLocalidades();
     eliminarLocalidades();
 });
 
@@ -304,35 +305,192 @@ function actualizarLocalidades() {
     });
 }
 
-// function cargarDatosParaEditar(id) {
-//     apiRequest("obtener_uno", { id })
-//         .then(r => r.json())
-//         .then(data => {
-//             // Llenar formulario...
-//         });
-// }
-//
-// function guardarCambios() {
-//     apiRequest("actualizar", formularioEditar)
-//         .then(r => r.text())
-//         .then(resp => manejarRespuestaCRUD(resp, "Actualizado correctamente."));
-// }
 
 
 
 /* =====================================================
    4. ELIMINAR (DELETE)
    ===================================================== */
+function configurarVistaEliminarLocalidades() {
 
-// function eliminarPersonal(id) {
-//     confirmar("¿Eliminar registro?", "No se puede deshacer.")
-//         .then(r => {
-//             if (!r.isConfirmed) return;
-//             apiRequest("eliminar", { id })
-//                 .then(r => r.text())
-//                 .then(resp => manejarRespuestaCRUD(resp, "Eliminado correctamente."));
-//         });
-// }
+    const select = document.getElementById('filtroBusqueda');
+
+    select.addEventListener('change', function () {
+
+        limpiarResultados();
+
+        // Rehabilitar todas las opciones
+        Array.from(select.options).forEach(op => {
+            op.disabled = false;
+            op.style.color = "";
+        });
+
+        // Ocultar todos los campos
+        document.getElementById('campoId').style.display = "none";
+        document.getElementById('campoNombreTrabajo').style.display = "none";
+        document.getElementById('campoUbicacion').style.display = "none";
+
+        // Mostrar el campo correcto
+        if (this.value === "id") {
+            document.getElementById('campoId').style.display = "block";
+        }
+        if (this.value === "nombre_trabajo") {
+            document.getElementById('campoNombreTrabajo').style.display = "block";
+        }
+        if (this.value === "ubicacion") {
+            document.getElementById('campoUbicacion').style.display = "block";
+        }
+
+        // Deshabilitar solo la opción seleccionada
+        const opt = this.options[this.selectedIndex];
+        opt.disabled = true;
+        opt.style.color = "gray";
+    });
+}
+
+function obtenerInputBusqueda() {
+
+    const filtro = document.getElementById('filtroBusqueda').value;
+
+    if (filtro === "id") return document.getElementById('inputId');
+    if (filtro === "nombre_trabajo") return document.getElementById('inputNombreTrabajo');
+    if (filtro === "ubicacion") return document.getElementById('inputUbicacion');
+
+    return null;
+}
+
+function limpiarResultados() {
+    const cont = document.getElementById('resultadosBusqueda');
+    cont.style.display = "none";
+
+    // Limpiar inputs si existen
+    const campos = ["res_id", "res_nombre", "res_ubicacion", "res_poblacion", "res_localidad", "res_estado", "res_tipo_instalacion"];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+}
+
+function eliminarLocalidades() {
+
+    const selectFiltro = document.getElementById('filtroBusqueda');
+    const formulario = document.getElementById('formConsulta');
+    const contFiltros = document.getElementById('filtroELiminar');
+    const contResultados = document.getElementById('resultadosBusqueda');
+
+    let localidadSeleccionada = null;
+
+    formulario.addEventListener('submit', function (event) {
+        event.preventDefault();
+        manejarBusqueda();
+    });
+
+    function manejarBusqueda() {
+
+        const input = obtenerInputBusqueda();
+
+        if (!input) {
+            alerta("Seleccione un filtro", "Debe elegir un filtro antes de consultar.", "warning");
+            return;
+        }
+
+        const valor = input.value.trim();
+
+        if (!valor) {
+            alerta("Búsqueda Vacía", "Ingrese un valor antes de consultar.", "warning");
+            return;
+        }
+
+        const filtros = construirFiltros(selectFiltro.value, valor);
+
+        realizarBusqueda(filtros);
+    }
+
+    function construirFiltros(filtro, valor) {
+        const f = {};
+        f[filtro] = valor;
+        return f;
+    }
+
+    function realizarBusqueda(filtros) {
+        apiRequest("mostrar-eliminar-localidad", filtros)
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data || data.length === 0) {
+                    alerta("Consulta Localidades", "No se encontró información.", "warning");
+                    return;
+                }
+                console.log("Datos de la API:", data);
+
+                mostrarResultados(data);
+            })
+            .catch(() => alerta("Error", "Ocurrió un problema al consultar.", "error"));
+    }
+
+    function mostrarResultados(datos) {
+
+        contFiltros.style.display = "none";
+        contResultados.style.display = "block";
+
+        const loc = datos[0];
+        localidadSeleccionada = loc;
+
+        document.getElementById("res_id").value = loc.id_localidad;
+        document.getElementById("res_nombre").value = loc.nombre_centro_trabajo;
+        document.getElementById("res_ubicacion").value = loc.ubicacion_georeferenciada;
+        document.getElementById("res_poblacion").value = loc.poblacion;
+        document.getElementById("res_localidad").value = loc.localidad;
+        document.getElementById("res_estado").value = loc.estado;
+        document.getElementById("res_tipo_instalacion").value = loc.tipo_instalacion;
+
+        // -------------------------
+        // INTEGRA EL BOTÓN ELIMINAR
+        // -------------------------
+        document.getElementById("btnEliminar").onclick = function () {
+            const mensaje =
+                "Una vez aplicados los cambios no podrán revertirse.\n\n" +
+                "Nota: Al eliminar esta localidad también se eliminarán los usuarios asociados a esta. " +
+                "Si desea conservarlos, por favor cambie su localidad antes de continuar.";
+
+            confirmar(
+                "¿Está seguro que desea eliminar la localidad seleccionada?",
+                mensaje,
+                "warning"
+            ).then(res => {
+                if (!res.isConfirmed) return;
+
+                // Llamada a la API para eliminar
+                apiRequest("eliminar-localidad", { id_localidad: localidadSeleccionada.id_localidad })
+                    .then(r => r.text())
+                    .then(resp => manejarRespuestaCRUD(
+                        resp,
+                        "La localidad seleccionada y los usuarios asociados han sido eliminados correctamente.",
+                        "dashboard.php" // página a redirigir
+                    ))
+                    .catch(() => alerta("Error", "Ocurrió un problema en la petición.", "error"));
+            });
+        };
+
+
+        // -------------------------
+        // BOTÓN CANCELAR
+        // -------------------------
+        document.getElementById("btnCancelar").onclick = function () {
+            alerta("Operación cancelada", "La eliminación fue cancelada.", "info");
+            contResultados.style.display = "none";
+            contFiltros.style.display = "block";
+            contFiltros.scrollIntoView({ behavior: "smooth" });
+        };
+    }
+
+
+}
+
+
+
+
+
 
 
 
@@ -378,151 +536,4 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
     } else {
         alerta("Error", respuesta, "error");
     }
-}
-/* =====================================================
-   4. ELIMINAR (DELETE)
-   ===================================================== */
-
-function eliminarLocalidades() {
-    const inputBusqueda = document.getElementById('inputBuscarLocalidad');
-    const datalistLocalidades = document.getElementById('localidades');
-    const botonEliminar = document.getElementById('btnEliminar');
-
-    // Verificar que los elementos existan
-    if (!inputBusqueda || !botonEliminar || !datalistLocalidades) {
-        console.log('Elementos no encontrados para eliminar localidades');
-        return;
-    }
-
-    console.log('Función eliminarLocalidades inicializada');
-
-    // Variable para almacenar la localidad seleccionada
-    let localidadSeleccionada = null;
-
-    // Al escribir, buscar localidades
-    inputBusqueda.addEventListener('input', () => {
-        const texto = inputBusqueda.value.trim();
-        
-        console.log('Texto ingresado:', texto);
-        
-        // Resetear selección
-        localidadSeleccionada = null;
-        
-        // Si hay menos de 2 caracteres, limpiar y salir
-        if (texto.length < 2) {
-            datalistLocalidades.innerHTML = '';
-            return;
-        }
-
-        // Buscar localidades
-        apiRequest('buscar-localidades', { busqueda: texto })
-            .then(r => r.json())
-            .then(localidades => {
-                console.log('Localidades encontradas:', localidades);
-                
-                // Limpiar datalist
-                datalistLocalidades.innerHTML = '';
-                
-                if (!localidades || localidades.length === 0) {
-                    console.log('No se encontraron localidades');
-                    return;
-                }
-
-                // Agregar opciones al datalist
-                localidades.forEach(loc => {
-                    const opcion = document.createElement('option');
-                    opcion.value = `${loc.nombre} - ${loc.localidad}`;
-                    opcion.dataset.id = loc.id_localidad;
-                    opcion.dataset.nombre = loc.nombre;
-                    opcion.dataset.localidad = loc.localidad;
-                    datalistLocalidades.appendChild(opcion);
-                });
-                
-                console.log('Opciones agregadas al datalist:', datalistLocalidades.children.length);
-            })
-            .catch(error => {
-                console.error('Error al buscar localidades:', error);
-                alerta("Error", "No se pudo buscar localidades", "error");
-            });
-    });
-
-    // Al cambiar el valor (cuando se selecciona del datalist)
-    inputBusqueda.addEventListener('change', () => {
-        const valorIngresado = inputBusqueda.value.trim();
-        console.log('Valor seleccionado:', valorIngresado);
-        
-        // Buscar la opción que coincida
-        const opcionEncontrada = Array.from(datalistLocalidades.options)
-            .find(opt => opt.value === valorIngresado);
-
-        if (opcionEncontrada) {
-            localidadSeleccionada = {
-                id: opcionEncontrada.dataset.id,
-                nombre: opcionEncontrada.dataset.nombre,
-                localidad: opcionEncontrada.dataset.localidad,
-                textoCompleto: valorIngresado
-            };
-            console.log('Localidad seleccionada válida:', localidadSeleccionada);
-        } else {
-            localidadSeleccionada = null;
-            console.log('No se encontró coincidencia exacta');
-        }
-    });
-
-    // Botón eliminar
-    botonEliminar.addEventListener('click', () => {
-        console.log('Botón eliminar clickeado');
-        console.log('Localidad almacenada:', localidadSeleccionada);
-        
-        // Verificar si hay una localidad seleccionada
-        if (!localidadSeleccionada || !localidadSeleccionada.id) {
-            alerta(
-                "Selección requerida", 
-                "Por favor, selecciona una localidad de la lista desplegable. Escribe al menos 2 caracteres y elige una opción que aparezca.", 
-                "warning"
-            );
-            return;
-        }
-
-        const idLocalidad = localidadSeleccionada.id;
-        const nombreLocalidad = localidadSeleccionada.textoCompleto;
-
-        console.log('Localidad a eliminar - ID:', idLocalidad, 'Nombre:', nombreLocalidad);
-
-        // Confirmar eliminación
-        confirmar(
-            "¿Eliminar Localidad?", 
-            `Se eliminará: ${nombreLocalidad}. Esta acción no se puede deshacer.`
-        )
-            .then(r => {
-                if (!r.isConfirmed) {
-                    console.log('Eliminación cancelada por el usuario');
-                    return;
-                }
-
-                console.log('Enviando petición de eliminación...');
-
-                // Enviar petición de eliminación
-                apiRequest("eliminar-localidad", { id_localidad: idLocalidad })
-                    .then(r => r.text())
-                    .then(resp => {
-                        console.log('Respuesta del servidor:', resp);
-                        
-                        // Limpiar el input y la selección
-                        inputBusqueda.value = '';
-                        localidadSeleccionada = null;
-                        datalistLocalidades.innerHTML = '';
-                        
-                        manejarRespuestaCRUD(
-                            resp,
-                            "Localidad eliminada correctamente.",
-                            "eliminar-localidades.php" // Redirigir a la misma página
-                        );
-                    })
-                    .catch(error => {
-                        console.error('Error al eliminar:', error);
-                        alerta("Error", "Ocurrió un problema al eliminar", "error");
-                    });
-            });
-    });
 }

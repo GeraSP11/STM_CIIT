@@ -137,41 +137,101 @@ class LocalidadlModel
             ':id' => $id
         ]);
     }
-public function eliminarLocalidadConDependencias($id)
-{
-    global $pdo;
-    
-    try {
-        $pdo->beginTransaction();
-        
-        // Eliminar en orden inverso a las dependencias
-        $pdo->prepare("DELETE FROM envios WHERE punto_verificacion = ?")->execute([$id]);
-        $pdo->prepare("DELETE FROM fleteros WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
-        $pdo->prepare("DELETE FROM pedidos WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
-        $pdo->prepare("DELETE FROM rutas WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
-        $pdo->prepare("DELETE FROM maniobras WHERE localidad = ?")->execute([$id]);
-        $pdo->prepare("DELETE FROM carrocerias WHERE localidad_pertenece = ?")->execute([$id]);
-        $pdo->prepare("DELETE FROM transacciones_productos WHERE localidad = ?")->execute([$id]);
-        $pdo->prepare("DELETE FROM productos WHERE ubicacion_producto = ?")->execute([$id]);
-        $pdo->prepare("DELETE FROM personal WHERE afiliacion_laboral = ?")->execute([$id]);
-        
-        // Finalmente eliminar la localidad
-        $pdo->prepare("DELETE FROM localidades WHERE id_localidad = ?")->execute([$id]);
-        
-        $pdo->commit();
-        
-        return [
-            'success' => true,
-            'message' => 'Localidad y todos sus registros relacionados eliminados correctamente'
-        ];
-        
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        return [
-            'success' => false,
-            'error' => 'ERROR_BD',
-            'message' => 'Error al eliminar: ' . $e->getMessage()
-        ];
+    public function eliminarLocalidad($id)
+    {
+        global $pdo;
+
+        try {
+            $pdo->beginTransaction();
+
+            // Eliminar en orden inverso a las dependencias
+            $pdo->prepare("DELETE FROM envios WHERE punto_verificacion = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM fleteros WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+            $pdo->prepare("DELETE FROM pedidos WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+            $pdo->prepare("DELETE FROM rutas WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+            $pdo->prepare("DELETE FROM maniobras WHERE localidad = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM carrocerias WHERE localidad_pertenece = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM transacciones_productos WHERE localidad = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM productos WHERE ubicacion_producto = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM personal WHERE afiliacion_laboral = ?")->execute([$id]);
+
+            // Finalmente eliminar la localidad
+            $pdo->prepare("DELETE FROM localidades WHERE id_localidad = ?")->execute([$id]);
+
+            $pdo->commit();
+
+            return [
+                'success' => true,
+                'message' => 'Localidad y todos sus registros relacionados eliminados correctamente'
+            ];
+
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return [
+                'success' => false,
+                'error' => 'ERROR_BD',
+                'message' => 'Error al eliminar: ' . $e->getMessage()
+            ];
+        }
     }
-}
+
+    // Método para mostrar las localidades a eliminar según los filtros
+    // Método del Modelo: LocalidadModel.php
+    public function mostrarLocalidadEliminar($filtros)
+    {
+        global $pdo; // Si deseas usar la conexión global
+
+        // Base de la consulta SQL
+        $sql = "SELECT * FROM localidades";
+        $params = [];
+
+        // Comprobar si algún filtro fue proporcionado y agregar las condiciones necesarias
+        $conditions = [];
+
+        if (isset($filtros['id']) && !empty($filtros['id'])) {
+            $conditions[] = "id_localidad = :id";
+            $params['id'] = $filtros['id'];
+        }
+
+        if (isset($filtros['nombre_trabajo']) && !empty($filtros['nombre_trabajo'])) {
+            $conditions[] = "nombre_centro_trabajo ILIKE :nombre_trabajo";
+            $params['nombre_trabajo'] = "%" . $filtros['nombre_trabajo'] . "%";
+        }
+
+        if (isset($filtros['ubicacion']) && !empty($filtros['ubicacion'])) {
+            $conditions[] = "ubicacion_georeferenciada ILIKE :ubicacion";
+            $params['ubicacion'] = "%" . $filtros['ubicacion'] . "%";
+        }
+
+
+        // Si hay condiciones, las agregar al SQL con "AND"
+        if (count($conditions) > 0) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+
+        try {
+            // Ejecutar la consulta SQL con PDO
+            $stmt = $pdo->prepare($sql);
+
+            // Asignar los parámetros de la consulta
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(':' . $key, $value);
+            }
+
+            // Ejecutar la consulta
+            if ($stmt->execute()) {
+                $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // Devolver los resultados si los hay
+                return $resultados;
+            } else {
+                return ['error' => 'Hubo un problema al ejecutar la consulta'];
+            }
+
+        } catch (PDOException $e) {
+            // Manejo de errores de PDO
+            return ['error' => 'Error en la consulta: ' . $e->getMessage()];
+        }
+    }
+
 }

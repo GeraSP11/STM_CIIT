@@ -79,21 +79,34 @@ class LocalidadController
 
         return $resultado ? "OK" : "Error al actualizar localidad";
     }
-public function eliminarLocalidad($data)
-{
-    $id = $data['id_localidad'] ?? null;
-    
-    if (!$id) {
-        return "ID de localidad inválido";
+    public function eliminarLocalidad($data)
+    {
+        $id = $data['id_localidad'] ?? null;
+
+        if (!$id) {
+            return "ID de localidad inválido";
+        }
+
+        $model = new LocalidadlModel();
+        $resultado = $model->eliminarLocalidad($id);
+
+        if ($resultado === "ERROR_DEPENDENCIAS") {
+            return "No se puede eliminar: existen registros de personal vinculados a esta localidad.";
+        }
+
+        return $resultado ? "OK" : "Error al eliminar localidad";
     }
-    
-    $model = new LocalidadlModel();
-    $resultado = $model->eliminarLocalidad($id);
-    
-    if ($resultado === "ERROR_DEPENDENCIAS") {
-        return "No se puede eliminar: existen registros de personal vinculados a esta localidad.";
+
+     // Método para manejar la solicitud de mostrar las localidades para eliminar
+    public function mostrarLocalidadEliminar($data)
+    {
+        // Crear instancia del modelo
+        $localidadModel = new LocalidadlModel();
+
+        // Llamar a la función en el modelo que obtiene los resultados
+        $resultados = $localidadModel->mostrarLocalidadEliminar($data);
+
+        // Devolver los resultados al controlador
+        return $resultados;
     }
-    
-    return $resultado ? "OK" : "Error al eliminar localidad";
-}
 }

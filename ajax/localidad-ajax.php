@@ -27,9 +27,17 @@ switch ($action) {
         echo $controller->actualizarLocalidad($_POST);
         break;
     case 'eliminar-localidad':
-    $controller = new LocalidadController();
-    echo $controller->eliminarLocalidad($_POST);
-    break;
+        $controller = new LocalidadController();
+        echo $controller->eliminarLocalidad($_POST);
+        break;
+    case 'mostrar-eliminar-localidad':
+        $controller = new LocalidadController();
+        $resultados = $controller->mostrarLocalidadEliminar($_POST);
+        header('Content-Type: application/json');
+        echo json_encode($resultados);
+        break;
+
+
     default:
         echo "Acción no válida";
 }
