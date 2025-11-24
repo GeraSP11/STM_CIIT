@@ -20,7 +20,7 @@ try {
     $stmt = $pdo->query("SELECT * FROM usuarios");
     $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
     foreach ($usuarios as $u) {
-        echo "ID: {$u['id_usuario']} | Usuario: {$u['nombre_usuario']} | Correo: {$u['correo_electronico']}<br>";
+        echo "ID: {$u['id_usuario']} | Usuario: {$u['nombre_usuario']} | Correo: {$u['correo_electronico']} | Clave Personal: {$u['identificador_de_rh']}<br> | Pass: {$u['contrasena']}";
     }
 
     echo "<h2>Productos</h2>";

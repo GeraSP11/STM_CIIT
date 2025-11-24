@@ -94,7 +94,7 @@
             border: 2px solid var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(84, 28, 51, 0.3);
-            
+
         }
 
         a {
@@ -150,24 +150,25 @@
     <div class="container d-flex align-items-center justify-content-center py-3" style="min-height: calc(100vh - 100px);">
         <div class="login-card bg-white rounded p-5 w-100" style="max-width: 450px;">
             <h1 class="text-center fw-normal mb-2">Registro de Usuario</h1>
-            <form action="procesar_login.php" method="POST">
+            <form id="formRegistroUsuarios" method="POST">
+                <input type="hidden" name="action" value="registrar">
 
                 <div class="form-floating mb-2">
                     <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required title="3-20 caracteres, solo letras y números">
                     <label for="nombre_usuario">Nombre de usuario</label>
-                    <div></div> <!-- aquí va el mensaje de error -->
+                    <div class="invalid-feedback"></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="form-floating mb-2">
                     <input type="email" class="form-control" id="email" name="email" required title="Introduce un correo electrónico válido">
                     <label for="email">Correo Electrónico</label>
-                    <div></div> <!-- aquí va el mensaje de error -->
+                    <div class="invalid-feedback"></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="form-floating mb-2">
-                    <input type="text" class="form-control" id="clave_personal" name="clave_personal" required  title="18 caracteres, solo letras y números">
+                    <input type="text" class="form-control" id="clave_personal" name="clave_personal" required title="18 caracteres, solo letras y números">
                     <label for="clave_personal">Clave de Identificación de Personal</label>
-                    <div></div> <!-- aquí va el mensaje de error -->
+                    <div class="invalid-feedback"></div> <!-- aquí va el mensaje de error -->
                 </div>
 
                 <div class="position-relative mb-2">
@@ -175,7 +176,7 @@
                     <div class="form-floating">
                         <input type="password" class="form-control pe-5" id="password" name="password" required title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="password">Contraseña</label>
-                        <div></div> <!-- aquí va el mensaje de error -->
+                        <div class="invalid-feedback"></div> <!-- aquí va el mensaje de error -->
                     </div> <label for="showPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -183,10 +184,10 @@
                         </svg> </label>
                 </div>
 
-                <div class="position-relative mb-2"> <input type="checkbox" id="showConfirmPassword" onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'confirm_password'">
+                <div class="position-relative mb-2"> <input type="checkbox" id="showConfirmPassword" onchange="document.getElementById('confirm_password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating"> <input type="password" class="form-control pe-5" id="confirm_password" name="confirm_password" required title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
                         <label for="confirm_password">Confirmar contraseña</label>
-                        <div></div> <!-- aquí va el mensaje de error -->
+                        <div class="invalid-feedback"></div> <!-- aquí va el mensaje de error -->
                     </div> <label for="showConfirmPassword" class="password-toggle">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -207,6 +208,15 @@
     </div>
     <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- SCRIPT DEL FORMULARIO -->
     <script src="/assets/js/usuarios.js"></script>
 </body>
 

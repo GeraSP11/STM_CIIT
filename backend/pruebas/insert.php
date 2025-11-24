@@ -71,14 +71,13 @@ try {
         ['maria_gonzalez', 'admin123', 'maria.gonzalez@empresa.com', $ids_personal[0]],
         ['juan_lopez', 'tms2024', 'juan.lopez@empresa.com', $ids_personal[1]],
         ['ana_ramirez', 'logistica45', 'ana.ramirez@empresa.com', $ids_personal[2]],
-        ['carlos_hernandez', 'almacen99', 'carlos.hernandez@empresa.com', $ids_personal[3]],
-        ['fernanda_vargas', 'cliente789', 'fernanda.vargas@empresa.com', $ids_personal[4]]
+        ['carlos_hernandez', 'almacen99', 'carlos.hernandez@empresa.com', $ids_personal[3]]
     ];
 
     foreach ($usuarios as $u) {
         $stmt_usuarios->execute([
             ':nombre_usuario' => $u[0],
-            ':contrasena' => password_hash($u[1], PASSWORD_DEFAULT),
+            ':contrasena' => $u[1],
             ':correo_electronico' => $u[2],
             ':identificador_de_rh' => $u[3]
         ]);
