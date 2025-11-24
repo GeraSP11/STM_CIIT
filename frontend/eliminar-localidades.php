@@ -16,7 +16,6 @@ $seccion = 'Eliminar Localidades';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        /* Contenedor gris */
         .search-box {
             margin: 40px auto;
             width: 55%;
@@ -25,7 +24,6 @@ $seccion = 'Eliminar Localidades';
             border-radius: 5px;
         }
 
-        /* Etiqueta vino */
         .search-title {
             background: #4a1026;
             color: white;
@@ -37,7 +35,6 @@ $seccion = 'Eliminar Localidades';
             border-radius: 4px;
         }
 
-        /* Botón vino */
         .btn-custom {
             background: #4a1026;
             color: white;
@@ -50,6 +47,18 @@ $seccion = 'Eliminar Localidades';
 
         .btn-custom:hover {
             background: #3a0c1f;
+        }
+
+        .btn-custom:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Estilo para el input con datalist */
+        #inputBuscarLocalidad {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -76,17 +85,26 @@ $seccion = 'Eliminar Localidades';
 
     <!-- Contenedor principal -->
     <div class="search-box shadow">
-
         <div class="search-title">Filtro de búsqueda: *</div>
 
-        <select class="form-select mt-3" style="width:70%;">
-            <option>Identificador de la Localidad</option>
-        </select>
+        <input 
+            type="text" 
+            class="form-control mt-3" 
+            id="inputBuscarLocalidad" 
+            list="localidades" 
+            placeholder="Escribe el nombre del centro o localidad (mínimo 2 caracteres)..."
+            autocomplete="off"
+        >
+        <datalist id="localidades"></datalist>
 
-        <button class="btn-custom mt-4">Buscar</button>
+        <button class="btn-custom mt-4" id="btnEliminar">Eliminar</button>
     </div>
 
+    <!-- Scripts -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/js/alertas.js"></script>
+    <script src="/assets/js/localidades.js"></script>
 </body>
 
 </html>

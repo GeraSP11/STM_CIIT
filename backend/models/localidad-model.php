@@ -137,5 +137,41 @@ class LocalidadlModel
             ':id' => $id
         ]);
     }
-
+public function eliminarLocalidadConDependencias($id)
+{
+    global $pdo;
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // Eliminar en orden inverso a las dependencias
+        $pdo->prepare("DELETE FROM envios WHERE punto_verificacion = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM fleteros WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+        $pdo->prepare("DELETE FROM pedidos WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+        $pdo->prepare("DELETE FROM rutas WHERE localidad_origen = ? OR localidad_destino = ?")->execute([$id, $id]);
+        $pdo->prepare("DELETE FROM maniobras WHERE localidad = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM carrocerias WHERE localidad_pertenece = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM transacciones_productos WHERE localidad = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM productos WHERE ubicacion_producto = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM personal WHERE afiliacion_laboral = ?")->execute([$id]);
+        
+        // Finalmente eliminar la localidad
+        $pdo->prepare("DELETE FROM localidades WHERE id_localidad = ?")->execute([$id]);
+        
+        $pdo->commit();
+        
+        return [
+            'success' => true,
+            'message' => 'Localidad y todos sus registros relacionados eliminados correctamente'
+        ];
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        return [
+            'success' => false,
+            'error' => 'ERROR_BD',
+            'message' => 'Error al eliminar: ' . $e->getMessage()
+        ];
+    }
+}
 }

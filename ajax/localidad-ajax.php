@@ -26,6 +26,10 @@ switch ($action) {
         $controller = new LocalidadController();
         echo $controller->actualizarLocalidad($_POST);
         break;
+    case 'eliminar-localidad':
+    $controller = new LocalidadController();
+    echo $controller->eliminarLocalidad($_POST);
+    break;
     default:
         echo "Acción no válida";
 }
