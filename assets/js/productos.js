@@ -14,6 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
         configurarRegistroProductos();
     }
 
+        // ACTUALIZAR PRODUCTOS
+        if (document.getElementById("buscador_producto")) {
+            configurarActualizarProducto();
+        }
+    
+    // ELIMINAR PRODUCTOS - Detectar por el input de búsqueda
+    if (document.getElementById("producto_input")) {
+        configurarEliminarProducto();
+    }
+
     // PARA FUTURO CRUD
     // if (document.getElementById("formConsultaProductos")) configurarConsultaProductos();
     // if (document.getElementById("formActualizarProducto")) configurarActualizarProducto();
@@ -150,6 +160,495 @@ function configurarRegistroProductos() {
     });
 }
 
+
+/********************************************
+ *      ACTUALIZAR PRODUCTOS
+ ********************************************/
+
+function configurarActualizarProducto() {
+    const buscador = document.getElementById("buscador_producto");
+    const sugerenciasDiv = document.getElementById("sugerencias");
+    
+    if (!buscador || !sugerenciasDiv) return;
+    
+    let timeoutBusqueda = null;
+    
+    // Buscar productos mientras el usuario escribe
+    buscador.addEventListener("input", function() {
+        const termino = this.value.trim();
+        
+        // Limpiar timeout anterior
+        clearTimeout(timeoutBusqueda);
+        
+        if (termino.length < 2) {
+            sugerenciasDiv.classList.remove("activo");
+            sugerenciasDiv.innerHTML = "";
+            return;
+        }
+        
+        // Esperar 300ms después de que el usuario deje de escribir
+        timeoutBusqueda = setTimeout(() => {
+            buscarProductosSugerencias(termino);
+        }, 300);
+    });
+    
+    // Cerrar sugerencias al hacer clic fuera
+    document.addEventListener("click", function(e) {
+        if (!buscador.contains(e.target) && !sugerenciasDiv.contains(e.target)) {
+            sugerenciasDiv.classList.remove("activo");
+        }
+    });
+}
+
+// Función para buscar productos y mostrar sugerencias
+function buscarProductosSugerencias(termino) {
+    const sugerenciasDiv = document.getElementById("sugerencias");
+    
+    apiRequestProductos("buscar_productos", { termino: termino })
+        .then(r => r.json())
+        .then(data => {
+            sugerenciasDiv.innerHTML = "";
+            
+            if (data.error) {
+                sugerenciasDiv.innerHTML = `<div class="no-resultados">${data.error}</div>`;
+                sugerenciasDiv.classList.add("activo");
+                return;
+            }
+            
+            if (data.length === 0) {
+                sugerenciasDiv.innerHTML = '<div class="no-resultados">No se encontraron productos</div>';
+                sugerenciasDiv.classList.add("activo");
+                return;
+            }
+            
+            data.forEach(producto => {
+                const item = document.createElement("div");
+                item.className = "sugerencia-item";
+                item.innerHTML = `
+                    <span class="sugerencia-nombre">${producto.nombre_producto}</span>
+                    <span class="sugerencia-id">(ID: ${producto.id_producto})</span>
+                `;
+                
+                item.addEventListener("click", () => {
+                    cargarProductoEnFormulario(producto.id_producto);
+                    sugerenciasDiv.classList.remove("activo");
+                    document.getElementById("buscador_producto").value = producto.nombre_producto;
+                });
+                
+                sugerenciasDiv.appendChild(item);
+            });
+            
+            sugerenciasDiv.classList.add("activo");
+        })
+        .catch(err => {
+            console.error("Error en búsqueda:", err);
+            sugerenciasDiv.innerHTML = '<div class="no-resultados">Error al buscar productos</div>';
+            sugerenciasDiv.classList.add("activo");
+        });
+}
+
+// Función para cargar producto completo en el formulario
+function cargarProductoEnFormulario(idProducto) {
+    apiRequestProductos("obtener_producto", { id_producto: idProducto })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                alerta("Error", data.error, "error");
+                return;
+            }
+            
+            // Llenar todos los campos del formulario
+            document.getElementById("id_producto").value = data.id_producto || "";
+            document.getElementById("nombre_producto").value = data.nombre_producto || "";
+            document.getElementById("cajas_por_cama").value = data.cajas_por_cama || "";
+            document.getElementById("peso").value = data.peso || "";
+            document.getElementById("altura").value = data.altura || "";
+            // largo y ancho se dejan vacíos para que el usuario los ingrese si quiere recalcular
+            document.getElementById("largo").value = "";
+            document.getElementById("ancho").value = "";
+            document.getElementById("peso_volumetrico").value = data.peso_volumetrico || "";
+            document.getElementById("tipo_de_embalaje").value = data.tipo_de_embalaje || "";
+            document.getElementById("ubicacion_producto").value = data.ubicacion_producto || "";
+            document.getElementById("camas_por_pallet").value = data.camas_por_pallet || "";
+            document.getElementById("peso_soportado").value = data.peso_soportado || "";
+            document.getElementById("unidades_existencia").value = data.unidades_existencia || "";
+            document.getElementById("tipo_de_mercancia").value = data.tipo_de_mercancia || "";
+            
+            // Mostrar botones de acción
+            document.querySelector(".botones").style.display = "flex";
+            document.querySelector(".botones").style.justifyContent = "center";
+            document.querySelector(".botones").style.gap = "20px";
+            document.querySelector(".botones").style.marginTop = "30px";
+            
+            alerta("Éxito", "Producto cargado. Puede editar los campos.", "success");
+        })
+        .catch(err => {
+            console.error("Error al cargar producto:", err);
+            alerta("Error", "No se pudo cargar el producto", "error");
+        });
+}
+
+// Función para calcular peso volumétrico
+function calcularPesoVolumetrico() {
+    const altura = parseFloat(document.getElementById("altura").value) || 0;
+    const largo = parseFloat(document.getElementById("largo").value) || 0;
+    const ancho = parseFloat(document.getElementById("ancho").value) || 0;
+    
+    if (altura > 0 && largo > 0 && ancho > 0) {
+        // Fórmula: (Altura × Largo × Ancho) / 5000
+        const pesoVolumetrico = (altura * largo * ancho) / 5000;
+        document.getElementById("peso_volumetrico").value = pesoVolumetrico.toFixed(2);
+    } else {
+        document.getElementById("peso_volumetrico").value = "";
+    }
+}
+
+// Función para guardar cambios del producto
+function guardarProducto() {
+    const idProducto = document.getElementById("id_producto").value;
+    
+    if (!idProducto) {
+        alerta("Error", "No hay ningún producto seleccionado", "error");
+        return;
+    }
+    
+    // Crear objeto con los datos del formulario (SIN largo y ancho)
+    const datos = {
+        id_producto: idProducto,
+        nombre_producto: document.getElementById("nombre_producto").value.trim(),
+        cajas_por_cama: document.getElementById("cajas_por_cama").value,
+        peso: document.getElementById("peso").value,
+        altura: document.getElementById("altura").value,
+        peso_volumetrico: document.getElementById("peso_volumetrico").value,
+        tipo_de_embalaje: document.getElementById("tipo_de_embalaje").value,
+        ubicacion_producto: document.getElementById("ubicacion_producto").value,
+        camas_por_pallet: document.getElementById("camas_por_pallet").value,
+        peso_soportado: document.getElementById("peso_soportado").value,
+        unidades_existencia: document.getElementById("unidades_existencia").value,
+        tipo_de_mercancia: document.getElementById("tipo_de_mercancia").value
+    };
+    
+    // Validar campos obligatorios
+    if (!datos.nombre_producto || !datos.ubicacion_producto) {
+        alerta("Error", "Complete todos los campos obligatorios", "error");
+        return;
+    }
+    
+    confirmar("¿Actualizar Producto?", "¿Deseas guardar los cambios?")
+        .then(r => {
+            if (!r.isConfirmed) return;
+            
+            apiRequestProductos("actualizar_producto", datos)
+                .then(r => r.text())
+                .then(resp => {
+                    if (resp.trim() === "OK") {
+                        alerta("Éxito", "Producto actualizado correctamente", "success");
+                        limpiarFormulario();
+                    } else {
+                        alerta("Error", resp, "error");
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alerta("Error", "Ocurrió un error al actualizar el producto", "error");
+                });
+        });
+}
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
+    document.getElementById("buscador_producto").value = "";
+    document.getElementById("id_producto").value = "";
+    document.getElementById("nombre_producto").value = "";
+    document.getElementById("cajas_por_cama").value = "";
+    document.getElementById("peso").value = "";
+    document.getElementById("altura").value = "";
+    document.getElementById("largo").value = "";
+    document.getElementById("ancho").value = "";
+    document.getElementById("peso_volumetrico").value = "";
+    document.getElementById("tipo_de_embalaje").value = "";
+    document.getElementById("ubicacion_producto").value = "";
+    document.getElementById("camas_por_pallet").value = "";
+    document.getElementById("peso_soportado").value = "";
+    document.getElementById("unidades_existencia").value = "";
+    document.getElementById("tipo_de_mercancia").value = "";
+    
+    document.querySelector(".botones").style.display = "none";
+    document.getElementById("sugerencias").classList.remove("activo");
+}
+
+
+// productos.js - Eliminar la validación del btnBuscar
+
+function configurarEliminarProducto() {
+    console.log("🔧 Configurando eliminar producto...");
+    
+    const btnEliminar = document.getElementById("btnEliminar");
+    const btnCancelar = document.getElementById("btnCancelar");
+    const productoInput = document.getElementById("producto_input");
+    const sugerenciasDiv = document.getElementById("sugerencias_eliminar");
+    
+    console.log("Elementos encontrados:", {
+        btnEliminar: !!btnEliminar,
+        productoInput: !!productoInput,
+        sugerenciasDiv: !!sugerenciasDiv
+    });
+    
+    // Verificar que estamos en la página de eliminar (SIN btnBuscar)
+    if (!btnEliminar || !productoInput || !sugerenciasDiv) {
+        console.log("❌ Faltan elementos, saliendo...");
+        return;
+    }
+    
+    console.log("✅ Todos los elementos encontrados");
+    
+    let timeoutBusqueda = null;
+    
+    // Buscar productos mientras el usuario escribe
+    productoInput.addEventListener("input", function() {
+        const termino = this.value.trim();
+        console.log("📝 Input cambió:", termino);
+        
+        clearTimeout(timeoutBusqueda);
+        
+        if (termino.length < 2) {
+            console.log("⚠️ Término muy corto");
+            sugerenciasDiv.classList.remove("activo");
+            sugerenciasDiv.innerHTML = "";
+            return;
+        }
+        
+        console.log("⏳ Esperando 300ms para buscar...");
+        timeoutBusqueda = setTimeout(() => {
+            console.log("🔍 Buscando sugerencias para:", termino);
+            buscarProductosSugerenciasEliminar(termino);
+        }, 300);
+    });
+    
+    // Cerrar sugerencias al hacer clic fuera
+    document.addEventListener("click", function(e) {
+        if (!productoInput.contains(e.target) && !sugerenciasDiv.contains(e.target)) {
+            sugerenciasDiv.classList.remove("activo");
+        }
+    });
+    
+    // Eliminar producto
+    btnEliminar.addEventListener("click", function() {
+        console.log("🗑️ Botón eliminar clickeado");
+        confirmarEliminacionProducto();
+    });
+    
+    // Cancelar eliminación
+    if (btnCancelar) {
+        btnCancelar.addEventListener("click", function() {
+            console.log("❌ Botón cancelar clickeado");
+            limpiarFormularioEliminarProducto();
+        });
+    }
+}
+
+// Función para cargar todos los productos en el select
+function cargarProductosParaEliminar() {
+    const select = document.getElementById("producto_select");
+    
+    if (!select) return;
+    
+    apiRequestProductos("listar_todos_productos")
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                alerta("Error", data.error, "error");
+                return;
+            }
+            
+            // Limpiar select
+            select.innerHTML = '<option value="">Seleccione un producto</option>';
+            
+            // Agregar productos
+            data.forEach(producto => {
+                const option = document.createElement("option");
+                option.value = producto.id_producto;
+                option.textContent = `${producto.nombre_producto} - ID: ${producto.id_producto}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error("Error al cargar productos:", err);
+            alerta("Error", "No se pudieron cargar los productos", "error");
+        });
+}
+
+// Función para buscar y mostrar los datos del producto
+function buscarProductoParaEliminar(idProducto) {
+    if (!idProducto) {
+        alerta("Error", "Seleccione un producto", "error");
+        return;
+    }
+    
+    apiRequestProductos("obtener_producto", { id_producto: idProducto })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                alerta("Error", data.error, "error");
+                return;
+            }
+            
+            mostrarDatosProductoEliminar(data);
+        })
+        .catch(err => {
+            console.error("Error al buscar producto:", err);
+            alerta("Error", "No se pudo cargar el producto", "error");
+        });
+}
+
+function buscarProductosSugerenciasEliminar(termino) {
+    console.log("🔎 buscarProductosSugerenciasEliminar llamada con:", termino);
+    
+    const sugerenciasDiv = document.getElementById("sugerencias_eliminar");
+    
+    if (!sugerenciasDiv) {
+        console.error("❌ No se encontró sugerencias_eliminar");
+        return;
+    }
+    
+    console.log("📡 Haciendo petición AJAX...");
+    
+    apiRequestProductos("buscar_productos", { termino: termino })
+        .then(r => {
+            console.log("📨 Respuesta recibida:", r);
+            return r.json();
+        })
+        .then(data => {
+            console.log("📦 Datos parseados:", data);
+            
+            sugerenciasDiv.innerHTML = "";
+            
+            if (data.error) {
+                console.warn("⚠️ Error en respuesta:", data.error);
+                sugerenciasDiv.innerHTML = `<div class="no-resultados">${data.error}</div>`;
+                sugerenciasDiv.classList.add("activo");
+                return;
+            }
+            
+            if (data.length === 0) {
+                console.log("📭 No se encontraron productos");
+                sugerenciasDiv.innerHTML = '<div class="no-resultados">No se encontraron productos</div>';
+                sugerenciasDiv.classList.add("activo");
+                return;
+            }
+            
+            console.log(`✅ ${data.length} productos encontrados`);
+            
+            data.forEach(producto => {
+                const item = document.createElement("div");
+                item.className = "sugerencia-item";
+                item.innerHTML = `
+                    <div class="sugerencia-nombre">${producto.nombre_producto}</div>
+                    <div class="sugerencia-id">ID: ${producto.id_producto}</div>
+                `;
+                
+                item.addEventListener("click", () => {
+                    console.log("✅ Producto seleccionado:", producto);
+                    
+                    // Guardar producto seleccionado
+                    window.productoSeleccionadoEliminar = producto;
+                    
+                    // Actualizar input
+                    document.getElementById("producto_input").value = producto.nombre_producto;
+                    
+                    // Cerrar sugerencias
+                    sugerenciasDiv.classList.remove("activo");
+                    
+                    // Cargar datos automáticamente
+                    buscarProductoParaEliminar(producto.id_producto);
+                });
+                
+                sugerenciasDiv.appendChild(item);
+            });
+            
+            sugerenciasDiv.classList.add("activo");
+            console.log("✅ Sugerencias mostradas");
+        })
+        .catch(err => {
+            console.error("❌ Error en búsqueda:", err);
+            sugerenciasDiv.innerHTML = '<div class="no-resultados">Error al buscar productos</div>';
+            sugerenciasDiv.classList.add("activo");
+        });
+}
+
+// Función para mostrar los datos del producto en la sección de resultados
+function mostrarDatosProductoEliminar(producto) {
+    // Guardar el ID del producto
+    document.getElementById("id_producto").value = producto.id_producto;
+    
+    // Mostrar los datos
+    document.getElementById("display_nombre").textContent = producto.nombre_producto || "-";
+    document.getElementById("display_ubicacion").textContent = producto.ubicacion_producto || "-";
+    document.getElementById("display_peso_volumetrico").textContent = producto.peso_volumetrico ? `${producto.peso_volumetrico} kg` : "-";
+    document.getElementById("display_tipo_mercancia").textContent = producto.tipo_de_mercancia || "-";
+    document.getElementById("display_unidades").textContent = producto.unidades_existencia || "-";
+    
+    // Mostrar la sección de resultados
+    document.getElementById("resultsSection").classList.remove("hidden");
+    
+    // Hacer scroll a la sección de resultados
+    document.getElementById("resultsSection").scrollIntoView({ 
+        behavior: "smooth", 
+        block: "nearest" 
+    });
+}
+
+// Función para confirmar y eliminar el producto
+function confirmarEliminacionProducto() {
+    const idProducto = document.getElementById("id_producto").value;
+    const nombreProducto = document.getElementById("display_nombre").textContent;
+    
+    if (!idProducto) {
+        alerta("Error", "No hay ningún producto seleccionado", "error");
+        return;
+    }
+    
+    // Confirmación con SweetAlert2
+    confirmar(
+        "¿Eliminar Producto?",
+        `¿Está seguro de eliminar el producto "${nombreProducto}"?\n\nEsta acción NO se puede deshacer.`
+    )
+    .then(r => {
+        if (!r.isConfirmed) return;
+        
+        // Realizar la petición de eliminación
+        apiRequestProductos("eliminar_producto", { id_producto: idProducto })
+            .then(r => r.text())
+            .then(resp => {
+                if (resp.trim() === "OK") {
+                    alerta("Éxito", "Producto eliminado correctamente", "success");
+                    limpiarFormularioEliminarProducto();
+                } else {
+                    alerta("Error", resp, "error");
+                }
+            })
+            .catch(err => {
+                console.error("Error al eliminar producto:", err);
+                alerta("Error", "Ocurrió un error al eliminar el producto", "error");
+            });
+    });
+}
+
+// Función para limpiar el formulario de eliminar
+function limpiarFormularioEliminarProducto() {
+    document.getElementById("producto_input").value = "";
+    document.getElementById("id_producto").value = "";
+    document.getElementById("resultsSection").classList.add("hidden");
+    document.getElementById("sugerencias_eliminar").classList.remove("activo");
+    window.productoSeleccionadoEliminar = null;
+    
+    // Limpiar valores mostrados
+    document.getElementById("display_nombre").textContent = "-";
+    document.getElementById("display_ubicacion").textContent = "-";
+    document.getElementById("display_peso_volumetrico").textContent = "-";
+    document.getElementById("display_tipo_mercancia").textContent = "-";
+    document.getElementById("display_unidades").textContent = "-";
+}
 
 /********************************************
  *  UTILIDADES GENERALES PARA CRUD (API)

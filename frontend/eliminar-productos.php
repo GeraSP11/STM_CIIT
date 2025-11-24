@@ -193,6 +193,61 @@ $seccion = 'Eliminar Productos';
         .btn-cancel:hover {
             background-color: #5a6268;
         }
+
+        .sugerencias {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-top: -30px;
+    }
+
+    .sugerencias.activo {
+        display: block;
+    }
+
+    .sugerencia-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+    }
+
+    .sugerencia-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .sugerencia-item:last-child {
+        border-bottom: none;
+    }
+
+    .sugerencia-nombre {
+        font-weight: 600;
+        color: #333;
+        display: block;
+    }
+
+    .sugerencia-id {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 3px;
+    }
+
+    .no-resultados {
+        padding: 15px;
+        text-align: center;
+        color: #999;
+        font-style: italic;
+    }
     </style>
 </head>
 
@@ -218,14 +273,18 @@ $seccion = 'Eliminar Productos';
 
         <!-- Sección de búsqueda -->
         <div class="search-section" id="searchSection">
-            <div class="search-label">Filtro de búsqueda: *</div>
-            <select id="producto_select">
-                <option value="">Identificador del Producto</option>
-                <!-- Las opciones se cargarán dinámicamente -->
-            </select>
-            <br>
-            <button type="button" class="btn-search" id="btnBuscar">Buscar</button>
-        </div>
+    <div class="search-label">Filtro de búsqueda: *</div>
+    <div style="position: relative; max-width: 600px; margin: 0 auto;">
+        <input 
+            type="text" 
+            id="producto_input" 
+            placeholder="Escribe el nombre del producto"
+            autocomplete="off"
+            style="width: 100%; padding: 15px 20px; border: 2px solid #ccc; border-radius: 8px; font-size: 1rem; margin-bottom: 30px;"
+        >
+        <div id="sugerencias_eliminar" class="sugerencias"></div>
+    </div>
+</div>
 
         <!-- Sección de resultados (oculta inicialmente) -->
         <div id="resultsSection" class="results-section hidden">
@@ -273,7 +332,11 @@ $seccion = 'Eliminar Productos';
         </div>
     </main>
 
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/productos.js"></script>
+    <script src="/assets/js/alertas.js"></script>
 </body>
 
 </html>
