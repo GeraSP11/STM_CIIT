@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById("formConsultaUsuarios")) {
         configurarConsultaUsuarios();
     }
+        if (document.querySelector('.form-control-custom')) {
+        configurarEliminacionUsuarios();
+    }
+
 
 });
 
@@ -297,4 +301,33 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
     } else {
         alerta("Error", respuesta, "error");
     }
+}
+function configurarEliminacionUsuarios() {
+    const inputCurp = document.querySelector('.form-control-custom');
+    const btnBuscar = document.querySelector('.btn-custom');
+    
+    if (!btnBuscar) return;
+    
+    btnBuscar.addEventListener("click", function () {
+        const curp = inputCurp.value.trim();
+        
+        if (curp === "") {
+            alerta("Eliminación", "Debes ingresar una CURP.", "warning");
+            return;
+        }
+        
+        confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
+            .then(r => {
+                if (!r.isConfirmed) return;
+                
+                apiRequestUsuarios("eliminar", { curp })
+                    .then(r => r.text())
+                    .then(resp => manejarRespuestaCRUD(
+                        resp,
+                        "Usuario eliminado correctamente.",
+                        "index.php"
+                    ))
+                    .catch(() => alerta("Error", "Ocurrió un error al eliminar el usuario.", "error"));
+            });
+    });
 }

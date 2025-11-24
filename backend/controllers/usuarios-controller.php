@@ -79,4 +79,28 @@ class UsuariosController
             "clave_personal" => $usuario['curp']
         ];
     }
+    public function eliminarUsuario($data)
+{
+    $curp = trim($data['curp'] ?? '');
+    
+    if (empty($curp)) {
+        return "La CURP es obligatoria";
+    }
+    
+    $model = new UsuariosModel();
+    
+    // Verificar si existe el usuario
+    $usuario = $model->consultarUsuarioPorCriterio($curp);
+    
+    if (!$usuario) {
+        return "No se encontró ningún usuario con esa CURP";
+    }
+    
+    // Eliminar usuario
+    if ($model->eliminarUsuario($curp)) {
+        return "OK";
+    } else {
+        return "Error al eliminar el usuario";
+    }
+}
 }

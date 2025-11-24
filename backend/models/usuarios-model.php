@@ -97,4 +97,24 @@ class UsuariosModel
         // 3. Combinar datos del usuario + personal
         return array_merge($usuario, $personal);
     }
+public function eliminarUsuario($curp)
+{
+    global $pdo;
+    
+    // 1. Buscar el id_personal por CURP
+    $sqlPersonal = "SELECT id_personal FROM personal WHERE curp = ?";
+    $stmt = $pdo->prepare($sqlPersonal);
+    $stmt->execute([$curp]);
+    $personal = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$personal) {
+        return false;
+    }
+    
+    // 2. Eliminar usuario asociado (CASCADE eliminará automáticamente por la FK)
+    $sqlDelete = "DELETE FROM usuarios WHERE identificador_de_rh = ?";
+    $stmt = $pdo->prepare($sqlDelete);
+    
+    return $stmt->execute([$personal['id_personal']]);
+}
 }

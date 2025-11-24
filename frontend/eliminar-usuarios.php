@@ -107,7 +107,20 @@ $seccion = 'Eliminar usuarios';
 
     </div>
 
+
+<!-- Bootstrap -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 (si no lo tienes, agrégalo) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Tu archivo de alertas -->
+    <script src="/assets/js/alertas.js"></script>
+    
+    <!-- Tu archivo de usuarios -->
+    <script src="/assets/js/usuarios.js"></script>
+</body>
+</html>
 </body>
 
 </html>
