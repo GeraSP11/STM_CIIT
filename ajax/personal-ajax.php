@@ -20,6 +20,10 @@ switch ($action) {
         header('Content-Type: application/json');
         echo json_encode($localidades);
         break;
+    case 'actualizar-personal':
+        $controller = new PersonalController();
+        echo $controller->actualizarPersonal($_POST);
+        break;
     default:
         echo "Acción no válida";
 }
