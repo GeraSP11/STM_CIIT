@@ -83,6 +83,22 @@ $seccion = 'Registro de Productos';
         .btn-custom:hover {
             background-color: #50001c;
         }
+
+        /* mensajes de error */
+        .error {
+            outline: 1px solid #e74c3c;
+        }
+
+        .error-message {
+            display: block;
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .error-message.show {
+            display: block;
+        }
     </style>
 </head>
 
@@ -129,8 +145,8 @@ $seccion = 'Registro de Productos';
                     </div>
 
                     <div class="form-group">
-                        <label for="cajas_cama">Cajas por Cama:</label>
-                        <input type="number" id="cajas_cama" name="cajas_por_cama" step="1" value="0">
+                        <label for="cajas_por_cama">Cajas por Cama:</label>
+                        <input type="number" id="cajas_por_cama" name="cajas_por_cama" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -140,7 +156,7 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="unidades_existencia">Unidades en Existencia:</label>
-                        <input type="number" id="unidad_existencia" name="unidad_existencia" step="1" value="0">
+                        <input type="number" id="unidades_existencia" name="unidades_existencia" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -178,7 +194,7 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="peso_volumetrico">Peso Volumétrico (Kg):</label>
-                        <input type="number" id="peso_volumetrico" name="peso_volumetrico_kg" step="0.01" value="0.00">
+                        <input type="number" id="peso_volumetrico" name="peso_volumetrico_kg" step="0.01" value="0.00" readonly>
                     </div>
 
                     <div class="form-group">
@@ -212,6 +228,7 @@ $seccion = 'Registro de Productos';
     <script src="/assets/js/alertas.js"></script>
 
     <!-- SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/productos-validaciones.js"></script>
     <script src="/assets/js/productos.js"></script>
 
 </body>

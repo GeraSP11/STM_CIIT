@@ -8,7 +8,7 @@ $controller = new ProductosController();
 switch ($action) {
 
     case 'registrar':
-        echo json_encode($controller->registrarProducto($_POST));
+        echo $controller->registrarProducto($_POST);
         break;
 
     case 'listar_localidades':

@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cargarTiposEmbalaje();
         cargarTiposMercancia();
         cargarLocalidades();
+        initValidacionesProductos()
         configurarRegistroProductos();
     }
 
@@ -24,27 +25,27 @@ document.addEventListener("DOMContentLoaded", () => {
  ********************************************/
 
 const tiposEmbalaje = [
-    "Envase simple","Envase combinado","Envase interior","Envase exterior",
-    "Envase intermedio","Recipiente intermedio para granel (RIG / IBC)","Gran embalaje (LP)",
-    "Tambor metálico","Tambor de plástico","Bidón metálico","Bidón de plástico","Caja de madera",
-    "Caja de cartón / fibra","Caja de plástico","Caja metálica",
-    "Bolsa de plástico","Bolsa de papel","Frasco o botella de vidrio","Frasco o botella de plástico",
-    "Garrafa o contenedor de vidrio / gres","Contenedor a presión (cilindro, tanque portátil)",
-    "Embalaje compuesto (varios materiales)","Embalaje con flejes o ligaduras",
-    "Embalaje interior rígido","Envase reutilizable o retornable","Embalaje para cantidades limitadas",
-    "Embalaje para residuos peligrosos","Embalaje especial para líquidos corrosivos",
+    "Envase simple", "Envase combinado", "Envase interior", "Envase exterior",
+    "Envase intermedio", "Recipiente intermedio para granel (RIG / IBC)", "Gran embalaje (LP)",
+    "Tambor metálico", "Tambor de plástico", "Bidón metálico", "Bidón de plástico", "Caja de madera",
+    "Caja de cartón / fibra", "Caja de plástico", "Caja metálica",
+    "Bolsa de plástico", "Bolsa de papel", "Frasco o botella de vidrio", "Frasco o botella de plástico",
+    "Garrafa o contenedor de vidrio / gres", "Contenedor a presión (cilindro, tanque portátil)",
+    "Embalaje compuesto (varios materiales)", "Embalaje con flejes o ligaduras",
+    "Embalaje interior rígido", "Envase reutilizable o retornable", "Embalaje para cantidades limitadas",
+    "Embalaje para residuos peligrosos", "Embalaje especial para líquidos corrosivos",
     "Embalaje especial para materiales explosivos"
 ];
 
 const tiposMercancia = [
-    "Mercancías peligrosas","Sustancias peligrosas","Materiales peligrosos","Residuos peligrosos",
-    "Mercancías en cantidades limitadas","Mercancías en cantidades exceptuadas","Mercancías no peligrosas",
-    "Mercancías comunes / generales","Mercancías para consumo final","Mercancías a granel",
-    "Mercancías en envases especiales","Mercancías transportadas en tanque/autotanque",
-    "Clase 1 - Explosivos","Clase 2 - Gases","Clase 3 - Líquidos inflamables",
+    "Mercancías peligrosas", "Sustancias peligrosas", "Materiales peligrosos", "Residuos peligrosos",
+    "Mercancías en cantidades limitadas", "Mercancías en cantidades exceptuadas", "Mercancías no peligrosas",
+    "Mercancías comunes / generales", "Mercancías para consumo final", "Mercancías a granel",
+    "Mercancías en envases especiales", "Mercancías transportadas en tanque/autotanque",
+    "Clase 1 - Explosivos", "Clase 2 - Gases", "Clase 3 - Líquidos inflamables",
     "Clase 4 - Sólidos inflamables / combustión espontánea / reacción con agua",
-    "Clase 5 - Sustancias comburentes y peróxidos orgánicos","Clase 6 - Sustancias tóxicas e infecciosas",
-    "Clase 7 - Materiales radiactivos","Clase 8 - Sustancias corrosivas",
+    "Clase 5 - Sustancias comburentes y peróxidos orgánicos", "Clase 6 - Sustancias tóxicas e infecciosas",
+    "Clase 7 - Materiales radiactivos", "Clase 8 - Sustancias corrosivas",
     "Clase 9 - Sustancias peligrosas varias / misceláneas"
 ];
 
@@ -82,6 +83,11 @@ function cargarLocalidades() {
     if (!select) return;
 
     apiRequestProductos("listar_localidades")
+        /*.then(r => r.text())
+                .then(texto => {
+                    console.log("RESPUESTA CRUDA DEL SERVIDOR:");
+                    console.log(texto);
+                })*/
         .then(r => r.json())
         .then(data => {
             if (data.error) {
@@ -112,19 +118,31 @@ function configurarRegistroProductos() {
     formulario.addEventListener("submit", function (e) {
         e.preventDefault();
 
+        // Validación global
+        if (!validarFormularioProductos()) return;
+
         confirmar("¿Registrar Producto?", "¿Deseas continuar?")
             .then(r => {
                 if (!r.isConfirmed) return;
 
                 apiRequestProductos("registrar", formulario)
                     .then(r => r.text())
-                    .then(resp =>
+                    .then(resp => {
                         manejarRespuestaCRUD(
                             resp,
                             "Producto registrado correctamente.",
-                            "registrar-productos.php" // O la ruta que tú quieras
-                        )
-                    )
+                            null
+                        );
+                        // Limpia los campos
+                        formulario.reset();
+
+                        // Limpia errores visuales si existen
+                        document.querySelectorAll('.error-message').forEach(e => e.classList.remove('show'));
+                        document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
+
+                        // Limpia el peso volumétrico
+                        document.getElementById("peso_volumetrico").value = "";
+                    })
                     .catch(() =>
                         alerta("Error", "Ocurrió un error al registrar el producto.", "error")
                     );
