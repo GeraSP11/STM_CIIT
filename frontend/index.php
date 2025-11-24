@@ -1,4 +1,3 @@
-<!-- Archivo: login.php -->
 <?php
 $page_title = 'MARINA Corredor Interoceánico';
 ?>
@@ -118,6 +117,12 @@ $page_title = 'MARINA Corredor Interoceánico';
             background: var(--secondary);
         }
 
+        .btn-primary:disabled {
+            background: #6c757d;
+            transform: none;
+            cursor: not-allowed;
+        }
+
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -161,6 +166,25 @@ $page_title = 'MARINA Corredor Interoceánico';
             font-weight: 400;
         }
 
+        .alert {
+            border-radius: 0.25rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c2c7;
+            color: #842029;
+        }
+
+        .alert-success {
+            background-color: #d1e7dd;
+            border: 1px solid #badbcc;
+            color: #0f5132;
+        }
+
         /* Responsive adjustments */
         @media screen and (max-height: 700px) {
             .main-container {
@@ -192,14 +216,12 @@ $page_title = 'MARINA Corredor Interoceánico';
             }
         }
 
-        /* Para pantallas muy grandes */
         @media screen and (min-width: 1920px) {
             .login-card {
                 max-width: 500px;
             }
         }
 
-        /* Asegurar que el contenido no se corte */
         @media screen and (max-height: 600px) {
             body {
                 overflow-y: auto;
@@ -220,7 +242,10 @@ $page_title = 'MARINA Corredor Interoceánico';
         <div class="login-card bg-white rounded p-5">
             <h1 class="text-center fw-normal mb-4">Inicio de sesión</h1>
 
-            <form action="procesar_login.php" method="POST">
+            <!-- Div para mensajes de alerta -->
+            <div id="mensajeAlerta" style="display: none;"></div>
+
+            <form id="formLogin">
                 <div class="form-floating mb-4">
                     <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
                         placeholder="Usuario" required pattern="^[a-zA-Z0-9]{3,20}$"
@@ -239,10 +264,9 @@ $page_title = 'MARINA Corredor Interoceánico';
                     <input type="checkbox" id="showPassword"
                         onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating">
-                        <input type="password" class="form-control pe-5" id="password" name="password"
-                            placeholder="Contraseña" required
-                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-                            title="Mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un símbolo">
+                    <!-- DESPUÉS (bien) -->
+<input type="password" class="form-control pe-5" id="password" name="password"
+    placeholder="Contraseña" required minlength="8">
                         <label for="password">Contraseña</label>
                     </div>
                     <label for="showPassword" class="password-toggle">
@@ -253,7 +277,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">Entrar</button>
+                <button type="submit" id="btnLogin" class="btn btn-primary w-100 py-3 fw-semibold">Entrar</button>
 
                 <div class="d-flex justify-content-between pt-4 mt-3 border-top">
                     <a href="recuperar-password.php" class="link-secondary text-decoration-none small">¿Olvidaste tu
@@ -266,6 +290,9 @@ $page_title = 'MARINA Corredor Interoceánico';
 
     <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript del login -->
+    <script src="/assets/js/login.js"></script>
 </body>
 
 </html>
