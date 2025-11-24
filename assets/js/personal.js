@@ -16,16 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 2. Consultar ----
     consultarPersonal(); // validaciones internas
 
+    // ---- 3. Actualizar ----
     cargarLocalidades();
     update();
 
 
-
-    // ---- 3. Actualizar ----
-    // configurarEdicion();       // (Próximo)
-
     // ---- 4. Eliminar ----
-    // configurarEliminacion();   // (Próximo)
+    configurarEliminacion();
 });
 
 
@@ -159,9 +156,6 @@ function consultarPersonal() {
 /* =====================================================
    3. ACTUALIZAR (UPDATE)
    ===================================================== */
-/* =====================================================
-   3. ACTUALIZAR (UPDATE) — ALERTAS MODIFICADAS
-   ===================================================== */
 
    function update() {
     const curpBusqueda = document.getElementById('curp_busqueda');
@@ -278,17 +272,185 @@ function limpiarFormulario() {
 /* =====================================================
    4. ELIMINAR (DELETE)
    ===================================================== */
+// ========== FUNCIONES PARA ELIMINAR PERSONAL ==========
 
-// function eliminarPersonal(id) {
-//     confirmar("¿Eliminar registro?", "No se puede deshacer.")
-//         .then(r => {
-//             if (!r.isConfirmed) return;
-//             apiRequest("eliminar", { id })
-//                 .then(r => r.text())
-//                 .then(resp => manejarRespuestaCRUD(resp, "Eliminado correctamente."));
-//         });
-// }
+// Configurar eventos para eliminación de personal
+function configurarEliminacion() {
+    const btnBuscar = document.getElementById('btnBuscar');
+    const btnEliminar = document.getElementById('btnEliminar');
+    const curpBusqueda = document.getElementById('curp_busqueda');
+    
+    // Solo ejecutar si estamos en la página de eliminar
+    if (!btnBuscar || !btnEliminar || !curpBusqueda) {
+        return;
+    }
+    
+    // Buscar personal al hacer clic en el botón
+    btnBuscar.addEventListener('click', function() {
+        const curp = curpBusqueda.value.trim();
+        buscarPersonalParaEliminar(curp);
+    });
+    
+    // Buscar personal al presionar Enter en el campo de búsqueda
+    curpBusqueda.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const curp = this.value.trim();
+            buscarPersonalParaEliminar(curp);
+            
+            return false;
+        }
+    });
+    
+    // Eliminar personal al hacer clic en el botón eliminar
+    btnEliminar.addEventListener('click', function() {
+        confirmarEliminacion();
+    });
+}
 
+// Función para buscar personal por CURP para eliminar
+function buscarPersonalParaEliminar(curp) {
+    if (!curp || curp.length !== 18) {
+        alerta("CURP inválida", "La CURP debe tener exactamente 18 caracteres.", "warning");
+        return;
+    }
+    
+    fetch('/ajax/personal-ajax.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=consultar-personal&curp=${encodeURIComponent(curp)}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            return response.text().then(text => {
+                console.error('Respuesta no JSON:', text);
+                throw new TypeError("La respuesta no es JSON válido");
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.length > 0) {
+            const personal = data[0];
+            mostrarInformacionPersonal(personal);
+        } else {
+            alerta("CURP inválida", "No se encontró personal con esa CURP", "warning");
+            ocultarSeccionInfo();
+        }
+    })
+    .catch(error => {
+        console.error('Error al buscar personal:', error);
+        alert('Error al buscar el personal. Verifica la consola para más detalles.');
+    });
+}
+
+// Función para mostrar la información del personal encontrado
+function mostrarInformacionPersonal(personal) {
+    // Almacenar el ID del personal
+    document.getElementById('id_personal').value = personal.id_personal;
+    
+    // Mostrar los datos en la sección de información
+    document.getElementById('display_curp').textContent = personal.curp || '-';
+    document.getElementById('display_nombre').textContent = personal.nombre || '-';
+    document.getElementById('display_paterno').textContent = personal.apellido_paterno || '-';
+    document.getElementById('display_materno').textContent = personal.apellido_materno || '-';
+    document.getElementById('display_afiliacion').textContent = personal.afiliacion_laboral || '-';
+    document.getElementById('display_cargo').textContent = personal.cargo || '-';
+    
+    // Mostrar la sección de información
+    const infoSection = document.getElementById('info-section');
+    infoSection.classList.remove('hidden');
+    
+    // Hacer scroll suave hacia la sección de información
+    infoSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Función para ocultar la sección de información
+function ocultarSeccionInfo() {
+    const infoSection = document.getElementById('info-section');
+    if (infoSection) {
+        infoSection.classList.add('hidden');
+    }
+    
+    const idPersonal = document.getElementById('id_personal');
+    if (idPersonal) {
+        idPersonal.value = '';
+    }
+}
+
+// Función para confirmar y eliminar el personal
+// Función para confirmar y eliminar el personal
+function confirmarEliminacion() {
+    const idPersonal = document.getElementById('id_personal').value;
+    const curp = document.getElementById('display_curp').textContent;
+    const nombre = document.getElementById('display_nombre').textContent;
+    
+    if (!idPersonal) {
+        alerta("Error", "No hay ningún registro seleccionado para eliminar", "error");
+        return;
+    }
+    
+    // Confirmar la eliminación con el usuario
+    confirmar(
+        "Confirmar eliminación",
+        `¿Está seguro de que desea eliminar permanentemente el registro?
+        
+CURP: ${curp}
+Nombre: ${nombre}
+
+Esta acción NO se puede deshacer.`,
+        "warning"
+    ).then((result) => {
+        if (!result.isConfirmed) {
+            return; // El usuario canceló
+        }
+        
+        // Si confirmó, proceder con la eliminación
+        apiRequest("eliminar-personal", { id_personal: idPersonal })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                if (data.trim() === 'OK') {
+                    alerta("Éxito", "Personal eliminado correctamente.", "success");
+                    limpiarFormularioEliminacion();
+                } else {
+                    alerta("Error", data, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar personal:', error);
+                alerta("Error", "Ocurrió un problema al eliminar el personal.", "error");
+            });
+    });
+}
+
+// Función para limpiar el formulario después de eliminar
+function limpiarFormularioEliminacion() {
+    const curpBusqueda = document.getElementById('curp_busqueda');
+    if (curpBusqueda) {
+        curpBusqueda.value = '';
+    }
+    
+    const idPersonal = document.getElementById('id_personal');
+    if (idPersonal) {
+        idPersonal.value = '';
+    }
+    
+    ocultarSeccionInfo();
+}
 
 
 /* =====================================================
