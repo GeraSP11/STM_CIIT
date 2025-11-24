@@ -59,4 +59,42 @@ class UsuariosModel
 
         return $resultado ? $resultado['id_usuario'] : null;
     }
+
+    public function consultarUsuarioPorCriterio($curp)
+    {
+        global $pdo;
+
+        // 1. Buscar el id del personal por CURP
+        $sqlPersonal = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
+                    FROM personal
+                    WHERE curp = ?";
+
+        $stmt = $pdo->prepare($sqlPersonal);
+        $stmt->execute([$curp]);
+
+        $personal = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$personal) {
+            return false; // No existe el personal con esa CURP
+        }
+
+        $idPersonal = $personal['id_personal'];
+
+        // 2. Buscar usuario asociado a ese id_personal
+        $sqlUsuario = "SELECT id_usuario, nombre_usuario, correo_electronico, identificador_de_rh
+                   FROM usuarios
+                   WHERE identificador_de_rh = ?";
+
+        $stmt = $pdo->prepare($sqlUsuario);
+        $stmt->execute([$idPersonal]);
+
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$usuario) {
+            return false; // No existe un usuario ligado a ese id_personal
+        }
+
+        // 3. Combinar datos del usuario + personal
+        return array_merge($usuario, $personal);
+    }
 }

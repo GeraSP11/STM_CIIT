@@ -3,7 +3,7 @@ require_once __DIR__ . "/../models/usuarios-model.php";
 
 class UsuariosController
 {
-
+    // Registrar un Usuario
     public function registrarUsuario($data)
     {
         $nombre = trim($data['nombre_usuario']);
@@ -42,5 +42,41 @@ class UsuariosController
         } else {
             return "Ocurrió un error al registrar el usuario.";
         }
+    }
+
+    // Consultar un Usuario
+    public function consultarUsuario($data)
+    {
+        $criterio = trim($data['criterio'] ?? '');
+
+        if ($criterio === '') {
+            return [
+                "error" => true,
+                "message" => "Debes ingresar una Clave de Personal para buscar."
+            ];
+        }
+
+        $model = new UsuariosModel();
+
+        // Buscar usuario por Clave de Personal
+        $usuario = $model->consultarUsuarioPorCriterio($criterio);
+
+        if (!$usuario) {
+            return [
+                "error" => true,
+                "message" => "No se encontró ningún usuario con ese criterio."
+            ];
+        }
+
+        // Construir nombre completo desde datos del personal
+        $nombreCompleto = $usuario['nombre_personal'] . " " . $usuario['apellido_paterno'] . " " . $usuario['apellido_materno'];
+
+        // Formato JSON que tu JS espera
+        return [
+            "usuario"        => $usuario['nombre_usuario'],
+            "nombre_completo" => $nombreCompleto,
+            "correo"         => $usuario['correo_electronico'],
+            "clave_personal" => $usuario['curp']
+        ];
     }
 }

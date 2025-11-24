@@ -110,17 +110,64 @@ $seccion = 'Consultar Usuario';
     <!-- Contenido -->
     <div class="content-area">
 
-        <div class="search-label">Clave: *</div>
+        <form id="formConsultaUsuarios">
+            <div class="search-label">Clave: *</div>
 
-        <input type="text" placeholder="Clave de Identificación de Personal" class="form-control-custom">
+            <input type="text" id="clave_usuario" name="clave_usuario" placeholder="Clave de Identificación de Personal" class="form-control-custom">
+            <small style="color: gray;">*Campos obligatorios</small>
 
-        <small style="color: gray;">*Campos obligatorios</small>
-
-        <button class="btn btn-custom">Consultar</button>
+            <button class="btn btn-custom">Consultar</button>
+        </form>
 
     </div>
 
+    <!-- Contenedor tabla resultados, oculto inicialmente -->
+    <div id="tablaUsuarios" class="mt-4" style="display:none;">
+        <table class="table table-bordered w-75 mx-auto shadow">
+            <thead style="background-color: #4D2132; color: #4D2132; font-size:18px;">
+                <tr>
+                    <th colspan="2" class="text-center">Resultados</th>
+                </tr>
+            </thead>
+
+            <tbody id="tbodyUsuarios">
+                <tr>
+                    <td class="fw-bold">Nombre de usuario:</td>
+                    <td id="td_usuario"></td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Nombre completo:</td>
+                    <td id="td_nombre"></td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Correo electrónico:</td>
+                    <td id="td_correo"></td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Clave de Identificación de Personal:</td>
+                    <td id="td_clave"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-center mt-3">
+            <button id="btnVolver" class="btn btn-custom">Volver</button>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/usuarios.js"></script>
 </body>
 
 </html>

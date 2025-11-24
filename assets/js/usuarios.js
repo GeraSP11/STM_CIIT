@@ -11,19 +11,18 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // ---- 1. Registrar ----
-    configurarRegistroUsuarios();
+    // Solo activar registro si existe el formulario
+    if (document.getElementById("formRegistroUsuarios")) {
+        configurarRegistroUsuarios();
+    }
 
-    // ---- 2. Consultar (próximo) ----
-    // configurarConsultaUsuarios();
-
-    // ---- 3. Actualizar (próximo) ----
-    // configurarActualizacionUsuarios();
-
-    // ---- 4. Eliminar (próximo) ----
-    // configurarEliminacionUsuarios();
+    // Solo activar consulta si existe el formulario
+    if (document.getElementById("formConsultaUsuarios")) {
+        configurarConsultaUsuarios();
+    }
 
 });
+
 
 
 /* =====================================================
@@ -33,12 +32,12 @@ document.addEventListener("DOMContentLoaded", function () {
 function configurarRegistroUsuarios() {
 
     const formulario = document.getElementById("formRegistroUsuarios");
-    if (!formulario) return; // Si no existe, no hacer nada
+    if (!formulario) return;
 
     formulario.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        // Validación global antes de enviar
+        // Validación global
         if (!validateForm()) return;
 
         confirmar("¿Registrar Usuario?", "¿Deseas continuar?")
@@ -63,38 +62,72 @@ function configurarRegistroUsuarios() {
    2. CONSULTAR (READ)
    ===================================================== */
 
-// FUTURO — estructura lista para avanzar como personal.js
 function configurarConsultaUsuarios() {
-    // Similar a consultarPersonal()
+
+    const formConsulta = document.getElementById("formConsultaUsuarios");
+    const inputCriterio = document.getElementById("clave_usuario");
+    const tabla = document.getElementById("tablaUsuarios");
+    const btnVolver = document.getElementById("btnVolver");
+
+    const tdUsuario = document.getElementById("td_usuario");
+    const tdNombre = document.getElementById("td_nombre");
+    const tdCorreo = document.getElementById("td_correo");
+    const tdClave = document.getElementById("td_clave");
+
+    if (!formConsulta) return;
+
+    formConsulta.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const criterio = inputCriterio.value.trim();
+
+        if (criterio === "") {
+            alerta("Consulta", "Debes ingresar una clave de personal (CURP).", "warning");
+            return;
+        }
+
+        apiRequestUsuarios("consultar-usuario", { criterio })
+            /*.then(r => r.text())
+            .then(texto => {
+                console.log("RESPUESTA CRUDA DEL SERVIDOR:");
+                console.log(texto);
+            })*/
+        .then(r => r.json())
+            .then(data => {
+
+                if (!data || data.error) {
+                    alerta("Sin resultados", "No se encontró ningún usuario con esa clave de personal.", "warning");
+                    return;
+                }
+
+                tdUsuario.textContent = data.usuario;
+                tdNombre.textContent = data.nombre_completo;
+                tdCorreo.textContent = data.correo;
+                tdClave.textContent = data.clave_personal;
+
+                // Mostrar tabla
+                tabla.style.display = "block";
+
+                // Ocultar formulario
+                formConsulta.parentElement.style.display = "none";
+            });
+    });
+
+    if (btnVolver) {
+        btnVolver.addEventListener("click", function () {
+            tabla.style.display = "none";
+            formConsulta.parentElement.style.display = "block";
+            inputCriterio.value = "";
+        });
+    }
 }
 
 
 
 /* =====================================================
-   3. ACTUALIZAR (UPDATE)
+   5. VALIDACIONES DE FORMULARIO
    ===================================================== */
 
-function configurarActualizacionUsuarios() {
-    // Base lista, se llenará cuando implementes la vista
-}
-
-
-
-/* =====================================================
-   4. ELIMINAR (DELETE)
-   ===================================================== */
-
-function configurarEliminacionUsuarios() {
-    // Base lista, igual que en personal.js
-}
-
-
-
-/* =====================================================
-   5. VALIDACIONES DE FORMULARIO (SE MANTIENEN)
-   ===================================================== */
-
-// Referencias
 const inputs = {
     nombre_usuario: document.getElementById('nombre_usuario'),
     email: document.getElementById('email'),
@@ -105,6 +138,8 @@ const inputs = {
 
 // Helpers
 function showError(input, message) {
+    if (!input) return;
+
     let errorDiv = input.parentElement.querySelector('.invalid-feedback');
 
     if (!errorDiv) {
@@ -119,6 +154,8 @@ function showError(input, message) {
 }
 
 function clearError(input) {
+    if (!input) return;
+
     let errorDiv = input.parentElement.querySelector('.invalid-feedback');
     if (errorDiv) {
         errorDiv.textContent = "";
@@ -129,36 +166,44 @@ function clearError(input) {
 
 // Validaciones individuales
 function checkNombreUsuario() {
+    if (!inputs.nombre_usuario) return;
+
     const val = inputs.nombre_usuario.value.trim();
     clearError(inputs.nombre_usuario);
 
     if (!val) return showError(inputs.nombre_usuario, "El nombre de usuario es obligatorio");
 
     if (!/^[A-Z][a-zA-Z0-9]{4,20}$/.test(val))
-        return showError(inputs.nombre_usuario, "Solo letras o números (3-20 caracteres), primera letra mayúscula");
+        return showError(inputs.nombre_usuario, "Debe iniciar con mayúscula y tener 5-20 caracteres");
 }
 
 function checkEmail() {
+    if (!inputs.email) return;
+
     const val = inputs.email.value.trim();
     clearError(inputs.email);
 
     if (!val) return showError(inputs.email, "El correo es obligatorio");
 
-    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!reg.test(val)) return showError(inputs.email, "Correo electrónico inválido");
+    const reg = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    if (!reg.test(val)) return showError(inputs.email, "Correo inválido");
 }
 
 function checkClavePersonal() {
+    if (!inputs.clave_personal) return;
+
     const val = inputs.clave_personal.value.trim();
     clearError(inputs.clave_personal);
 
-    if (!val) return showError(inputs.clave_personal, "La clave personal es obligatoria");
+    if (!val) return showError(inputs.clave_personal, "La clave personal (CURP) es obligatoria");
 
-    if (!/^[a-zA-Z0-9]{18,20}$/.test(val))
-        return showError(inputs.clave_personal, "Debe contener letras o números (18-20 caracteres)");
+    if (!/^[A-Za-z0-9]{18}$/.test(val))
+        return showError(inputs.clave_personal, "La CURP debe tener exactamente 18 caracteres");
 }
 
 function checkPassword() {
+    if (!inputs.password) return;
+
     const val = inputs.password.value;
     clearError(inputs.password);
 
@@ -172,22 +217,22 @@ function checkPassword() {
         special: /[@$!%*?&]/.test(val)
     };
 
-    const errors = [];
-    if (!rules.min) errors.push("8 caracteres");
-    if (!rules.upper) errors.push("una mayúscula");
-    if (!rules.lower) errors.push("una minúscula");
-    if (!rules.number) errors.push("un número");
-    if (!rules.special) errors.push("un símbolo especial");
+    const fails = [];
+    for (const rule in rules) {
+        if (!rules[rule]) fails.push(rule);
+    }
 
-    if (errors.length)
-        return showError(inputs.password, "Debe contener: " + errors.join(", "));
+    if (fails.length)
+        return showError(inputs.password, "Debe contener: mayúscula, minúscula, número, símbolo y mínimo 8 caracteres");
 }
 
 function checkConfirmPassword() {
+    if (!inputs.confirm_password) return;
+
     clearError(inputs.confirm_password);
 
     if (!inputs.confirm_password.value)
-        return showError(inputs.confirm_password, "Debe confirmar la contraseña");
+        return showError(inputs.confirm_password, "Debes confirmar la contraseña");
 
     if (inputs.confirm_password.value !== inputs.password.value)
         return showError(inputs.confirm_password, "Las contraseñas no coinciden");
@@ -195,16 +240,17 @@ function checkConfirmPassword() {
 
 // Validación global
 function validateForm() {
-    checkNombreUsuario();
-    checkEmail();
-    checkClavePersonal();
-    checkPassword();
-    checkConfirmPassword();
+
+    if (inputs.nombre_usuario) checkNombreUsuario();
+    if (inputs.email) checkEmail();
+    if (inputs.clave_personal) checkClavePersonal();
+    if (inputs.password) checkPassword();
+    if (inputs.confirm_password) checkConfirmPassword();
 
     return !document.querySelector('.is-invalid');
 }
 
-// Eventos en tiempo real
+// Eventos con protección
 if (inputs.nombre_usuario) inputs.nombre_usuario.addEventListener("input", checkNombreUsuario);
 if (inputs.email) inputs.email.addEventListener("input", checkEmail);
 if (inputs.clave_personal) inputs.clave_personal.addEventListener("input", checkClavePersonal);
