@@ -24,6 +24,10 @@ switch ($action) {
         $controller = new PersonalController();
         echo $controller->actualizarPersonal($_POST);
         break;
+    case 'eliminar-personal':
+        $controller = new PersonalController();
+        echo $controller->eliminarPersonal($_POST);
+        break;
     default:
         echo "Acción no válida";
 }

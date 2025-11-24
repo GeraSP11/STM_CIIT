@@ -97,8 +97,8 @@ class UsuariosModel
         // 3. Combinar datos del usuario + personal
         return array_merge($usuario, $personal);
     }
-public function eliminarUsuario($curp)
-{
+ public function eliminarUsuario($curp)
+ {
     global $pdo;
     
     // 1. Buscar el id_personal por CURP
@@ -116,5 +116,5 @@ public function eliminarUsuario($curp)
     $stmt = $pdo->prepare($sqlDelete);
     
     return $stmt->execute([$personal['id_personal']]);
-}
+ }
 }

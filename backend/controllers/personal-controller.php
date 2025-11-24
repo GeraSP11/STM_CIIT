@@ -86,4 +86,27 @@ public function actualizarPersonal($data)
     return $resultado ? "OK" : "Error al actualizar personal";
 }
 
+public function eliminarPersonal($data)
+{
+    $idPersonal = trim($data['id_personal']);
+
+    if (empty($idPersonal)) {
+        return "ID de personal no válido";
+    }
+
+    $model = new PersonalModel();
+
+    // Verificar si el personal existe antes de eliminar
+    $personal = $model->obtenerPersonalPorId($idPersonal);
+    
+    if (!$personal) {
+        return "El personal no existe en el sistema";
+    }
+
+    // Eliminar el registro
+    $resultado = $model->eliminarPersonal($idPersonal);
+
+    return $resultado ? "OK" : "Error al eliminar el personal";
+}
+
 }
