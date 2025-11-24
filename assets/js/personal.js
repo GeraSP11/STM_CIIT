@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 2. Consultar ----
     consultarPersonal(); // validaciones internas
 
+    cargarLocalidades();
+    update();
+
 
 
     // ---- 3. Actualizar ----
@@ -156,20 +159,119 @@ function consultarPersonal() {
 /* =====================================================
    3. ACTUALIZAR (UPDATE)
    ===================================================== */
+/* =====================================================
+   3. ACTUALIZAR (UPDATE) — ALERTAS MODIFICADAS
+   ===================================================== */
 
-// function cargarDatosParaEditar(id) {
-//     apiRequest("obtener_uno", { id })
-//         .then(r => r.json())
-//         .then(data => {
-//             // Llenar formulario...
-//         });
-// }
-//
-// function guardarCambios() {
-//     apiRequest("actualizar", formularioEditar)
-//         .then(r => r.text())
-//         .then(resp => manejarRespuestaCRUD(resp, "Actualizado correctamente."));
-// }
+   function update() {
+    const curpBusqueda = document.getElementById('curp_busqueda');
+    const updateForm = document.getElementById('updateForm');
+
+    if (curpBusqueda) {
+        curpBusqueda.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarPersonalPorCurp(this.value.trim());
+            }
+        });
+    }
+
+    if (updateForm) {
+        updateForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            actualizarPersonal();
+        });
+    }
+}
+
+
+// Buscar personal usando apiRequest + alertas personalizadas
+function buscarPersonalPorCurp(curp) {
+    if (!curp || curp.length !== 18) {
+        alerta("CURP inválida", "Debe ingresar 18 caracteres.", "error");
+        return;
+    }
+
+    apiRequest("consultar-personal", { curp })
+        .then(r => r.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                alerta("Sin resultados", "No se encontró personal con esa CURP.", "warning");
+                limpiarFormulario();
+                return;
+            }
+
+            const personal = data[0];
+
+            document.getElementById('id_personal').value = personal.id_personal || '';
+            document.getElementById('curp').value = personal.curp || '';
+            document.getElementById('nombre_personal').value = personal.nombre || '';
+            document.getElementById('apellido_paterno').value = personal.apellido_paterno || '';
+            document.getElementById('apellido_materno').value = personal.apellido_materno || '';
+            document.getElementById('cargo').value = personal.cargo || '';
+            document.getElementById('afiliacion_laboral').value = personal.id_localidad || '';
+
+            const formActions = document.querySelector('.form-actions');
+            if (formActions) {
+                formActions.style.display = 'flex';
+                formActions.style.justifyContent = 'center';
+                formActions.style.gap = '15px';
+                formActions.style.marginTop = '30px';
+            }
+
+            alerta("Personal encontrado", "Puede editar los campos y guardar los cambios.", "success");
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alerta("Error", "Ocurrió un problema al consultar al personal.", "error");
+        });
+}
+
+
+// Actualizar usando apiRequest + alertas personalizadas
+function actualizarPersonal() {
+    const form = document.getElementById('updateForm');
+
+    const id = document.getElementById('id_personal').value;
+    const curp = document.getElementById('curp').value.trim();
+    const nombre = document.getElementById('nombre_personal').value.trim();
+    const apellidoPaterno = document.getElementById('apellido_paterno').value.trim();
+    const cargo = document.getElementById('cargo').value;
+    const afiliacion = document.getElementById('afiliacion_laboral').value;
+
+    if (!id || !curp || !nombre || !apellidoPaterno || !cargo || !afiliacion) {
+        alerta("Campos incompletos", "Debe llenar todos los campos obligatorios.", "warning");
+        return;
+    }
+
+    if (curp.length !== 18) {
+        alerta("CURP inválida", "La CURP debe tener exactamente 18 caracteres.", "warning");
+        return;
+    }
+
+    apiRequest("actualizar-personal", form)
+        .then(r => r.text())
+        .then(resp => {
+            manejarRespuestaCRUD(resp, "Personal actualizado correctamente.");
+            limpiarFormulario();
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alerta("Error", "No se pudo actualizar el personal.", "error");
+        });
+}
+
+
+function limpiarFormulario() {
+    document.getElementById('updateForm').reset();
+    document.getElementById('id_personal').value = '';
+    document.getElementById('curp_busqueda').value = '';
+
+    const formActions = document.querySelector('.form-actions');
+    if (formActions) formActions.style.display = 'none';
+}
+
+
 
 
 

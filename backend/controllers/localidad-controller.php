@@ -79,5 +79,21 @@ class LocalidadController
 
         return $resultado ? "OK" : "Error al actualizar localidad";
     }
-
+public function eliminarLocalidad($data)
+{
+    $id = $data['id_localidad'] ?? null;
+    
+    if (!$id) {
+        return "ID de localidad inválido";
+    }
+    
+    $model = new LocalidadlModel();
+    $resultado = $model->eliminarLocalidad($id);
+    
+    if ($resultado === "ERROR_DEPENDENCIAS") {
+        return "No se puede eliminar: existen registros de personal vinculados a esta localidad.";
+    }
+    
+    return $resultado ? "OK" : "Error al eliminar localidad";
+}
 }

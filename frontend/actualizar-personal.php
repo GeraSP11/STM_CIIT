@@ -261,8 +261,11 @@ $page_title = 'Actualizar Personal';
             </div>
         </form>
     </main>
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="./js/actualizarEliminarPersonal.js"></script>
+    <script src="/assets/js/personal.js"></script>
+    <script src="/assets/js/alertas.js"></script>
 </body>
 
 </html>

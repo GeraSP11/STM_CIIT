@@ -53,4 +53,37 @@ class PersonalController
         }
     }
 
+// Método para actualizar los datos de un personal existente
+
+public function actualizarPersonal($data)
+{
+    $idPersonal = trim($data['id_personal']);
+    $nombre = trim($data['nombre_personal']);
+    $apellidoPaterno = trim($data['apellido_paterno']);
+    $apellidoMaterno = trim($data['apellido_materno']);
+    $curp = trim($data['curp']);
+    $cargo = trim($data['cargo']);
+    $afiliacionLaboral = trim($data['afiliacion_laboral']);
+
+    $model = new PersonalModel();
+
+    // Verifica si la CURP ya existe en otro registro (diferente al actual)
+    if ($model->curpExisteEnOtroRegistro($curp, $idPersonal)) {
+        return "La CURP ya está registrada en otro personal.";
+    }
+
+    // Actualizar
+    $resultado = $model->actualizarPersonal(
+        $idPersonal,
+        $nombre,
+        $apellidoPaterno,
+        $apellidoMaterno,
+        $curp,
+        $cargo,
+        $afiliacionLaboral
+    );
+
+    return $resultado ? "OK" : "Error al actualizar personal";
+}
+
 }

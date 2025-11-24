@@ -61,32 +61,71 @@ class PersonalModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function listarPersonal($curp = null)
-    {
-        global $pdo;
+// Verificar si la CURP existe en otro registro diferente al actual
+public function curpExisteEnOtroRegistro($curp, $idPersonal)
+{
+    global $pdo;
 
-        $sql = "SELECT 
-                p.nombre_personal AS nombre,
-                p.apellido_paterno,
-                p.apellido_materno,
-                l.nombre_centro_trabajo AS afiliacion_laboral,
-                p.cargo,
-                p.curp
-            FROM personal p
-            JOIN localidades l ON p.afiliacion_laboral = l.id_localidad";
+    $sql = "SELECT id_personal FROM personal WHERE curp = ? AND id_personal != ? LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$curp, $idPersonal]);
 
-        $params = [];
+    return $stmt->rowCount() > 0;
+}
 
-        if ($curp) {
-            $sql .= " WHERE p.curp = :curp";
-            $params[':curp'] = $curp;
-        }
+// Actualizar datos del personal
+public function actualizarPersonal($idPersonal, $nombre, $apellidoPaterno, $apellidoMaterno, $curp, $cargo, $afiliacionLaboral)
+{
+    global $pdo;
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+    $sql = "UPDATE personal 
+            SET nombre_personal = ?, 
+                apellido_paterno = ?, 
+                apellido_materno = ?, 
+                curp = ?, 
+                cargo = ?, 
+                afiliacion_laboral = ?
+            WHERE id_personal = ?";
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([
+        $nombre,
+        $apellidoPaterno,
+        $apellidoMaterno,
+        $curp,
+        $cargo,
+        $afiliacionLaboral,
+        $idPersonal
+    ]);
+}
+
+// Modificar el método listarPersonal existente para incluir id_personal y id_localidad
+public function listarPersonal($curp = null)
+{
+    global $pdo;
+
+    $sql = "SELECT 
+            p.id_personal,
+            p.nombre_personal AS nombre,
+            p.apellido_paterno,
+            p.apellido_materno,
+            l.nombre_centro_trabajo AS afiliacion_laboral,
+            l.id_localidad,
+            p.cargo,
+            p.curp
+        FROM personal p
+        JOIN localidades l ON p.afiliacion_laboral = l.id_localidad";
+
+    $params = [];
+
+    if ($curp) {
+        $sql .= " WHERE p.curp = :curp";
+        $params[':curp'] = $curp;
     }
 
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
 
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
