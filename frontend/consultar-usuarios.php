@@ -84,6 +84,7 @@ $seccion = 'Consultar Usuario';
         .breadcrumb-container a i {
             color: #4D2132;
         }
+        
     </style>
 </head>
 
@@ -124,7 +125,7 @@ $seccion = 'Consultar Usuario';
     <!-- Contenedor tabla resultados, oculto inicialmente -->
     <div id="tablaUsuarios" class="mt-4" style="display:none;">
         <table class="table table-bordered w-75 mx-auto shadow">
-            <thead style="background-color: #4D2132; color: #4D2132; font-size:18px;">
+            <thead style="background-color: #4D2132; color: #4D2132; font-size: 18px;">
                 <tr>
                     <th colspan="2" class="text-center">Resultados</th>
                 </tr>
