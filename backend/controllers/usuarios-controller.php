@@ -72,13 +72,13 @@ class UsuariosController
         $nombreCompleto = $usuario['nombre_personal'] . " " . $usuario['apellido_paterno'] . " " . $usuario['apellido_materno'];
 
         // Formato JSON que tu JS espera
-        return [
-            "usuario"        => $usuario['nombre_usuario'],
-            "nombre_completo" => $nombreCompleto,
-            "correo"         => $usuario['correo_electronico'],
-            "clave_personal" => $usuario['curp']
-        ];
-    }
+    return json_encode([
+        "usuario"         => $usuario['nombre_usuario'],
+        "nombre_completo" => $nombreCompleto,
+        "correo"          => $usuario['correo_electronico'],
+        "clave_personal"  => $usuario['curp']
+    ]);
+}
     //Eliminar Usuarios
     public function eliminarUsuario($data)
 {

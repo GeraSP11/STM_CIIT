@@ -20,10 +20,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.getElementById("formConsultaUsuarios")) {
         configurarConsultaUsuarios();
     }
-        if (document.querySelector('.form-control-custom')) {
+
+    // Solo activar eliminación si existe el formulario específico
+    if (document.getElementById("formEliminarUsuario")) {
         configurarEliminacionUsuarios();
     }
 
+    // Solo activar actualización si existe el formulario específico
+    if (document.getElementById("formActualizarUsuario")) {
+        configurarActualizacionUsuarios();
+    }
 
 });
 
@@ -189,7 +195,7 @@ function checkEmail() {
 
     if (!val) return showError(inputs.email, "El correo es obligatorio");
 
-    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  
+    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // ✅ CORREGIDO
     if (!reg.test(val)) return showError(inputs.email, "Correo inválido");
 }
 
@@ -302,14 +308,33 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
         alerta("Error", respuesta, "error");
     }
 }
+
 function configurarEliminacionUsuarios() {
-    const inputCurp = document.querySelector('.form-control-custom');
-    const btnBuscar = document.querySelector('.btn-custom');
     
-    if (!btnBuscar) return;
+    const formEliminar = document.getElementById("formEliminarUsuario");
     
-    btnBuscar.addEventListener("click", function () {
+    if (!formEliminar) {
+        console.log("No se encontró el formulario de eliminación");
+        return;
+    }
+    
+    console.log("Formulario de eliminación encontrado:", formEliminar);
+    
+    formEliminar.addEventListener("submit", function (e) {
+        e.preventDefault(); // ✅ Prevenir el envío tradicional del formulario
+        
+        console.log("Submit capturado - no debería recargar");
+        
+        const inputCurp = document.getElementById("input_curp_eliminar");
+        
+        if (!inputCurp) {
+            console.error("No se encontró el input de CURP");
+            return;
+        }
+        
         const curp = inputCurp.value.trim();
+        
+        console.log("CURP ingresada:", curp);
         
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
@@ -318,16 +343,26 @@ function configurarEliminacionUsuarios() {
         
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
+                console.log("Respuesta de confirmación:", r);
+                
                 if (!r.isConfirmed) return;
+                
+                console.log("Usuario confirmó - enviando petición...");
                 
                 apiRequestUsuarios("eliminar", { curp })
                     .then(r => r.text())
-                    .then(resp => manejarRespuestaCRUD(
-                        resp,
-                        "Usuario eliminado correctamente.",
-                        "index.php"
-                    ))
-                    .catch(() => alerta("Error", "Ocurrió un error al eliminar el usuario.", "error"));
+                    .then(resp => {
+                        console.log("Respuesta del servidor:", resp);
+                        manejarRespuestaCRUD(
+                            resp,
+                            "Usuario eliminado correctamente.",
+                            "index.php"
+                        );
+                    })
+                    .catch(error => {
+                        console.error("Error en la petición:", error);
+                        alerta("Error", "Ocurrió un error al eliminar el usuario.", "error");
+                    });
             });
     });
 }

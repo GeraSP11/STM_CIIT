@@ -16,7 +16,7 @@ switch ($action) {
         echo $controller->consultarUsuario($_POST);
         break;
 
-    case 'eliminar':
+    case 'eliminar-usuario':
         $controller = new UsuariosController();
         echo $controller->eliminarUsuario($_POST);
         break;
