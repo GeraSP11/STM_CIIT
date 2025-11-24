@@ -1,6 +1,7 @@
-
 <?php
-$page_title = 'Actualizar Personal';
+$page_title = 'MARINA Corredor Interoceánico';
+$titulo_seccion = 'Gestión de Personal';
+$seccion = 'Actualizar Personal';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -8,9 +9,11 @@ $page_title = 'Actualizar Personal';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actualizar Personal</title>
+    <title><?php echo $page_title; ?></title>
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/bootstrap/icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/headers-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -23,62 +26,6 @@ $page_title = 'Actualizar Personal';
             background-color: #f5f5f5;
         }
 
-        .header {
-            background: linear-gradient(#4b0000 100%);
-            color: white;
-            padding: 25px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin: 0;
-        }
-
-        .header-logo {
-            width: 100px;
-            height: 100px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-            padding: 10px;
-        }
-
-        .header-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .breadcrumb-nav {
-            background-color: white;
-            padding: 15px 40px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-        }
-
-        .breadcrumb-nav i {
-            font-size: 1.5rem;
-            color: #5c2e3e;
-        }
-
-        .breadcrumb-nav span {
-            color: #333;
-            font-weight: 500;
-        }
-
         .main-content {
             background-color: white;
             margin: 40px auto;
@@ -89,7 +36,7 @@ $page_title = 'Actualizar Personal';
         }
 
         .main-content h2 {
-            color: #8b4513;
+            color: #4a1026;
             font-size: 1.8rem;
             font-weight: 400;
             margin-bottom: 30px;
@@ -105,7 +52,7 @@ $page_title = 'Actualizar Personal';
         }
 
         .curp-label {
-            background-color: #5c2e3e;
+            background-color: #4a1026;
             color: white;
             padding: 12px 35px;
             font-weight: 500;
@@ -123,6 +70,11 @@ $page_title = 'Actualizar Personal';
 
         .curp-search-section input::placeholder {
             color: #999;
+        }
+
+        .curp-search-section input:focus {
+            outline: none;
+            border-color: #4a1026;
         }
 
         .update-form {
@@ -167,7 +119,7 @@ $page_title = 'Actualizar Personal';
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #5c2e3e;
+            border-color: #4a1026;
             background-color: white;
         }
 
@@ -186,19 +138,23 @@ $page_title = 'Actualizar Personal';
 </head>
 
 <body>
-    <div class="header">
-        <h1>Gestión de personal</h1>
-        <div class="header-logo">
-            <img src="/assets/img/logo_principal.jpeg" alt="Corredor Interoceánico">
-        </div>
-    </div>
-    <div class="breadcrumb-nav">
-        <i class="bi bi-house-door-fill"></i>
-        <span>></span>
-        <span>Actualizar Personal</span>
-    </div>
+    <!-- Header dinámico -->
+    <?php include('includes/header-dinamico.php'); ?>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mt-2">
+        <ol class="breadcrumb" style="padding-left: 15px;">
+            <li class="breadcrumb-item">
+                <a href="/dashboard.php"><i class="fas fa-home" style="color:#4D2132;"></i></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <?php echo $seccion; ?>
+            </li>
+        </ol>
+    </nav>
+
     <main class="main-content">
-        <h2>Actualizar Registro de Personal</h2>
+        <h2><?php echo $seccion; ?></h2>
 
         <div class="curp-search-section">
             <div class="curp-label">CURP</div>
@@ -261,6 +217,7 @@ $page_title = 'Actualizar Personal';
             </div>
         </form>
     </main>
+
     <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
     <script src="/assets/libs/swal/sweetalert2.min.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
