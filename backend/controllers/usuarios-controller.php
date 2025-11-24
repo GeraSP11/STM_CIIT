@@ -79,6 +79,7 @@ class UsuariosController
             "clave_personal" => $usuario['curp']
         ];
     }
+    //Eliminar Usuarios
     public function eliminarUsuario($data)
 {
     $curp = trim($data['curp'] ?? '');

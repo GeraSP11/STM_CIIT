@@ -189,7 +189,7 @@ function checkEmail() {
 
     if (!val) return showError(inputs.email, "El correo es obligatorio");
 
-    const reg = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // ✅ CORREGIDO
     if (!reg.test(val)) return showError(inputs.email, "Correo inválido");
 }
 
