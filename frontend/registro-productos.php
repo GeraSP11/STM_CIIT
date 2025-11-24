@@ -105,7 +105,8 @@ $seccion = 'Registro de Productos';
 
     <div class="content-area">
 
-        <form class="form-section" method="POST" action="procesar_producto.php">
+        <form id="formRegistroProductos" class="form-section" method="POST">
+            <input type="hidden" name="action" value="registrar">
 
             <div class="form-row">
 
@@ -129,7 +130,7 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="cajas_cama">Cajas por Cama:</label>
-                        <input type="number" id="cajas_cama" name="cajas_por_cama" min="0">
+                        <input type="number" id="cajas_cama" name="cajas_por_cama" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -139,16 +140,14 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="unidades_existencia">Unidades en Existencia:</label>
-                        <select id="unidades_existencia" name="unidades_existencia">
-                            <option value="">Seleccione un tipo</option>
-                        </select>
+                        <input type="number" id="unidad_existencia" name="unidad_existencia" step="1" value="0">
                     </div>
 
                     <div class="form-group">
                         <label for="tipo_mercancia">Tipos de Mercancía:</label>
                         <select id="tipo_mercancia" name="tipo_mercancia">
                             <option value="">Seleccione un tipo</option>
-                            
+
                         </select>
                     </div>
                 </div>
@@ -174,7 +173,7 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="camas_por_pallet">Camas por Pallet:</label>
-                        <input type="number" id="camas_por_pallet" name="cajas_por_pallet">
+                        <input type="number" id="camas_por_pallet" name="cajas_por_pallet" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -202,7 +201,19 @@ $seccion = 'Registro de Productos';
 
     </div>
 
+    <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/productos.js"></script>
+
 </body>
 
 </html>
