@@ -140,8 +140,8 @@ $seccion = 'Registro de Productos';
                     </div>
 
                     <div class="form-group">
-                        <label for="largo">Largo (m):</label>
-                        <input type="number" id="largo" name="largo_m" step="0.01" value="0.00">
+                        <label for="largo">Largo (cm):</label>
+                        <input type="number" id="largo" name="largo_m" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -178,13 +178,13 @@ $seccion = 'Registro de Productos';
                     </div>
 
                     <div class="form-group">
-                        <label for="altura">Altura (m):</label>
-                        <input type="number" id="altura" name="altura_m" step="0.01" value="0.00">
+                        <label for="altura">Altura (cm):</label>
+                        <input type="number" id="altura" name="altura_m" step="1" value="0">
                     </div>
 
                     <div class="form-group">
-                        <label for="ancho">Ancho (m):</label>
-                        <input type="number" id="ancho" name="ancho_m" step="0.01" value="0.00">
+                        <label for="ancho">Ancho (cm):</label>
+                        <input type="number" id="ancho" name="ancho_m" step="1" value="0">
                     </div>
 
                     <div class="form-group">

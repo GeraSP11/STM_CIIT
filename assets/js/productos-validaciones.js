@@ -103,26 +103,28 @@ function validarEnteroCeroOPositivoEvento(evento, fieldId, mensajeError) {
 
 /* Calcular peso volumétrico usando factor 167 (kg/m3) */
 function calcularPesoVolumetrico() {
-    const largo = parseFloat(document.getElementById('largo')?.value) || 0;
-    const ancho = parseFloat(document.getElementById('ancho')?.value) || 0;
-    const altura = parseFloat(document.getElementById('altura')?.value) || 0;
-    const peso = parseFloat(document.getElementById('peso')?.value) || 0;
+    const largo = parseFloat(document.getElementById('largo')?.value) || 0;   // cm
+    const ancho = parseFloat(document.getElementById('ancho')?.value) || 0;   // cm
+    const altura = parseFloat(document.getElementById('altura')?.value) || 0; // cm
 
     const pvInput = document.getElementById('peso_volumetrico');
     if (!pvInput) return;
 
-    if (largo > 0 && ancho > 0 && altura > 0 && peso > 0) {
-        const volumen = largo * ancho * altura; // m^3
-        const pv = (volumen * 167).toFixed(2);
+    if (largo > 0 && ancho > 0 && altura > 0) {
+        // Convertir cm³ a m³ dividiendo entre 1,000,000
+        const volumen_m3 = (largo * ancho * altura) / 1000000; // cm³ -> m³
+        
+        const pv = (volumen_m3 * 167).toFixed(2); // Factor 167 kg/m³
         pvInput.value = pv;
         limpiarErrorCampo('peso_volumetrico');
     } else {
         pvInput.value = '';
-        if (largo > 0 || ancho > 0 || altura > 0 || peso > 0) {
-            mostrarErrorCampo('peso_volumetrico', 'Complete dimensiones y peso para calcular el peso volumétrico.');
+        if (largo > 0 || ancho > 0 || altura > 0) {
+            mostrarErrorCampo('peso_volumetrico', 'Complete dimensiones para calcular el peso volumétrico.');
         }
     }
 }
+
 
 /* Validación global (al enviar) */
 function validarFormularioProductos() {

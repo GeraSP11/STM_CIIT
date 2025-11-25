@@ -261,22 +261,22 @@ $seccion = 'Actualizar Productos';
                 </div>
 
                 <div class="form-group">
-                    <label for="peso">Peso:</label>
+                    <label for="peso">Peso (kg):</label>
                     <input type="number" id="peso" name="peso" step="0.01">
                 </div>
 
                 <div class="form-row-triple">
                     <div class="form-group">
-                        <label for="altura">Altura:</label>
-                        <input type="number" id="altura" name="altura" step="0.01" oninput="calcularPesoVolumetrico()">
+                        <label for="altura">Altura (cm):</label>
+                        <input type="number" id="altura" name="altura" step="1" oninput="calcularPesoVolumetrico()">
                     </div>
                     <div class="form-group">
-                        <label for="largo">Largo:</label>
-                        <input type="number" id="largo" name="largo" step="0.01" oninput="calcularPesoVolumetrico()">
+                        <label for="largo">Largo (cm):</label>
+                        <input type="number" id="largo" name="largo" step="1" oninput="calcularPesoVolumetrico()">
                     </div>
                     <div class="form-group">
-                        <label for="ancho">Ancho:</label>
-                        <input type="number" id="ancho" name="ancho" step="0.01" oninput="calcularPesoVolumetrico()">
+                        <label for="ancho">Ancho (cm):</label>
+                        <input type="number" id="ancho" name="ancho" step="1" oninput="calcularPesoVolumetrico()">
                     </div>
                 </div>
 
