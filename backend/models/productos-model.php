@@ -56,39 +56,116 @@ class ProductosModel
     }
 
     public function buscarProductos($termino)
-{
-    global $pdo;
-    
-    $sql = "SELECT id_producto, nombre_producto, ubicacion_producto
+    {
+        global $pdo;
+
+        $sql = "SELECT id_producto, nombre_producto, ubicacion_producto
             FROM productos 
             WHERE nombre_producto LIKE ? 
             ORDER BY nombre_producto 
             LIMIT 10";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(["%$termino%"]);
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
-public function obtenerProductoPorId($idProducto)
-{
-    global $pdo;
-    
-    $sql = "SELECT * FROM productos WHERE id_producto = ? LIMIT 1";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$idProducto]);
-    
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(["%$termino%"]);
 
-public function actualizarProducto($data)
-{
-    global $pdo;
-    
-    // SQL sin largo y ancho
-    $sql = "UPDATE productos SET 
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerProductoPorId($idProducto)
+    {
+        global $pdo;
+
+        $sql = "SELECT * FROM productos WHERE id_producto = ? LIMIT 1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idProducto]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function consultarProductosPorFiltros($data)
+    {
+        global $pdo;
+
+        $sql = "
+        SELECT 
+            p.*, 
+            l.nombre_centro_trabajo,
+            l.tipo_instalacion,
+            l.estado
+        FROM productos p
+        INNER JOIN localidades l ON l.id_localidad = p.ubicacion_producto
+        WHERE 1=1
+    ";
+
+        $params = [];
+
+        /* -------------------------------
+       FILTRO: NOMBRE DEL PRODUCTO  
+    --------------------------------*/
+        if (!empty($data["nombre_producto"])) {
+            $sql .= " AND LOWER(p.nombre_producto) LIKE LOWER(?)";
+            $params[] = "%" . $data["nombre_producto"] . "%";
+        }
+
+        /* --------------------------------
+       FILTRO SELECCIONADO POR EL USUARIO
+    ---------------------------------*/
+        if (!empty($data["filtro"])) {
+
+            switch ($data["filtro"]) {
+
+                case "ubicacion":
+                    if (!empty($data["id_localidad"])) {
+                        $sql .= " AND p.ubicacion_producto = ?";
+                        $params[] = $data["id_localidad"];
+                    }
+                    break;
+
+                case "tipo_mercancia":
+                    if (!empty($data["tipo_mercancia"])) {
+                        $sql .= " AND p.tipo_de_mercancia = ?";
+                        $params[] = $data["tipo_mercancia"];
+                    }
+                    break;
+
+                case "peso":
+                    if (!empty($data["rango_peso"])) {
+                        list($min, $max) = explode("-", $data["rango_peso"]);
+
+                        $sql .= " AND p.peso >= ? AND p.peso <= ?";
+                        $params[] = floatval($min);
+                        $params[] = floatval($max);
+                    }
+                    break;
+
+                case "existencia":
+                    if (!empty($data["cantidad_existencia"])) {
+                        $sql .= " AND p.unidades_existencia >= ?";
+                        $params[] = intval($data["cantidad_existencia"]);
+                    }
+                    break;
+            }
+        }
+
+        /* -------------------------------
+       ORDENAR POR NOMBRE SIEMPRE
+    --------------------------------*/
+        $sql .= " ORDER BY p.nombre_producto ASC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function actualizarProducto($data)
+    {
+        global $pdo;
+
+        // SQL sin largo y ancho
+        $sql = "UPDATE productos SET 
             nombre_producto = ?,
             peso = ?,
             altura = ?,
@@ -101,47 +178,47 @@ public function actualizarProducto($data)
             tipo_de_mercancia = ?,
             unidades_existencia = ?
             WHERE id_producto = ?";
-    
-    $stmt = $pdo->prepare($sql);
-    
-    // Execute sin largo y ancho
-    return $stmt->execute([
-        $data["nombre_producto"],
-        $data["peso"],
-        $data["altura"],
-        $data["cajas_por_cama"],
-        $data["camas_por_pallet"],
-        $data["peso_soportado"],
-        $data["peso_volumetrico"],
-        $data["ubicacion_producto"],
-        $data["tipo_de_embalaje"],
-        $data["tipo_de_mercancia"],
-        $data["unidades_existencia"],
-        $data["id_producto"]
-    ]);
-}
 
-public function eliminarProducto($idProducto)
-{
-    global $pdo;
-    
-    $sql = "DELETE FROM productos WHERE id_producto = ?";
-    $stmt = $pdo->prepare($sql);
-    
-    return $stmt->execute([$idProducto]);
-}
+        $stmt = $pdo->prepare($sql);
 
-public function listarTodosProductos()
-{
-    global $pdo;
-    
-    $sql = "SELECT id_producto, nombre_producto 
+        // Execute sin largo y ancho
+        return $stmt->execute([
+            $data["nombre_producto"],
+            $data["peso"],
+            $data["altura"],
+            $data["cajas_por_cama"],
+            $data["camas_por_pallet"],
+            $data["peso_soportado"],
+            $data["peso_volumetrico"],
+            $data["ubicacion_producto"],
+            $data["tipo_de_embalaje"],
+            $data["tipo_de_mercancia"],
+            $data["unidades_existencia"],
+            $data["id_producto"]
+        ]);
+    }
+
+    public function eliminarProducto($idProducto)
+    {
+        global $pdo;
+
+        $sql = "DELETE FROM productos WHERE id_producto = ?";
+        $stmt = $pdo->prepare($sql);
+
+        return $stmt->execute([$idProducto]);
+    }
+
+    public function listarTodosProductos()
+    {
+        global $pdo;
+
+        $sql = "SELECT id_producto, nombre_producto 
             FROM productos 
             ORDER BY nombre_producto ASC";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

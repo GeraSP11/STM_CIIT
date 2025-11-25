@@ -30,80 +30,97 @@ class ProductosController
     }
 
     public function buscarProductos($data)
-{
-    $termino = $data["termino"] ?? "";
-    
-    if (strlen($termino) < 2) {
-        return ["error" => "El término de búsqueda debe tener al menos 2 caracteres"];
-    }
-    
-    $model = new ProductosModel();
-    return $model->buscarProductos($termino);
-}
+    {
+        $termino = $data["termino"] ?? "";
 
-public function obtenerProductoPorId($data)
-{
-    $idProducto = $data["id_producto"] ?? 0;
-    
-    if (!$idProducto) {
-        return ["error" => "ID de producto no válido"];
-    }
-    
-    $model = new ProductosModel();
-    $producto = $model->obtenerProductoPorId($idProducto);
-    
-    if (!$producto) {
-        return ["error" => "Producto no encontrado"];
-    }
-    
-    return $producto;
-}
+        if (strlen($termino) < 2) {
+            return ["error" => "El término de búsqueda debe tener al menos 2 caracteres"];
+        }
 
-public function actualizarProducto($data)
-{
-    $idProducto = $data["id_producto"] ?? 0;
-    
-    if (!$idProducto) {
-        return "ID de producto no válido";
+        $model = new ProductosModel();
+        return $model->buscarProductos($termino);
     }
-    
-    $model = new ProductosModel();
-    
-    // Verificar que el producto existe
-    $productoExiste = $model->obtenerProductoPorId($idProducto);
-    if (!$productoExiste) {
-        return "El producto no existe";
-    }
-    
-    $ok = $model->actualizarProducto($data);
-    
-    return $ok ? "OK" : "No se pudo actualizar el producto";
-}
 
-public function eliminarProducto($data)
-{
-    $idProducto = $data["id_producto"] ?? 0;
-    
-    if (!$idProducto) {
-        return "ID de producto no válido";
-    }
-    
-    $model = new ProductosModel();
-    
-    // Verificar que el producto existe
-    $productoExiste = $model->obtenerProductoPorId($idProducto);
-    if (!$productoExiste) {
-        return "El producto no existe";
-    }
-    
-    $ok = $model->eliminarProducto($idProducto);
-    
-    return $ok ? "OK" : "No se pudo eliminar el producto";
-}
+    public function obtenerProductoPorId($data)
+    {
+        $idProducto = $data["id_producto"] ?? 0;
 
-public function listarTodosProductos()
-{
-    $model = new ProductosModel();
-    return $model->listarTodosProductos();
-}
+        if (!$idProducto) {
+            return ["error" => "ID de producto no válido"];
+        }
+
+        $model = new ProductosModel();
+        $producto = $model->obtenerProductoPorId($idProducto);
+
+        if (!$producto) {
+            return ["error" => "Producto no encontrado"];
+        }
+
+        return $producto;
+    }
+
+    public function consultarProductos($data)
+    {
+        try {
+            $model = new ProductosModel();
+            $resultados = $model->consultarProductosPorFiltros($data);
+
+            if (!$resultados || count($resultados) === 0) {
+                return json_encode(["error" => "No se encontraron productos con los criterios especificados."]);
+            }
+
+            return json_encode($resultados);
+        } catch (Exception $e) {
+            return json_encode(["error" => "Error en la consulta: " . $e->getMessage()]);
+        }
+    }
+
+
+    public function actualizarProducto($data)
+    {
+        $idProducto = $data["id_producto"] ?? 0;
+
+        if (!$idProducto) {
+            return "ID de producto no válido";
+        }
+
+        $model = new ProductosModel();
+
+        // Verificar que el producto existe
+        $productoExiste = $model->obtenerProductoPorId($idProducto);
+        if (!$productoExiste) {
+            return "El producto no existe";
+        }
+
+        $ok = $model->actualizarProducto($data);
+
+        return $ok ? "OK" : "No se pudo actualizar el producto";
+    }
+
+    public function eliminarProducto($data)
+    {
+        $idProducto = $data["id_producto"] ?? 0;
+
+        if (!$idProducto) {
+            return "ID de producto no válido";
+        }
+
+        $model = new ProductosModel();
+
+        // Verificar que el producto existe
+        $productoExiste = $model->obtenerProductoPorId($idProducto);
+        if (!$productoExiste) {
+            return "El producto no existe";
+        }
+
+        $ok = $model->eliminarProducto($idProducto);
+
+        return $ok ? "OK" : "No se pudo eliminar el producto";
+    }
+
+    public function listarTodosProductos()
+    {
+        $model = new ProductosModel();
+        return $model->listarTodosProductos();
+    }
 }

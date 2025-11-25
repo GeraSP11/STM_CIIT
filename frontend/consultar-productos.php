@@ -93,21 +93,20 @@ $seccion = 'Consultar Productos';
     <!-- FORMULARIO -->
     <div class="content-area">
 
-        <form method="GET" action="consultar_producto.php">
-
+        <form id="formConsultaProductos" class="mb-3">
             <h4 class="fw-bold mb-4">Búsqueda por:</h4>
 
             <!-- Nombre -->
-            <div>
-                <label>Nombre del producto:</label>
-                <input type="text" class="form-control" name="nombre_producto">
+            <div class="mb-3">
+                <label for="nombre_producto_consulta">Nombre del producto:</label>
+                <input type="text" id="nombre_producto_consulta" class="form-control" name="nombre_producto" placeholder="Nombre del producto">
             </div>
 
             <!-- Filtro -->
-            <div>
-                <label>Aplicar un filtro:</label>
-                <select class="form-control" name="filtro">
-                    <option selected disabled value="">Seleccione un filtro</option>
+            <div class="mb-3">
+                <label for="filtro_busqueda">Aplicar un filtro:</label>
+                <select id="filtro_busqueda" class="form-control" name="filtro">
+                    <option selected value="">Seleccione un filtro</option>
                     <option value="ubicacion">Ubicación del producto</option>
                     <option value="tipo_mercancia">Tipo de mercancía</option>
                     <option value="peso">Peso</option>
@@ -115,14 +114,90 @@ $seccion = 'Consultar Productos';
                 </select>
             </div>
 
-            <!-- Botón -->
-            <button type="submit" class="btn-consultar d-block mx-auto">Consultar</button>
+            <!-- Contenedores dinámicos -->
+            <div id="filter_ubicacion_container" style="display:none;" class="mb-3">
+                <label for="filter_ubicacion">Ubicación del producto:</label>
+                <select id="filter_ubicacion" class="form-control">
+                    <option value="">Seleccione una localidad</option>
+                </select>
+            </div>
 
+            <div id="filter_tipo_mercancia_container" style="display:none;" class="mb-3">
+                <label for="filter_tipo_mercancia">Tipo de mercancía:</label>
+                <select id="filter_tipo_mercancia" class="form-control">
+                    <option value="">Seleccione</option>
+                </select>
+            </div>
+
+            <div id="filter_peso_container" style="display:none;" class="mb-3">
+                <label for="filter_peso">Rango de peso:</label>
+                <select id="filter_peso" class="form-control">
+                    <option value="">Seleccione</option>
+                    <option value="0-0.99">0 - 0.99 Kg</option>
+                    <option value="1-4.99">1 - 4.99 Kg</option>
+                    <option value="5-9.99">5 - 9.99 Kg</option>
+                    <option value="10-99.99">10 - 99.99 Kg</option>
+                    <option value="100-99999">100 Kg o más</option>
+                </select>
+            </div>
+
+            <div id="filter_existencia_container" style="display:none;" class="mb-3">
+                <label for="filter_existencia">Cantidad en existencia (>=):</label>
+                <input type="number" id="filter_existencia" class="form-control" min="0" step="1" value="">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" id="btnConsultar" class="btn-consultar">Consultar</button>
+            </div>
         </form>
+
+        <!-- TABLA OCULTA DE RESULTADOS -->
+        <div id="tablaResultadosProductos" style="display:none; margin-top:20px;">
+            <div class="card">
+                <div class="card-header" style="background:#4D2132;color:#fff;">
+                    Resultados
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0" id="resultadosTabla">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Ubicación</th>
+                                    <th>Tipo Mercancía</th>
+                                    <th>Tipo Embalaje</th>
+                                    <th>Peso (Kg)</th>
+                                    <th>Unidades</th>
+                                    <th>Tipo instalación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyResultadosProductos">
+                                <!-- llenado dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <button id="btnVolverResultados" class="btn btn-custom">Volver</button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
+    <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/productos.js"></script>
+
 </body>
 
 </html>
