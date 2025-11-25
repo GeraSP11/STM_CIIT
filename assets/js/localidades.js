@@ -84,9 +84,9 @@ function configurarVistaConsultar() {
         const fila = document.createElement("div");
         fila.classList.add("filter-row");
         fila.innerHTML = `
-            <input type="text" class="form-control" value="${textoFiltro}" readonly style="width: 40%;">
-            <input type="text" class="form-control" name="${valorFiltro}" placeholder="Ingrese valor" required style="width: 40%;">
-            <button class="delete-btn"><i class="fas fa-trash"></i></button>
+        <input type="text" class="form-control" value="${textoFiltro}" readonly style="width: 40%;">
+        <input type="text" class="form-control" name="${valorFiltro}" placeholder="Ingrese valor" required style="width: 40%;" pattern="[A-Za-zÑñáéíóúÁÉÍÓÚ\s-]+">
+        <button class="delete-btn"><i class="fas fa-trash"></i></button>
         `;
         contenedorFiltros.appendChild(fila);
 
@@ -96,6 +96,9 @@ function configurarVistaConsultar() {
         // Deshabilitar la opción seleccionada
         selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = true;
 
+        // Resetear select para que no tenga seleccionada la opción deshabilitada
+        selectFiltros.selectedIndex = 0;
+
         // Configurar botón eliminar del filtro
         fila.querySelector(".delete-btn").addEventListener("click", () => {
             fila.remove();
@@ -104,6 +107,7 @@ function configurarVistaConsultar() {
             selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = false;
         });
     });
+
 }
 
 
@@ -121,6 +125,11 @@ function consultarLocalidades() {
 
     formularioConsulta.addEventListener("submit", (e) => {
         e.preventDefault(); // Evita envío real
+        // Verificar validez de todos los inputs del formulario
+        if (!formularioConsulta.checkValidity()) {
+            alerta("Error", "Por favor completa los campos correctamente.", "error");
+            return; // detiene el envío
+        }
 
         // Capturamos los valores de los filtros dinámicos al momento de enviar
         const nombre = contenedorFiltros.querySelector('input[name="nombre_centro_trabajo"]')?.value.trim() || "";
@@ -314,8 +323,10 @@ function actualizarLocalidades() {
 function configurarVistaEliminarLocalidades() {
 
     const select = document.getElementById('filtroBusqueda');
+    if (!select) return; // evita errores si no existe
 
     select.addEventListener('change', function () {
+
 
         limpiarResultados();
 
@@ -374,11 +385,13 @@ function limpiarResultados() {
 function eliminarLocalidades() {
 
     const selectFiltro = document.getElementById('filtroBusqueda');
-    const formulario = document.getElementById('formConsulta');
     const contFiltros = document.getElementById('filtroELiminar');
     const contResultados = document.getElementById('resultadosBusqueda');
 
     let localidadSeleccionada = null;
+
+    const formulario = document.getElementById('formConsulta');
+    if (!formulario) return; // evita errores si no existe
 
     formulario.addEventListener('submit', function (event) {
         event.preventDefault();
