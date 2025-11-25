@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formRegistro) {
         cargarTiposEmbalaje();
         cargarTiposMercancia();
-        cargarLocalidades();
+        cargarLocalidadesEnSelect();
         initValidacionesProductos()
         configurarRegistroProductos();
     }
@@ -451,7 +451,7 @@ function cargarProductoEnFormulario(idProducto) {
 }
 
 // Función para calcular peso volumétrico
-function calcularPesoVolumetrico() {
+/*function calcularPesoVolumetrico() {
     const altura = parseFloat(document.getElementById("altura").value) || 0;
     const largo = parseFloat(document.getElementById("largo").value) || 0;
     const ancho = parseFloat(document.getElementById("ancho").value) || 0;
@@ -463,7 +463,7 @@ function calcularPesoVolumetrico() {
     } else {
         document.getElementById("peso_volumetrico").value = "";
     }
-}
+}*/
 
 // Función para guardar cambios del producto
 function guardarProducto() {

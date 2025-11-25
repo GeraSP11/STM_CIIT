@@ -329,6 +329,7 @@ $seccion = 'Actualizar Productos';
     <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
     <script src="/assets/libs/swal/sweetalert2.min.js"></script>
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/productos-validaciones.js"></script>
     <script src="/assets/js/productos.js"></script>
     <script src="/assets/js/alertas.js"></script>
 </body>
