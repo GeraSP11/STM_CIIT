@@ -336,21 +336,31 @@ function configurarVistaEliminarLocalidades() {
             op.style.color = "";
         });
 
-        // Ocultar todos los campos
+        // Ocultar todos los campos y quitar required
+        ['inputId', 'inputNombreTrabajo', 'inputUbicacion'].forEach(id => {
+            const campo = document.getElementById(id);
+            if (campo) campo.required = false;
+        });
+
         document.getElementById('campoId').style.display = "none";
         document.getElementById('campoNombreTrabajo').style.display = "none";
         document.getElementById('campoUbicacion').style.display = "none";
 
-        // Mostrar el campo correcto
+
+        // Mostrar el campo correcto y activar required
         if (this.value === "id") {
             document.getElementById('campoId').style.display = "block";
+            document.getElementById('inputId').required = true;
         }
         if (this.value === "nombre_trabajo") {
             document.getElementById('campoNombreTrabajo').style.display = "block";
+            document.getElementById('inputNombreTrabajo').required = true;
         }
         if (this.value === "ubicacion") {
             document.getElementById('campoUbicacion').style.display = "block";
+            document.getElementById('inputUbicacion').required = true;
         }
+
 
         // Deshabilitar solo la opción seleccionada
         const opt = this.options[this.selectedIndex];

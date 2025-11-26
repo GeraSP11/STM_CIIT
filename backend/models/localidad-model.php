@@ -179,8 +179,7 @@ class LocalidadlModel
     // Método del Modelo: LocalidadModel.php
     public function mostrarLocalidadEliminar($filtros)
     {
-        global $pdo; // Si deseas usar la conexión global
-
+        global $pdo;
         // Base de la consulta SQL
         $sql = "SELECT * FROM localidades";
         $params = [];
@@ -233,5 +232,15 @@ class LocalidadlModel
             return ['error' => 'Error en la consulta: ' . $e->getMessage()];
         }
     }
+
+    public function obtenerLocalidadPorUbicacion($ubicacion)
+    {
+        global $pdo;
+        $sql = "SELECT id_localidad FROM localidades WHERE ubicacion_georeferenciada = :ubic LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([":ubic" => $ubicacion]); // ← sintaxis correcta
+        return $stmt->fetch(PDO::FETCH_ASSOC);   // ← devuelve el registro
+    }
+
 
 }
