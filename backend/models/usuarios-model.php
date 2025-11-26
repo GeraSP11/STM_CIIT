@@ -117,4 +117,77 @@ class UsuariosModel
     
     return $stmt->execute([$personal['id_personal']]);
  }
+ public function buscarUsuarioPorCurp($curp)
+{
+    global $pdo;
+    
+    $sqlPersonal = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
+                    FROM personal WHERE curp = ?";
+    $stmt = $pdo->prepare($sqlPersonal);
+    $stmt->execute([$curp]);
+    $personal = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$personal) {
+        return false;
+    }
+    
+    $sqlUsuario = "SELECT id_usuario, nombre_usuario, correo_electronico, identificador_de_rh
+                   FROM usuarios WHERE identificador_de_rh = ?";
+    $stmt = $pdo->prepare($sqlUsuario);
+    $stmt->execute([$personal['id_personal']]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$usuario) {
+        return false;
+    }
+    
+    return array_merge($usuario, $personal);
+}
+
+public function obtenerTodoPersonal()
+{
+    global $pdo;
+    
+    $sql = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
+            FROM personal ORDER BY nombre_personal";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function actualizarUsuario($id_usuario, $curp_nueva, $nombre_usuario, $correo, $id_personal, $password = null)
+{
+    global $pdo;
+    
+    try {
+        $pdo->beginTransaction();
+        
+        if ($password !== null && $password !== '') {
+            $sql = "UPDATE usuarios 
+                    SET nombre_usuario = ?, correo_electronico = ?, 
+                        identificador_de_rh = ?, contrasena = ?
+                    WHERE id_usuario = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$nombre_usuario, $correo, $id_personal, $password, $id_usuario]);
+        } else {
+            $sql = "UPDATE usuarios 
+                    SET nombre_usuario = ?, correo_electronico = ?, identificador_de_rh = ?
+                    WHERE id_usuario = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$nombre_usuario, $correo, $id_personal, $id_usuario]);
+        }
+        
+        $sqlUpdatePersonal = "UPDATE personal SET curp = ? WHERE id_personal = ?";
+        $stmt = $pdo->prepare($sqlUpdatePersonal);
+        $stmt->execute([$curp_nueva, $id_personal]);
+        
+        $pdo->commit();
+        return true;
+        
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        return false;
+    }
+}
 }

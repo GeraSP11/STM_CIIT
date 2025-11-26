@@ -16,6 +16,21 @@ switch ($action) {
         echo $controller->consultarUsuario($_POST);
         break;
 
+    case 'obtener-personal':
+        $controller = new UsuariosController();
+        echo $controller->obtenerPersonal();
+        break;
+
+    case 'buscar-usuario':
+        $controller = new UsuariosController();
+        echo $controller->buscarUsuario($_POST);
+        break;
+
+    case 'actualizar-usuario':
+        $controller = new UsuariosController();
+        echo $controller->actualizarUsuario($_POST);
+        break;
+
     case 'eliminar-usuario':
         $controller = new UsuariosController();
         echo $controller->eliminarUsuario($_POST);
