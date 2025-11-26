@@ -102,7 +102,7 @@ function configurarConsultaUsuarios() {
                 console.log("RESPUESTA CRUDA DEL SERVIDOR:");
                 console.log(texto);
             })*/
-        .then(r => r.json())
+            .then(r => r.json())
             .then(data => {
 
                 if (!data || data.error) {
@@ -280,7 +280,7 @@ function apiRequestUsuarios(accion, datos = null) {
     // Si datos es un formulario HTML, usar sus datos directamente
     if (datos instanceof HTMLFormElement) {
         formData = new FormData(datos);
-    } 
+    }
     // Si datos es un objeto, crear FormData y agregar cada propiedad
     else {
         formData = new FormData();
@@ -317,29 +317,29 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
 }
 
 function configurarEliminacionUsuarios() {
-    
+
     const formEliminar = document.getElementById("formEliminarUsuario");
     if (!formEliminar) return;
-    
+
     const inputCurp = document.getElementById("input_curp_eliminar");
     const btnBuscar = formEliminar.querySelector('button[type="submit"]');
-    
+
     if (!btnBuscar || !inputCurp) return;
-    
+
     btnBuscar.addEventListener("click", function (e) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         const curp = inputCurp.value.trim();
-        
+
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
             return;
         }
-        
+
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
                 if (!r.isConfirmed) return;
-                
+
                 apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(

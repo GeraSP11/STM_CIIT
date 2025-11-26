@@ -50,10 +50,10 @@ class UsuariosController
         $criterio = trim($data['criterio'] ?? '');
 
         if ($criterio === '') {
-            return [
+            return json_encode([
                 "error" => true,
                 "message" => "Debes ingresar una Clave de Personal para buscar."
-            ];
+            ]);
         }
 
         $model = new UsuariosModel();
@@ -62,46 +62,46 @@ class UsuariosController
         $usuario = $model->consultarUsuarioPorCriterio($criterio);
 
         if (!$usuario) {
-            return [
+            return json_encode([
                 "error" => true,
                 "message" => "No se encontró ningún usuario con ese criterio."
-            ];
+            ]);
         }
 
         // Construir nombre completo desde datos del personal
         $nombreCompleto = $usuario['nombre_personal'] . " " . $usuario['apellido_paterno'] . " " . $usuario['apellido_materno'];
 
         // Formato JSON que tu JS espera
-    return json_encode([
-        "usuario"         => $usuario['nombre_usuario'],
-        "nombre_completo" => $nombreCompleto,
-        "correo"          => $usuario['correo_electronico'],
-        "clave_personal"  => $usuario['curp']
-    ]);
-}
+        return json_encode([
+            "usuario"         => $usuario['nombre_usuario'],
+            "nombre_completo" => $nombreCompleto,
+            "correo"          => $usuario['correo_electronico'],
+            "clave_personal"  => $usuario['curp']
+        ]);
+    }
     //Eliminar Usuarios
     public function eliminarUsuario($data)
-{
-    $curp = trim($data['curp'] ?? '');
-    
-    if (empty($curp)) {
-        return "La CURP es obligatoria";
+    {
+        $curp = trim($data['curp'] ?? '');
+
+        if (empty($curp)) {
+            return "La CURP es obligatoria";
+        }
+
+        $model = new UsuariosModel();
+
+        // Verificar si existe el usuario
+        $usuario = $model->consultarUsuarioPorCriterio($curp);
+
+        if (!$usuario) {
+            return "No se encontró ningún usuario con esa CURP";
+        }
+
+        // Eliminar usuario
+        if ($model->eliminarUsuario($curp)) {
+            return "OK";
+        } else {
+            return "Error al eliminar el usuario";
+        }
     }
-    
-    $model = new UsuariosModel();
-    
-    // Verificar si existe el usuario
-    $usuario = $model->consultarUsuarioPorCriterio($curp);
-    
-    if (!$usuario) {
-        return "No se encontró ningún usuario con esa CURP";
-    }
-    
-    // Eliminar usuario
-    if ($model->eliminarUsuario($curp)) {
-        return "OK";
-    } else {
-        return "Error al eliminar el usuario";
-    }
-}
 }
