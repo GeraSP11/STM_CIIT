@@ -221,19 +221,22 @@ $seccion = 'Eliminar Localidades';
             <div id="campoId" class="additional-field">
                 <div class="form-label-box">Identificador de la localidad:</div>
                 <input type="text" class="form-control-custom" id="inputId" name="inputId"
-                    placeholder="Ingrese el ID de la localidad">
+                    placeholder="Ingrese el ID de la localidad" pattern="^[0-9]+$">
             </div>
 
             <div id="campoNombreTrabajo" class="additional-field">
                 <div class="form-label-box">Nombre del centro de trabajo:</div>
                 <input type="text" class="form-control-custom" id="inputNombreTrabajo" name="inputNombreTrabajo"
-                    placeholder="Ingrese el nombre del centro de trabajo">
+                    placeholder="Ingrese el nombre del centro de trabajo" maxlength="100" min="10"
+                    pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ0-9\s\-]+$">
             </div>
+
 
             <div id="campoUbicacion" class="additional-field">
                 <div class="form-label-box">Ubicación georeferenciada:</div>
                 <input type="text" class="form-control-custom" id="inputUbicacion" name="inputUbicacion"
-                    placeholder="Ingrese la ubicación georeferenciada">
+                    placeholder="Ej. 19.4326, -99.1332" pattern="^-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+$"
+                    title="Formato correcto: latitud,longitud (ej. 19.4326, -99.1332)">
             </div>
 
             <div class="d-flex justify-content-center">

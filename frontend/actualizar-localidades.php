@@ -118,18 +118,18 @@ $seccion = 'Actualizar Localidades';
                         Nombre del Centro de Trabajo *
                     </label>
                     <input type="text" name="nombre_centro_trabajo" id="inputNombreCentro"
-                        placeholder="Nombre del Centro de Trabajo" required minlength="3" maxlength="200"
-                        pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$"
+                        placeholder="Nombre del Centro de Trabajo" required maxlength="100" min="10"
+                        pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ0-9\s\-]+$"
                         style="width:100%; padding:10px; border:1px solid #bbb; border-radius:4px;">
                 </div>
                 <div class="col-md-4">
                     <label style="font-weight:bold; display:block; margin-bottom:6px;">
                         Ubicación Georreferenciada (Latitud, Longitud) *
                     </label>
-                    <textarea name="ubicacion_georeferenciada" id="inputUbicacion" placeholder="Ej: 16.8531,-96.7712"
-                        required pattern="^-?\d+(\.\d+)?,-?\d+(\.\d+)?$"
+                    <input type="text" name="ubicacion_georeferenciada" id="inputUbicacion"
+                        placeholder="Ej: 16.8531,-96.7712" required pattern="^-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+$"
                         title="Formato: latitud,longitud (Ej: 16.8531,-96.7712)"
-                        style="width:100%; padding:10px; border:1px solid #bbb; border-radius:4px; min-height:42px; resize:vertical;"></textarea>
+                        style="width:100%; padding:10px; border:1px solid #bbb; border-radius:4px;">
                 </div>
                 <div class="col-md-4">
                     <label style="font-weight:bold; display:block; margin-bottom:6px;">Población *</label>

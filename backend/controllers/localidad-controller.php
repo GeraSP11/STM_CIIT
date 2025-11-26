@@ -67,6 +67,15 @@ class LocalidadController
         $tipoInstalacion = trim($data['tipo_instalacion']);
 
         $model = new LocalidadlModel();
+
+        // Verificar ubicación pero EXCLUYENDO la propia localidad
+        $ubicacionExistente = $model->obtenerLocalidadPorUbicacion($ubicacionGeo);
+
+        if ($ubicacionExistente && $ubicacionExistente['id_localidad'] != $id) {
+            return "La ubicación ya está registrada en otra localidad.";
+        }
+
+        // ✔ Actualizar
         $resultado = $model->actualizarLocalidad(
             $id,
             $nombreCentro,
@@ -79,6 +88,7 @@ class LocalidadController
 
         return $resultado ? "OK" : "Error al actualizar localidad";
     }
+
     public function eliminarLocalidad($data)
     {
         $id = $data['id_localidad'] ?? null;
@@ -97,7 +107,8 @@ class LocalidadController
         return $resultado ? "OK" : "Error al eliminar localidad";
     }
 
-     // Método para manejar la solicitud de mostrar las localidades para eliminar
+
+    // Método para manejar la solicitud de mostrar las localidades para eliminar
     public function mostrarLocalidadEliminar($data)
     {
         // Crear instancia del modelo

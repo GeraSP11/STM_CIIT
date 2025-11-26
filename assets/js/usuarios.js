@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Solo activar actualización si existe el formulario específico
-    if (document.getElementById("formActualizarUsuario")) {
+    if (document.getElementById("updateForm")) {
         configurarActualizacionUsuarios();
     }
 
@@ -97,12 +97,8 @@ function configurarConsultaUsuarios() {
         }
 
         apiRequestUsuarios("consultar-usuario", { criterio })
-            /*.then(r => r.text())
-            .then(texto => {
-                console.log("RESPUESTA CRUDA DEL SERVIDOR:");
-                console.log(texto);
-            })*/
-            .then(r => r.json())
+            
+        .then(r => r.json())
             .then(data => {
 
                 if (!data || data.error) {
@@ -129,6 +125,340 @@ function configurarConsultaUsuarios() {
             formConsulta.parentElement.style.display = "block";
             inputCriterio.value = "";
         });
+    }
+}
+
+
+
+/* =====================================================
+   3. ACTUALIZAR (UPDATE)
+   ===================================================== */
+
+function configurarActualizacionUsuarios() {
+    
+    const formActualizar = document.getElementById("updateForm");
+    if (!formActualizar) return;
+    
+    const inputCurpBusqueda = document.getElementById("curp_busqueda");
+    const btnBuscar = document.getElementById("btnBuscarUsuario");
+    
+    // Cargar personal al iniciar
+    cargarPersonalParaSelect();
+    
+    // Buscar con Enter
+    if (inputCurpBusqueda) {
+        inputCurpBusqueda.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarUsuarioActualizar();
+            }
+        });
+    }
+    
+    // Buscar con botón
+    if (btnBuscar) {
+        btnBuscar.addEventListener('click', function(e) {
+            e.preventDefault();
+            buscarUsuarioActualizar();
+        });
+    }
+    
+    // Submit del formulario
+    formActualizar.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('contrasena').value;
+        const passwordConfirm = document.getElementById('contrasena_confirmar').value;
+        
+        // Validar contraseñas solo si se ingresó alguna
+        if (password !== '' && password !== passwordConfirm) {
+            alerta("Error", "Las contraseñas no coinciden", "error");
+            return;
+        }
+        
+        confirmar("¿Actualizar Usuario?", "¿Deseas guardar los cambios?")
+            .then(r => {
+                if (!r.isConfirmed) return;
+                
+                apiRequestUsuarios("actualizar-usuario", formActualizar)
+                    .then(r => r.text())
+                    .then(resp => {
+                        manejarRespuestaCRUD(
+                            resp,
+                            "Usuario actualizado correctamente.",
+                            "index.php"
+                        );
+                    })
+                    .catch(() => alerta("Error", "Ocurrió un error al actualizar el usuario.", "error"));
+            });
+    });
+}
+
+// Función para cargar el personal en el select
+function cargarPersonalParaSelect() {
+    apiRequestUsuarios("obtener-personal", {})
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById('identificador_de_rh');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Seleccione una persona</option>';
+            
+            data.forEach(p => {
+                const nombreCompleto = `${p.nombre_personal} ${p.apellido_paterno} ${p.apellido_materno} (${p.curp})`;
+                const option = document.createElement('option');
+                option.value = p.id_personal;
+                option.textContent = nombreCompleto;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => console.error('Error al cargar personal:', err));
+}
+
+// Función para buscar usuario por CURP
+function buscarUsuarioActualizar() {
+    const curp = document.getElementById('curp_busqueda').value.trim().toUpperCase();
+    const formUpdate = document.getElementById('updateForm');
+    
+    if (!curp) {
+        mostrarAlerta('Ingrese una CURP para buscar', 'alert-info');
+        return;
+    }
+    
+    if (curp.length !== 18) {
+        mostrarAlerta('La CURP debe tener 18 caracteres', 'alert-error');
+        return;
+    }
+    
+    apiRequestUsuarios('buscar-usuario', { curp })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                mostrarAlerta(data.message, 'alert-error');
+                formUpdate.classList.remove('active');
+                return;
+            }
+            
+            llenarFormularioActualizar(data);
+            formUpdate.classList.add('active');
+            mostrarAlerta('Usuario encontrado. Puede editar los datos.', 'alert-success');
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            mostrarAlerta('Error al buscar el usuario', 'alert-error');
+        });
+}
+
+// Función para llenar el formulario con los datos del usuario
+// Función para llenar el formulario con los datos del usuario
+function llenarFormularioActualizar(data) {
+    // Campos ocultos
+    document.getElementById('id_usuario').value = data.id_usuario;
+    document.getElementById('curp').value = data.curp_actual;
+    
+    // Campos de solo lectura (nombre del personal)
+    // Necesitas separar el nombre completo
+    const nombres = data.nombre_completo.split(' ');
+    document.getElementById('nombre_personal').value = nombres[0] || '';
+    document.getElementById('apellido_paterno').value = nombres[1] || '';
+    document.getElementById('apellido_materno').value = nombres[2] || '';
+    
+    // Campo editable
+    document.getElementById('correo_electronico').value = data.correo_electronico;
+    
+    // Limpiar contraseñas
+    document.getElementById('contrasena').value = '';
+    document.getElementById('contrasena_confirmar').value = '';
+}
+// Función para mostrar alertas personalizadas
+function mostrarAlerta(mensaje, tipo) {
+    const alertDiv = document.getElementById('alertMessage');
+    if (!alertDiv) return;
+    
+    alertDiv.className = `alert ${tipo} show`;
+    alertDiv.textContent = mensaje;
+    
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+    }, 5000);
+}
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
+    document.getElementById('updateForm').reset();
+    document.getElementById('updateForm').classList.remove('active');
+    document.getElementById('curp_busqueda').value = '';
+    
+    const alertDiv = document.getElementById('alertMessage');
+    if (alertDiv) alertDiv.classList.remove('show');
+}
+
+// Función para cancelar y volver
+function cancelar() {
+    if (confirm('¿Desea cancelar? Los cambios no guardados se perderán.')) {
+        window.location.href = 'index.php';
+    }
+}
+
+
+
+/* =====================================================
+   4. ELIMINAR (DELETE)
+   ===================================================== */
+
+function configurarEliminacionUsuarios() {
+    
+    const formEliminar = document.getElementById("formEliminarUsuario");
+    if (!formEliminar) return;
+    
+    const inputCurp = document.getElementById("input_curp_eliminar");
+    const btnBuscar = formEliminar.querySelector('button[type="submit"]');
+    
+    if (!btnBuscar || !inputCurp) return;
+    
+    btnBuscar.addEventListener("click", function (e) {
+        e.preventDefault(); 
+        
+        const curp = inputCurp.value.trim();
+        
+        if (curp === "") {
+            alerta("Eliminación", "Debes ingresar una CURP.", "warning");
+            return;
+        }
+        
+        confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
+            .then(r => {
+                if (!r.isConfirmed) return;
+                
+                apiRequestUsuarios("eliminar-usuario", { curp })
+                    .then(r => r.text())
+                    .then(resp => manejarRespuestaCRUD(
+                        resp,
+                        "Usuario eliminado correctamente.",
+                        "index.php"
+                    ))
+                    .catch(() => alerta("Error", "Ocurrió un error al eliminar el usuario.", "error"));
+            });
+    });
+}
+
+
+
+/* =====================================================
+   FUNCIONES AUXILIARES PARA ACTUALIZACIÓN
+   ===================================================== */
+
+// Función para cargar el personal en el select
+function cargarPersonalParaSelect() {
+    apiRequestUsuarios("obtener-personal", {})
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById('identificador_de_rh');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Seleccione una persona</option>';
+            
+            data.forEach(p => {
+                const nombreCompleto = `${p.nombre_personal} ${p.apellido_paterno} ${p.apellido_materno} (${p.curp})`;
+                const option = document.createElement('option');
+                option.value = p.id_personal;
+                option.textContent = nombreCompleto;
+                select.appendChild(option);
+            });
+        })
+        .catch(err => console.error('Error al cargar personal:', err));
+}
+
+// Función para buscar usuario por CURP
+function buscarUsuarioActualizar() {
+    const curp = document.getElementById('curp_busqueda').value.trim().toUpperCase();
+    const formUpdate = document.getElementById('updateForm');
+    
+    if (!curp) {
+        mostrarAlerta('Ingrese una CURP para buscar', 'alert-info');
+        return;
+    }
+    
+    if (curp.length !== 18) {
+        mostrarAlerta('La CURP debe tener 18 caracteres', 'alert-error');
+        return;
+    }
+    
+    apiRequestUsuarios('buscar-usuario', { curp })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                mostrarAlerta(data.message, 'alert-error');
+                formUpdate.classList.remove('active');
+                return;
+            }
+            
+            llenarFormularioActualizar(data);
+            formUpdate.classList.add('active');
+            mostrarAlerta('Usuario encontrado. Puede editar los datos.', 'alert-success');
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            mostrarAlerta('Error al buscar el usuario', 'alert-error');
+        });
+}
+
+// Función para llenar el formulario con los datos del usuario
+function llenarFormularioActualizar(data) {
+    // Campos ocultos
+    document.getElementById('id_usuario').value = data.id_usuario;
+    document.getElementById('curp').value = data.curp_actual;
+    
+    // Separar el nombre completo que viene del backend
+    const partesNombre = data.nombre_completo.trim().split(' ');
+    
+    // Asignar las partes del nombre (si los campos existen en el HTML)
+    const campoNombre = document.getElementById('nombre_personal');
+    const campoPaterno = document.getElementById('apellido_paterno');
+    const campoMaterno = document.getElementById('apellido_materno');
+    
+    if (campoNombre) campoNombre.value = partesNombre[0] || '';
+    if (campoPaterno) campoPaterno.value = partesNombre[1] || '';
+    if (campoMaterno) campoMaterno.value = partesNombre.slice(2).join(' ') || '';
+    
+    // Campo editable de correo
+    const campoCorreo = document.getElementById('correo_electronico');
+    if (campoCorreo) campoCorreo.value = data.correo_electronico;
+    
+    // Limpiar contraseñas
+    const campoPassword = document.getElementById('contrasena');
+    const campoPasswordConfirm = document.getElementById('contrasena_confirmar');
+    
+    if (campoPassword) campoPassword.value = '';
+    if (campoPasswordConfirm) campoPasswordConfirm.value = '';
+}
+// Función para mostrar alertas personalizadas
+function mostrarAlerta(mensaje, tipo) {
+    const alertDiv = document.getElementById('alertMessage');
+    if (!alertDiv) return;
+    
+    alertDiv.className = `alert ${tipo} show`;
+    alertDiv.textContent = mensaje;
+    
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+    }, 5000);
+}
+
+// Función para limpiar el formulario
+function limpiarFormulario() {
+    document.getElementById('updateForm').reset();
+    document.getElementById('updateForm').classList.remove('active');
+    document.getElementById('curp_busqueda').value = '';
+    
+    const alertDiv = document.getElementById('alertMessage');
+    if (alertDiv) alertDiv.classList.remove('show');
+}
+
+// Función para cancelar y volver
+function cancelar() {
+    if (confirm('¿Desea cancelar? Los cambios no guardados se perderán.')) {
+        window.location.href = 'index.php';
     }
 }
 
@@ -195,7 +525,7 @@ function checkEmail() {
 
     if (!val) return showError(inputs.email, "El correo es obligatorio");
 
-    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  // ✅ CORREGIDO
+    const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!reg.test(val)) return showError(inputs.email, "Correo inválido");
 }
 
@@ -317,29 +647,29 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
 }
 
 function configurarEliminacionUsuarios() {
-
+    
     const formEliminar = document.getElementById("formEliminarUsuario");
     if (!formEliminar) return;
-
+    
     const inputCurp = document.getElementById("input_curp_eliminar");
     const btnBuscar = formEliminar.querySelector('button[type="submit"]');
-
+    
     if (!btnBuscar || !inputCurp) return;
-
+    
     btnBuscar.addEventListener("click", function (e) {
-        e.preventDefault();
-
+        e.preventDefault(); 
+        
         const curp = inputCurp.value.trim();
-
+        
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
             return;
         }
-
+        
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
                 if (!r.isConfirmed) return;
-
+                
                 apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(

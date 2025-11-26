@@ -92,7 +92,7 @@ $seccion = 'Registro de Localidades';
                 <div class="col-md-4">
                     <label for="nombre_centro" class="form-label">Nombre del centro de trabajo</label>
                     <input type="text" id="nombre_centro" name="nombre_centro" class="form-input" placeholder="Ej. PUBIS"
-                        required maxlength="100" pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ\s\-]+$"
+                        required maxlength="100" min="10" pattern="^(?=.*[A-Za-zÀ-ÿÑñ])[A-Za-zÀ-ÿÑñ0-9\s\-]+$"
                         title="Solo letras, números y espacios">
                 </div>
                 <div class="col-md-4">
