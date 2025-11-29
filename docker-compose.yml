@@ -22,10 +22,10 @@ services:
       - ./frontend:/var/www/html/frontend
       - ./backend:/var/www/html/backend
       - ./ajax:/var/www/html/ajax 
-      
+    depends_on:
+      - postgres
     networks:
       - appnet
-
 
   postgres:
     image: postgres:15
@@ -41,7 +41,6 @@ services:
       - ./db:/docker-entrypoint-initdb.d
     networks:
       - appnet
-
 
 volumes:
   pgdata:

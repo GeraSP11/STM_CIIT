@@ -1,6 +1,7 @@
 CREATE TABLE localidades (
     id_localidad SERIAL PRIMARY KEY,
     nombre_centro_trabajo VARCHAR(100),
+    clave_centro_trabajo VARCHAR(100),
     ubicacion_georeferenciada VARCHAR(200),
     poblacion VARCHAR(100),
     localidad VARCHAR(100),
@@ -14,9 +15,11 @@ CREATE TABLE personal (
     nombre_personal VARCHAR(100),
     apellido_paterno VARCHAR(100),
     apellido_materno VARCHAR(100),
-    afiliacion_laboral INT REFERENCES localidades(id_localidad) ON DELETE CASCADE,
+    numero_empleado INT,
+    afiliacion_laboral INT REFERENCES localidades(id_localidad) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
     cargo VARCHAR(50) CHECK (cargo IN 
-        ('Autoridad', 'Administrador del TMS', 'Operador Logístico','Cliente' ,'Jefe de Almacén')),
+        ('Autoridad', 'Administrador del TMS', 'Operador Logístico', 'Cliente', 'Jefe de Almacén', 'Chófer')),
     curp VARCHAR(18)
 );
 
@@ -25,77 +28,119 @@ CREATE TABLE usuarios (
     nombre_usuario VARCHAR(100),
     contrasena VARCHAR(100),
     correo_electronico VARCHAR(150),
-    identificador_de_rh INT REFERENCES personal(id_personal) ON DELETE CASCADE
+    identificador_de_rh INT REFERENCES personal(id_personal)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE productos (
     id_producto SERIAL PRIMARY KEY,
     nombre_producto VARCHAR(100),
-    ubicacion_producto INT REFERENCES localidades(id_localidad),
+    ubicacion_producto INT REFERENCES localidades(id_localidad) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
     peso FLOAT,
     altura FLOAT,
+    largo FLOAT,
+    ancho FLOAT,
     cajas_por_cama INT,
     camas_por_pallet INT,
     peso_soportado FLOAT,
     peso_volumetrico FLOAT,
     unidades_existencia FLOAT,
-    tipo_de_embalaje VARCHAR(100),
-    tipo_de_mercancia VARCHAR(100)
+    tipo_de_embalaje VARCHAR(100) CHECK (tipo_de_embalaje IN (
+        'Embalaje primario','Embalaje secundario','Embalaje terciario','Caja de cartón corrugado',
+        'Caja rígida','Caja plegadiza','Bolsa plástica','Bolsa de polietileno','Saco','Fardo',
+        'Tambo de acero','Tambo plástico','Bidón','Granel sólido','Granel líquido','Pallet de madera',
+        'Pallet plástico','Pallet metálico','Emplaye / stretch film','Retráctil (shrink wrap)',
+        'Contenedor marítimo','Contenedor refrigerado','Contenedor a granel',
+        'IBC (Intermediate Bulk Container)','Cráte','Huacal','Estiba','Super sack (big bag)',
+        'Envase de vidrio','Envase metálico','Envase plástico',
+        'Tarimas especiales NOM-SCT para mercancías peligrosas'
+    )),
+    tipo_de_mercancia VARCHAR(100) CHECK (tipo_de_mercancia IN (
+        'Mercancías peligrosas','Perecederas','Cadena de frío','Electrónicas / electromecánicas',
+        'Frágiles','Industriales','Sustancias químicas','Alimentos procesados','Textiles y moda',
+        'Culturales / editoriales','Vehículos y autopartes','Muebles y enseres',
+        'Materiales de construcción','Agropecuarias','Bienes de alto valor'
+    )),
+    observaciones VARCHAR(200)
 );
 
-CREATE TABLE contenedores (
+CREATE TABLE productos_localidades (
+    id_pl SERIAL PRIMARY KEY,
+    id_producto INT REFERENCES productos(id_producto) ON DELETE CASCADE ON UPDATE CASCADE,
+    id_localidad INT REFERENCES localidades(id_localidad) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE contenedores_teu(
     id_contenedor SERIAL PRIMARY KEY,
     etiqueta VARCHAR(50),
     largo FLOAT,
     ancho FLOAT,
-    altura FLOAT
+    altura FLOAT,
+    descripcion VARCHAR (100)
 );
 
 CREATE TABLE transacciones_productos (
     id_transaccion SERIAL PRIMARY KEY,
     numero_transaccion VARCHAR(50),
-    localidad INT REFERENCES localidades(id_localidad),
-    tipo_transaccion VARCHAR(50),
+    localidad INT REFERENCES localidades(id_localidad) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    tipo_transaccion VARCHAR(50) CHECK (tipo_transaccion IN 
+        ('Ingreso de producto', 'Salida de producto', 'Solicitud de Pedido')),
     fecha_inicio_transaccion DATE,
-    fecha_finalizacion_transaccion DATE
+    fecha_finalizacion_transaccion DATE,
+    usuario INT REFERENCES usuarios(id_usuario) 
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE vehiculos (
     id_vehiculo SERIAL PRIMARY KEY,
-    modalidad_vehiculo VARCHAR(100),
+    modalidad_vehiculo VARCHAR(50) CHECK (modalidad_vehiculo IN 
+        ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo')),
     descripcion_vehiculo VARCHAR(100),
-    chofer_asignado INT REFERENCES personal(id_personal)
+    chofer_asignado INT REFERENCES personal(id_personal) 
+        ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE TABLE carrocerias (
     id_carroceria SERIAL PRIMARY KEY,
     matricula VARCHAR(50),
-    id_vehiculo INT REFERENCES vehiculos(id_vehiculo),
-    localidad_pertenece INT REFERENCES localidades(id_localidad),
-    responsable_carroceria INT REFERENCES personal(id_personal),
+    localidad_pertenece INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    responsable_carroceria INT REFERENCES personal(id_personal)
+        ON DELETE SET NULL ON UPDATE CASCADE,
     numero_contenedores INT,
     peso_vehicular FLOAT,
-    numero_ejes_vehiculares INT
+    numero_ejes_vehiculares INT,
+    tipo_carroceria VARCHAR(20) CHECK (tipo_carroceria IN 
+        ('Unidad de arrastre', 'Unidad de carga'))
 );
+
 
 CREATE TABLE vehiculos_carrocerias (
     id_vehiculo_carroceria SERIAL PRIMARY KEY,
-    id_vehiculo INT REFERENCES vehiculos(id_vehiculo),
+    id_vehiculo INT REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     id_carroceria INT REFERENCES carrocerias(id_carroceria)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
-
 
 CREATE TABLE carrocerias_detalle (
     id_carrocerias_detalle SERIAL PRIMARY KEY,
-    identificador_carroceria INT REFERENCES carrocerias(id_carroceria),
+    identificador_carroceria INT REFERENCES carrocerias(id_carroceria)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     numero_contenedor INT,
-    capacidad_contenedor FLOAT
+    longitud FLOAT,
+    anchura FLOAT,
+    altura FLOAT    
 );
 
 CREATE TABLE maniobras (
     id_maniobra SERIAL PRIMARY KEY,
-    id_carroceria INT REFERENCES carrocerias(id_carroceria),
-    localidad INT REFERENCES localidades(id_localidad),
+    id_carroceria INT REFERENCES carrocerias(id_carroceria)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    localidad INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     tiempo_carga INT,
     tiempo_descarga INT,
     tiempo_almacenaje INT
@@ -103,7 +148,8 @@ CREATE TABLE maniobras (
 
 CREATE TABLE mantenimientos_vehiculos (
     id_mantenimiento SERIAL PRIMARY KEY,
-    id_transporte INT REFERENCES vehiculos(id_vehiculo),
+    id_transporte INT REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     fecha_ingreso DATE,
     fecha_salida DATE,
     descripcion_servicios VARCHAR(200)
@@ -111,42 +157,57 @@ CREATE TABLE mantenimientos_vehiculos (
 
 CREATE TABLE rutas (
     id_ruta SERIAL PRIMARY KEY,
-    localidad_origen INT REFERENCES localidades(id_localidad),
-    localidad_destino INT REFERENCES localidades(id_localidad),
-    tipo_vehiculo INT REFERENCES vehiculos(id_vehiculo),
-    tipo_ruta INT REFERENCES carrocerias(id_carroceria),
+    localidad_origen INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    localidad_destino INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    tipo_vehiculo INT REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    tipo_ruta INT REFERENCES carrocerias(id_carroceria)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     distancia FLOAT,
     descripcion VARCHAR(200)
 );
 
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
-    localidad_origen INT REFERENCES localidades(id_localidad),
-    localidad_destino INT REFERENCES localidades(id_localidad),
-    estatus_pedido VARCHAR(50)
+    clave_producto VARCHAR(30),
+    localidad_origen INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    localidad_destino INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    estatus_pedido VARCHAR(50),
+    fecha_solicitud DATE,
+    fecha_entrega DATE,
+    observaciones varchar(200)
 );
 
 CREATE TABLE pedidos_detalles (
     id_pedido_detalles SERIAL PRIMARY KEY,
-    id_pedido INT REFERENCES pedidos(id_pedido),
-    identificador_producto INT REFERENCES productos(id_producto),
+    identificador_producto INT REFERENCES productos(id_producto)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     cantidad_producto INT,
     observaciones VARCHAR(200)
 );
 
 CREATE TABLE fleteros (
     id_fletero SERIAL PRIMARY KEY,
-    localidad_origen INT REFERENCES localidades(id_localidad),
-    localidad_destino INT REFERENCES localidades(id_localidad),
-    identificador_vehiculo INT REFERENCES vehiculos(id_vehiculo),
+    localidad_origen INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    localidad_destino INT REFERENCES localidades(id_localidad)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    identificador_vehiculo INT REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     fecha_y_hora_llegada TIMESTAMP,
     fecha_y_hora_salida TIMESTAMP
 );
 
 CREATE TABLE fleteros_detalle (
     id_fletero_detalle SERIAL PRIMARY KEY,
-    identificador_flete INT REFERENCES fleteros(id_fletero),
-    identificador_producto INT REFERENCES productos(id_producto),
+    identificador_flete INT REFERENCES fleteros(id_fletero)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    identificador_producto INT REFERENCES productos(id_producto)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     numero_unidades INT,
     numero_contenedor INT,
     observaciones VARCHAR(200)
@@ -154,11 +215,15 @@ CREATE TABLE fleteros_detalle (
 
 CREATE TABLE envios (
     id_envio SERIAL PRIMARY KEY,
-    identificador_flete INT REFERENCES fleteros(id_fletero),
-    identificador_pedido INT REFERENCES pedidos(id_pedido),
+    identificador_flete INT REFERENCES fleteros(id_fletero)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    identificador_pedido INT REFERENCES pedidos(id_pedido)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     punto_verificacion INT REFERENCES localidades(id_localidad),
-    personal_asignado INT REFERENCES personal(id_personal),
-    personal_verifica INT REFERENCES personal(id_personal),
+    personal_asignado INT REFERENCES personal(id_personal)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    personal_verifica INT REFERENCES personal(id_personal)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     fecha_verificacion DATE,
     geolocalizacion VARCHAR(200)
 );
