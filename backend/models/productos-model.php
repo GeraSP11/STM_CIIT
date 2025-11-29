@@ -7,28 +7,54 @@ class ProductosModel
     {
         global $pdo;
 
-        $sql = "INSERT INTO productos (
-            nombre_producto, peso, altura, cajas_por_cama,
+        try {
+
+            $pdo->beginTransaction();
+
+            // Insertar en productos
+            $sql = "INSERT INTO productos (
+            nombre_producto, peso, altura, largo, ancho, cajas_por_cama,
             camas_por_pallet, peso_soportado, peso_volumetrico,
-            ubicacion_producto, tipo_de_embalaje, tipo_de_mercancia, unidades_existencia
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            ubicacion_producto, tipo_de_embalaje, tipo_de_mercancia,
+            unidades_existencia, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $data["nombre_producto"],
+                $data["peso_kg"],
+                $data["altura_cm"],
+                $data["largo_cm"],
+                $data["ancho_cm"],
+                $data["cajas_por_cama"],
+                $data["camas_por_pallet"],
+                $data["peso_soportado_kg"],
+                $data["peso_volumetrico_kg"],
+                $data["id_localidad"],
+                $data["tipo_embalaje"],
+                $data["tipo_mercancia"],
+                $data["unidades_existencia"],
+                $data["observaciones_producto"]
+            ]);
 
-        return $stmt->execute([
-            $data["nombre_producto"],
-            $data["peso_kg"],
-            $data["altura_m"],
-            $data["cajas_por_cama"],
-            $data["cajas_por_pallet"],
-            $data["peso_soportado_kg"],
-            $data["peso_volumetrico_kg"],
-            $data["id_localidad"],
-            $data["tipo_embalaje"],
-            $data["tipo_mercancia"],
-            $data["unidades_existencia"]
-        ]);
+            // ID seguro dentro de la misma transacción
+            $id_producto = $pdo->lastInsertId();
+
+            // Insertar relación
+            $sql2 = "INSERT INTO productos_localidades (id_producto, id_localidad)
+                 VALUES (?, ?)";
+
+            $stmt2 = $pdo->prepare($sql2);
+            $stmt2->execute([$id_producto, $data["id_localidad"]]);
+
+            $pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return "Error: " . $e->getMessage();
+        }
     }
+
 
     public function validarProductoExistente($nombre_producto, $id_localidad)
     {

@@ -141,7 +141,7 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="largo">Largo (cm):</label>
-                        <input type="number" id="largo" name="largo_m" step="1" value="0">
+                        <input type="number" id="largo" name="largo_cm" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -166,6 +166,7 @@ $seccion = 'Registro de Productos';
 
                         </select>
                     </div>
+
                 </div>
 
                 <!-- Columna derecha -->
@@ -179,17 +180,17 @@ $seccion = 'Registro de Productos';
 
                     <div class="form-group">
                         <label for="altura">Altura (cm):</label>
-                        <input type="number" id="altura" name="altura_m" step="1" value="0">
+                        <input type="number" id="altura" name="altura_cm" step="1" value="0">
                     </div>
 
                     <div class="form-group">
                         <label for="ancho">Ancho (cm):</label>
-                        <input type="number" id="ancho" name="ancho_m" step="1" value="0">
+                        <input type="number" id="ancho" name="ancho_cm" step="1" value="0">
                     </div>
 
                     <div class="form-group">
                         <label for="camas_por_pallet">Camas por Pallet:</label>
-                        <input type="number" id="camas_por_pallet" name="cajas_por_pallet" step="1" value="0">
+                        <input type="number" id="camas_por_pallet" name="camas_por_pallet" step="1" value="0">
                     </div>
 
                     <div class="form-group">
@@ -203,6 +204,12 @@ $seccion = 'Registro de Productos';
                             <option value="">Seleccione un tipo de embalaje</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="observaciones_producto">Observaciones:</label>
+                        <input type="text" id="observaciones_producto" name="observaciones_producto">
+                    </div>
+                    
                 </div>
 
             </div>

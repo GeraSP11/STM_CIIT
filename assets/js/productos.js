@@ -36,28 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
  ********************************************/
 
 const tiposEmbalaje = [
-    "Envase simple", "Envase combinado", "Envase interior", "Envase exterior",
-    "Envase intermedio", "Recipiente intermedio para granel (RIG / IBC)", "Gran embalaje (LP)",
-    "Tambor metálico", "Tambor de plástico", "Bidón metálico", "Bidón de plástico", "Caja de madera",
-    "Caja de cartón / fibra", "Caja de plástico", "Caja metálica",
-    "Bolsa de plástico", "Bolsa de papel", "Frasco o botella de vidrio", "Frasco o botella de plástico",
-    "Garrafa o contenedor de vidrio / gres", "Contenedor a presión (cilindro, tanque portátil)",
-    "Embalaje compuesto (varios materiales)", "Embalaje con flejes o ligaduras",
-    "Embalaje interior rígido", "Envase reutilizable o retornable", "Embalaje para cantidades limitadas",
-    "Embalaje para residuos peligrosos", "Embalaje especial para líquidos corrosivos",
-    "Embalaje especial para materiales explosivos"
+    "Embalaje primario", "Embalaje secundario", "Embalaje terciario", "Caja de cartón corrugado",
+    "Caja rígida", "Caja plegadiza", "Bolsa plástica", "Bolsa de polietileno", "Saco", "Fardo",
+    "Tambo de acero", "Tambo plástico", "Bidón", "Granel sólido", "Granel líquido", "Pallet de madera",
+    "Pallet plástico", "Pallet metálico", "Emplaye / stretch film", "Retráctil (shrink wrap)",
+    "Contenedor marítimo", "Contenedor refrigerado", "Contenedor a granel",
+    "IBC (Intermediate Bulk Container)", "Cráte", "Huacal", "Estiba", "Super sack (big bag)",
+    "Envase de vidrio", "Envase metálico", "Envase plástico",
+    "Tarimas especiales NOM-SCT para mercancías peligrosas"
 ];
 
 const tiposMercancia = [
-    "Mercancías peligrosas", "Sustancias peligrosas", "Materiales peligrosos", "Residuos peligrosos",
-    "Mercancías en cantidades limitadas", "Mercancías en cantidades exceptuadas", "Mercancías no peligrosas",
-    "Mercancías comunes / generales", "Mercancías para consumo final", "Mercancías a granel",
-    "Mercancías en envases especiales", "Mercancías transportadas en tanque/autotanque",
-    "Clase 1 - Explosivos", "Clase 2 - Gases", "Clase 3 - Líquidos inflamables",
-    "Clase 4 - Sólidos inflamables / combustión espontánea / reacción con agua",
-    "Clase 5 - Sustancias comburentes y peróxidos orgánicos", "Clase 6 - Sustancias tóxicas e infecciosas",
-    "Clase 7 - Materiales radiactivos", "Clase 8 - Sustancias corrosivas",
-    "Clase 9 - Sustancias peligrosas varias / misceláneas"
+    "Mercancías peligrosas", "Perecederas", "Cadena de frío", "Electrónicas / electromecánicas",
+    "Frágiles", "Industriales", "Sustancias químicas", "Alimentos procesados", "Textiles y moda",
+    "Culturales / editoriales", "Vehículos y autopartes", "Muebles y enseres",
+    "Materiales de construcción", "Agropecuarias", "Bienes de alto valor"
 ];
 
 
