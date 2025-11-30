@@ -269,46 +269,51 @@ $seccion = 'Actualizar Usuarios';
         <div id="alertMessage" class="alert"></div>
         
         <!-- Formulario de actualización -->
-        <form id="updateForm" class="update-form">
-            <input type="hidden" id="id_usuario" name="id_usuario" value="">
-            <input type="hidden" id="curp" name="curp" value="">
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Nombre: <span class="required">*</span></label>
-                    <input type="text" id="nombre_personal" class="form-control" readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Apellido Paterno: <span class="required">*</span></label>
-                    <input type="text" id="apellido_paterno" class="form-control" readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Apellido Materno: <span class="required">*</span></label>
-                    <input type="text" id="apellido_materno" class="form-control" readonly>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Correo electrónico: <span class="required">*</span></label>
-                    <input type="email" id="correo_electronico" name="correo_electronico" class="form-control" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Nueva Contraseña: <span class="required">*</span></label>
-                    <input type="password" id="contrasena" name="contrasena" class="form-control" minlength="6" placeholder="Mínimo 6 caracteres">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Confirmar Contraseña: <span class="required">*</span></label>
-                    <input type="password" id="contrasena_confirmar" class="form-control" minlength="6">
-                </div>
-            </div>
-            
-            <button type="submit" class="btn-submit">Guardar Cambios</button>
-        </form>
+        <!-- Formulario de actualización - VERSIÓN CORREGIDA -->
+<!-- Formulario de actualización -->
+<form id="updateForm" class="update-form">
+    <!-- Campos ocultos necesarios -->
+    <input type="hidden" id="id_usuario" name="id_usuario" value="">
+    <input type="hidden" id="curp" name="curp" value="">
+    <input type="hidden" id="nombre_usuario" name="nombre_usuario" value="">
+    <input type="hidden" id="identificador_de_rh" name="identificador_de_rh" value="">
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Nombre: <span class="required">*</span></label>
+            <input type="text" id="nombre_personal" class="form-control" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Apellido Paterno: <span class="required">*</span></label>
+            <input type="text" id="apellido_paterno" class="form-control" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Apellido Materno: <span class="required">*</span></label>
+            <input type="text" id="apellido_materno" class="form-control" readonly>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div class="form-group">
+            <label class="form-label">Correo electrónico: <span class="required">*</span></label>
+            <input type="email" id="correo_electronico" name="correo_electronico" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Nueva Contraseña:</label>
+            <input type="password" id="contrasena" name="contrasena" class="form-control" minlength="6" placeholder="Dejar vacío para mantener actual">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Confirmar Contraseña:</label>
+            <input type="password" id="contrasena_confirmar" class="form-control" minlength="6" placeholder="Confirmar nueva contraseña">
+        </div>
+    </div>
+    
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+</form>
     </main>
 
     <!-- Bootstrap -->

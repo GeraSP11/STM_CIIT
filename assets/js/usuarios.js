@@ -135,15 +135,11 @@ function configurarConsultaUsuarios() {
    ===================================================== */
 
 function configurarActualizacionUsuarios() {
-    
     const formActualizar = document.getElementById("updateForm");
     if (!formActualizar) return;
     
     const inputCurpBusqueda = document.getElementById("curp_busqueda");
     const btnBuscar = document.getElementById("btnBuscarUsuario");
-    
-    // Cargar personal al iniciar
-    cargarPersonalParaSelect();
     
     // Buscar con Enter
     if (inputCurpBusqueda) {
@@ -164,58 +160,131 @@ function configurarActualizacionUsuarios() {
     }
     
     // Submit del formulario
-    formActualizar.addEventListener('submit', function(e) {
+    formActualizar.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const password = document.getElementById('contrasena').value;
         const passwordConfirm = document.getElementById('contrasena_confirmar').value;
         
         // Validar contraseñas solo si se ingresó alguna
-        if (password !== '' && password !== passwordConfirm) {
-            alerta("Error", "Las contraseñas no coinciden", "error");
-            return;
+        if (password !== '' || passwordConfirm !== '') {
+            if (password !== passwordConfirm) {
+                alerta("Error", "Las contraseñas no coinciden", "error");
+                return;
+            }
+            if (password.length < 6) {
+                alerta("Error", "La contraseña debe tener al menos 6 caracteres", "error");
+                return;
+            }
         }
         
-        confirmar("¿Actualizar Usuario?", "¿Deseas guardar los cambios?")
-            .then(r => {
-                if (!r.isConfirmed) return;
+        // Pedir contraseña actual del usuario
+        const result = await Swal.fire({
+            title: 'Confirmar cambios',
+            html: '<p>Para actualizar el usuario, ingrese la contraseña actual del usuario:</p>',
+            input: 'password',
+            inputLabel: 'Contraseña actual del usuario',
+            inputPlaceholder: 'Ingrese la contraseña',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Actualizar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#5c2e3e',
+            showLoaderOnConfirm: true,
+            preConfirm: async (passwordActual) => {
+                if (!passwordActual) {
+                    Swal.showValidationMessage('Debe ingresar la contraseña actual');
+                    return false;
+                }
                 
-                apiRequestUsuarios("actualizar-usuario", formActualizar)
-                    .then(r => r.text())
-                    .then(resp => {
-                        manejarRespuestaCRUD(
-                            resp,
-                            "Usuario actualizado correctamente.",
-                            "index.php"
-                        );
-                    })
-                    .catch(() => alerta("Error", "Ocurrió un error al actualizar el usuario.", "error"));
-            });
+                try {
+                    const response = await apiRequestUsuarios('verificar-password', {
+                        id_usuario: document.getElementById('id_usuario').value,
+                        password_actual: passwordActual
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        Swal.showValidationMessage(data.message || 'Contraseña incorrecta');
+                        return false;
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.showValidationMessage('Error al verificar la contraseña');
+                    return false;
+                }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        });
+        
+        if (result.isConfirmed) {
+            actualizarUsuarioFinal();
+        }
     });
 }
 
-// Función para cargar el personal en el select
-function cargarPersonalParaSelect() {
-    apiRequestUsuarios("obtener-personal", {})
-        .then(r => r.json())
-        .then(data => {
-            const select = document.getElementById('identificador_de_rh');
-            if (!select) return;
-            
-            select.innerHTML = '<option value="">Seleccione una persona</option>';
-            
-            data.forEach(p => {
-                const nombreCompleto = `${p.nombre_personal} ${p.apellido_paterno} ${p.apellido_materno} (${p.curp})`;
-                const option = document.createElement('option');
-                option.value = p.id_personal;
-                option.textContent = nombreCompleto;
-                select.appendChild(option);
-            });
-        })
-        .catch(err => console.error('Error al cargar personal:', err));
+function actualizarUsuarioFinal() {
+    // Crear FormData y agregar manualmente todos los campos necesarios
+    const formData = new FormData();
+    
+    // Obtener valores y validar que existan
+    const id_usuario = document.getElementById('id_usuario')?.value || '';
+    const curp = document.getElementById('curp')?.value || '';
+    const nombre_usuario = document.getElementById('nombre_usuario')?.value || '';
+    const identificador_de_rh = document.getElementById('identificador_de_rh')?.value || '';
+    const correo_electronico = document.getElementById('correo_electronico')?.value || '';
+    const contrasena = document.getElementById('contrasena')?.value || '';
+    
+    // Debug: Verificar que los campos ocultos tengan valores
+    console.log('Datos a enviar:', {
+        id_usuario,
+        curp,
+        nombre_usuario,
+        identificador_de_rh,
+        correo_electronico,
+        contrasena: contrasena ? '***' : '(vacío)'
+    });
+    
+    // Validar campos obligatorios
+    if (!id_usuario || !curp || !nombre_usuario || !identificador_de_rh || !correo_electronico) {
+        alerta("Error", "Faltan datos obligatorios. Por favor, busque el usuario nuevamente.", "error");
+        return;
+    }
+    
+    // Agregar todos los campos al FormData
+    formData.append('id_usuario', id_usuario);
+    formData.append('curp', curp);
+    formData.append('nombre_usuario', nombre_usuario);
+    formData.append('identificador_de_rh', identificador_de_rh);
+    formData.append('correo_electronico', correo_electronico);
+    formData.append('contrasena', contrasena);
+    formData.append('action', 'actualizar-usuario');
+    
+    // Hacer la petición con la ruta correcta
+    fetch('/ajax/usuarios-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.text())
+    .then(resp => {
+        console.log('Respuesta del servidor:', resp); // Debug
+        manejarRespuestaCRUD(
+            resp,
+            "Usuario actualizado correctamente.",
+            "actualizar-usuarios.php"
+        );
+    })
+    .catch(err => {
+        console.error('Error en la petición:', err);
+        alerta("Error", "Ocurrió un error al actualizar el usuario.", "error");
+    });
 }
-
-// Función para buscar usuario por CURP
 function buscarUsuarioActualizar() {
     const curp = document.getElementById('curp_busqueda').value.trim().toUpperCase();
     const formUpdate = document.getElementById('updateForm');
@@ -249,28 +318,27 @@ function buscarUsuarioActualizar() {
         });
 }
 
-// Función para llenar el formulario con los datos del usuario
-// Función para llenar el formulario con los datos del usuario
 function llenarFormularioActualizar(data) {
     // Campos ocultos
-    document.getElementById('id_usuario').value = data.id_usuario;
-    document.getElementById('curp').value = data.curp_actual;
+    document.getElementById('id_usuario').value = data.id_usuario || '';
+    document.getElementById('curp').value = data.curp_actual || '';
+    document.getElementById('nombre_usuario').value = data.nombre_usuario || '';
+    document.getElementById('identificador_de_rh').value = data.id_personal || '';
     
-    // Campos de solo lectura (nombre del personal)
-    // Necesitas separar el nombre completo
+    // Campos de solo lectura
     const nombres = data.nombre_completo.split(' ');
     document.getElementById('nombre_personal').value = nombres[0] || '';
     document.getElementById('apellido_paterno').value = nombres[1] || '';
-    document.getElementById('apellido_materno').value = nombres[2] || '';
+    document.getElementById('apellido_materno').value = nombres.slice(2).join(' ') || '';
     
     // Campo editable
-    document.getElementById('correo_electronico').value = data.correo_electronico;
+    document.getElementById('correo_electronico').value = data.correo_electronico || '';
     
     // Limpiar contraseñas
     document.getElementById('contrasena').value = '';
     document.getElementById('contrasena_confirmar').value = '';
 }
-// Función para mostrar alertas personalizadas
+
 function mostrarAlerta(mensaje, tipo) {
     const alertDiv = document.getElementById('alertMessage');
     if (!alertDiv) return;
@@ -282,26 +350,6 @@ function mostrarAlerta(mensaje, tipo) {
         alertDiv.classList.remove('show');
     }, 5000);
 }
-
-// Función para limpiar el formulario
-function limpiarFormulario() {
-    document.getElementById('updateForm').reset();
-    document.getElementById('updateForm').classList.remove('active');
-    document.getElementById('curp_busqueda').value = '';
-    
-    const alertDiv = document.getElementById('alertMessage');
-    if (alertDiv) alertDiv.classList.remove('show');
-}
-
-// Función para cancelar y volver
-function cancelar() {
-    if (confirm('¿Desea cancelar? Los cambios no guardados se perderán.')) {
-        window.location.href = 'index.php';
-    }
-}
-
-
-
 /* =====================================================
    4. ELIMINAR (DELETE)
    ===================================================== */

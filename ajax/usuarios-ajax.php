@@ -26,6 +26,11 @@ switch ($action) {
         echo $controller->buscarUsuario($_POST);
         break;
 
+    case 'verificar-password':
+        $controller = new UsuariosController();
+        echo $controller->verificarPassword($_POST);
+        break;
+
     case 'actualizar-usuario':
         $controller = new UsuariosController();
         echo $controller->actualizarUsuario($_POST);

@@ -124,45 +124,37 @@ class UsuariosModel
 
         return $stmt->execute([$personal['id_personal']]);
     }
-    public function buscarUsuarioPorCurp($curp)
-    {
-        global $pdo;
 
-        $sqlPersonal = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
-                    FROM personal WHERE curp = ?";
-        $stmt = $pdo->prepare($sqlPersonal);
-        $stmt->execute([$curp]);
-        $personal = $stmt->fetch(PDO::FETCH_ASSOC);
+public function buscarUsuarioPorCurp($curp)
+{
+    global $pdo;
 
-        if (!$personal) {
-            return false;
-        }
+    // Buscar personal por CURP
+    $sqlPersonal = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
+                FROM personal WHERE curp = ?";
+    $stmt = $pdo->prepare($sqlPersonal);
+    $stmt->execute([$curp]);
+    $personal = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $sqlUsuario = "SELECT id_usuario, nombre_usuario, correo_electronico, identificador_de_rh
-                   FROM usuarios WHERE identificador_de_rh = ?";
-        $stmt = $pdo->prepare($sqlUsuario);
-        $stmt->execute([$personal['id_personal']]);
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$usuario) {
-            return false;
-        }
-
-        return array_merge($usuario, $personal);
+    if (!$personal) {
+        return false;
     }
 
-    public function obtenerTodoPersonal()
-    {
-        global $pdo;
+    // Buscar usuario asociado a ese personal
+    $sqlUsuario = "SELECT id_usuario, nombre_usuario, correo_electronico, identificador_de_rh
+               FROM usuarios WHERE identificador_de_rh = ?";
+    $stmt = $pdo->prepare($sqlUsuario);
+    $stmt->execute([$personal['id_personal']]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $sql = "SELECT id_personal, nombre_personal, apellido_paterno, apellido_materno, curp
-            FROM personal ORDER BY nombre_personal";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!$usuario) {
+        // No hay usuario asociado a este personal
+        return false;
     }
 
+    // Retornar datos combinados
+    return array_merge($usuario, $personal);
+}
     public function actualizarUsuario($id_usuario, $curp_nueva, $nombre_usuario, $correo, $id_personal, $password = null)
     {
         global $pdo;
@@ -196,4 +188,15 @@ class UsuariosModel
             return false;
         }
     }
+    public function obtenerPasswordUsuario($id_usuario)
+{
+    global $pdo;
+
+    $sql = "SELECT contrasena FROM usuarios WHERE id_usuario = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id_usuario]);
+    
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result ? $result['contrasena'] : null;
+}
 }
