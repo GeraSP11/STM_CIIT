@@ -181,8 +181,12 @@ function consultarPersonal() {
 
 // Buscar personal usando apiRequest + alertas personalizadas
 function buscarPersonalPorCurp(curp) {
-    if (!curp || curp.length !== 18) {
-        alerta("CURP inválida", "Debe ingresar 18 caracteres.", "error");
+    curp = curp.trim().toUpperCase();
+    
+    const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/;
+    
+    if (!curp || !curpRegex.test(curp)) {
+        alerta("CURP inválida", "Debe ingresar una CURP válida de 18 caracteres con formato correcto.", "error");
         return;
     }
 
@@ -227,20 +231,51 @@ function actualizarPersonal() {
     const form = document.getElementById('updateForm');
 
     const id = document.getElementById('id_personal').value;
-    const curp = document.getElementById('curp').value.trim();
+    const curp = document.getElementById('curp').value.trim().toUpperCase();
     const nombre = document.getElementById('nombre_personal').value.trim();
     const apellidoPaterno = document.getElementById('apellido_paterno').value.trim();
+    const apellidoMaterno = document.getElementById('apellido_materno').value.trim();
     const cargo = document.getElementById('cargo').value;
     const afiliacion = document.getElementById('afiliacion_laboral').value;
 
+    // Validar campos obligatorios
     if (!id || !curp || !nombre || !apellidoPaterno || !cargo || !afiliacion) {
         alerta("Campos incompletos", "Debe llenar todos los campos obligatorios.", "warning");
         return;
     }
 
-    if (curp.length !== 18) {
-        alerta("CURP inválida", "La CURP debe tener exactamente 18 caracteres.", "warning");
+    // Validar formato de CURP
+    const curpRegex = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$/;
+    if (!curpRegex.test(curp)) {
+        alerta("CURP inválida", "El formato de la CURP no es válido. Debe tener 18 caracteres con formato correcto.", "warning");
         return;
+    }
+
+    // Validar formato de nombre (solo letras, espacios, acentos y ñ)
+    const nombreRegex = /^[A-ZÁÉÍÓÚÑa-záéíóúñ\s]+$/;
+    if (!nombreRegex.test(nombre)) {
+        alerta("Nombre inválido", "El nombre solo puede contener letras, espacios y acentos.", "warning");
+        return;
+    }
+
+    // Validar formato de apellido paterno
+    if (!nombreRegex.test(apellidoPaterno)) {
+        alerta("Apellido paterno inválido", "El apellido paterno solo puede contener letras, espacios y acentos.", "warning");
+        return;
+    }
+
+    // Validar apellido materno (si existe)
+    if (apellidoMaterno && !nombreRegex.test(apellidoMaterno)) {
+        alerta("Apellido materno inválido", "El apellido materno solo puede contener letras, espacios y acentos.", "warning");
+        return;
+    }
+
+    // Actualizar campos con formato correcto
+    document.getElementById('curp').value = curp;
+    document.getElementById('nombre_personal').value = nombre;
+    document.getElementById('apellido_paterno').value = apellidoPaterno;
+    if (apellidoMaterno) {
+        document.getElementById('apellido_materno').value = apellidoMaterno;
     }
 
     apiRequest("actualizar-personal", form)
@@ -254,7 +289,6 @@ function actualizarPersonal() {
             alerta("Error", "No se pudo actualizar el personal.", "error");
         });
 }
-
 
 function limpiarFormulario() {
     document.getElementById('updateForm').reset();
