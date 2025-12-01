@@ -14,12 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
         configurarRegistroProductos();
     }
 
-    // ACTUALIZAR PRODUCTOS
+    // ACTUALIZAR PRODUCTOS - Usar las mismas funciones con IDs diferentes
     if (document.getElementById("buscador_producto")) {
+        cargarTiposEmbalaje("tipo_de_embalaje");      // Nota: usa "tipo_DE_embalaje"
+        cargarTiposMercancia("tipo_de_mercancia");    // Nota: usa "tipo_DE_mercancia"
+        cargarLocalidades("ubicacion_producto");
         configurarActualizarProducto();
     }
 
-    // ELIMINAR PRODUCTOS - Detectar por el input de búsqueda
+    // ELIMINAR PRODUCTOS
     if (document.getElementById("producto_input")) {
         configurarEliminarProducto();
     }
@@ -57,10 +60,14 @@ const tiposMercancia = [
 /********************************************
  *      CARGA DE SELECTS (EMBALAJE / MERCANCÍA / LOCALIDADES)
  ********************************************/
-
-function cargarTiposEmbalaje() {
-    const select = document.getElementById("tipo_embalaje");
+function cargarTiposEmbalaje(selectId = "tipo_embalaje") {
+    const select = document.getElementById(selectId);
     if (!select) return;
+
+    // Limpiar si ya tiene opciones
+    if (select.options.length > 1) {
+        select.innerHTML = '<option value="">Seleccione un tipo</option>';
+    }
 
     tiposEmbalaje.forEach(tipo => {
         const opt = document.createElement("option");
@@ -70,9 +77,14 @@ function cargarTiposEmbalaje() {
     });
 }
 
-function cargarTiposMercancia() {
-    const select = document.getElementById("tipo_mercancia");
+function cargarTiposMercancia(selectId = "tipo_mercancia") {
+    const select = document.getElementById(selectId);
     if (!select) return;
+
+    // Limpiar si ya tiene opciones
+    if (select.options.length > 1) {
+        select.innerHTML = '<option value="">Seleccione un tipo</option>';
+    }
 
     tiposMercancia.forEach(tipo => {
         const opt = document.createElement("option");
@@ -82,8 +94,7 @@ function cargarTiposMercancia() {
     });
 }
 
-/* Reutilizable para filtros: carga en cualquier select de localidades dado su id */
-function cargarLocalidadesEnSelect(selectId = "ubicacion_producto") {
+function cargarLocalidades(selectId = "ubicacion_producto") {
     const select = document.getElementById(selectId);
     if (!select) return;
 
@@ -91,24 +102,24 @@ function cargarLocalidadesEnSelect(selectId = "ubicacion_producto") {
         .then(r => r.json())
         .then(data => {
             if (data.error) {
-                if (typeof alerta === "function") alerta("Error", data.error, "error");
+                alerta("Error", data.error, "error");
                 return;
             }
-            // mantener la primera opción si existe
-            // limpiar existencias (excepto placeholder)
-            // si quieres mantener placeholder deja innerHTML con la primera opción
-            const placeholder = select.querySelector('option[value=""]') ? select.querySelector('option[value=""]').outerHTML : '<option value="">Seleccione una localidad</option>';
-            select.innerHTML = placeholder;
+
+            // Limpiar si ya tiene opciones
+            if (select.options.length > 1) {
+                select.innerHTML = '<option value="">Seleccione una localidad</option>';
+            }
+
             data.forEach(loc => {
                 const opt = document.createElement("option");
                 opt.value = loc.id_localidad;
-                opt.textContent = `${loc.nombre_centro_trabajo} (${loc.estado || ''})`;
+                opt.textContent = `${loc.nombre_centro_trabajo} (${loc.estado})`;
                 select.appendChild(opt);
             });
         })
         .catch(err => console.error("Error cargando localidades:", err));
 }
-
 
 /********************************************
  *     REGISTRO DE PRODUCTOS (CRUD)
@@ -411,16 +422,15 @@ function cargarProductoEnFormulario(idProducto) {
                 alerta("Error", data.error, "error");
                 return;
             }
-
-            // Llenar todos los campos del formulario
+            
+            // Llenar todos los campos del formulario INCLUYENDO largo y ancho
             document.getElementById("id_producto").value = data.id_producto || "";
             document.getElementById("nombre_producto").value = data.nombre_producto || "";
             document.getElementById("cajas_por_cama").value = data.cajas_por_cama || "";
             document.getElementById("peso").value = data.peso || "";
             document.getElementById("altura").value = data.altura || "";
-            // largo y ancho se dejan vacíos para que el usuario los ingrese si quiere recalcular
-            document.getElementById("largo").value = "";
-            document.getElementById("ancho").value = "";
+            document.getElementById("largo").value = data.largo || "";  // AHORA SÍ se carga
+            document.getElementById("ancho").value = data.ancho || "";  // AHORA SÍ se carga
             document.getElementById("peso_volumetrico").value = data.peso_volumetrico || "";
             document.getElementById("tipo_de_embalaje").value = data.tipo_de_embalaje || "";
             document.getElementById("ubicacion_producto").value = data.ubicacion_producto || "";
@@ -428,13 +438,14 @@ function cargarProductoEnFormulario(idProducto) {
             document.getElementById("peso_soportado").value = data.peso_soportado || "";
             document.getElementById("unidades_existencia").value = data.unidades_existencia || "";
             document.getElementById("tipo_de_mercancia").value = data.tipo_de_mercancia || "";
-
+            document.getElementById("observaciones").value = data.observaciones || "";  // NUEVO
+            
             // Mostrar botones de acción
             document.querySelector(".botones").style.display = "flex";
             document.querySelector(".botones").style.justifyContent = "center";
             document.querySelector(".botones").style.gap = "20px";
             document.querySelector(".botones").style.marginTop = "30px";
-
+            
             alerta("Éxito", "Producto cargado. Puede editar los campos.", "success");
         })
         .catch(err => {
@@ -458,41 +469,150 @@ function cargarProductoEnFormulario(idProducto) {
     }
 }*/
 
+function soloNumeros(input) {
+    input.value = input.value.replace(/[^0-9.]/g, '');
+}
+
 // Función para guardar cambios del producto
 function guardarProducto() {
     const idProducto = document.getElementById("id_producto").value;
-
+    
     if (!idProducto) {
         alerta("Error", "No hay ningún producto seleccionado", "error");
         return;
     }
-
-    // Crear objeto con los datos del formulario (SIN largo y ancho)
-    const datos = {
-        id_producto: idProducto,
-        nombre_producto: document.getElementById("nombre_producto").value.trim(),
-        cajas_por_cama: document.getElementById("cajas_por_cama").value,
-        peso: document.getElementById("peso").value,
-        altura: document.getElementById("altura").value,
-        peso_volumetrico: document.getElementById("peso_volumetrico").value,
-        tipo_de_embalaje: document.getElementById("tipo_de_embalaje").value,
-        ubicacion_producto: document.getElementById("ubicacion_producto").value,
-        camas_por_pallet: document.getElementById("camas_por_pallet").value,
-        peso_soportado: document.getElementById("peso_soportado").value,
-        unidades_existencia: document.getElementById("unidades_existencia").value,
-        tipo_de_mercancia: document.getElementById("tipo_de_mercancia").value
-    };
-
-    // Validar campos obligatorios
-    if (!datos.nombre_producto || !datos.ubicacion_producto) {
-        alerta("Error", "Complete todos los campos obligatorios", "error");
+    
+    // Obtener todos los valores
+    const nombreProducto = document.getElementById("nombre_producto").value.trim();
+    const ubicacion = document.getElementById("ubicacion_producto").value;
+    const tipoEmbalaje = document.getElementById("tipo_de_embalaje").value;
+    const tipoMercancia = document.getElementById("tipo_de_mercancia").value;
+    
+    const peso = document.getElementById("peso").value;
+    const altura = document.getElementById("altura").value;
+    const largo = document.getElementById("largo").value;
+    const ancho = document.getElementById("ancho").value;
+    const pesoVolumetrico = document.getElementById("peso_volumetrico").value;
+    
+    const cajasPorCama = document.getElementById("cajas_por_cama").value;
+    const camasPorPallet = document.getElementById("camas_por_pallet").value;
+    const pesoSoportado = document.getElementById("peso_soportado").value;
+    const unidadesExistencia = document.getElementById("unidades_existencia").value;
+    
+    // ========== VALIDACIONES ==========
+    
+    // 1. Campos obligatorios
+    if (!nombreProducto) {
+        alerta("Error", "El nombre del producto es obligatorio", "error");
+        document.getElementById("nombre_producto").focus();
         return;
     }
-
+    
+    if (!ubicacion) {
+        alerta("Error", "Debe seleccionar una ubicación", "error");
+        document.getElementById("ubicacion_producto").focus();
+        return;
+    }
+    
+    if (!tipoEmbalaje) {
+        alerta("Error", "Debe seleccionar un tipo de embalaje", "error");
+        document.getElementById("tipo_de_embalaje").focus();
+        return;
+    }
+    
+    if (!tipoMercancia) {
+        alerta("Error", "Debe seleccionar un tipo de mercancía", "error");
+        document.getElementById("tipo_de_mercancia").focus();
+        return;
+    }
+    
+    // 2. Validar peso (si se ingresó, debe ser mayor a 0)
+    if (peso !== '' && parseFloat(peso) <= 0) {
+        alerta("Error", "El peso debe ser mayor a 0", "error");
+        document.getElementById("peso").focus();
+        return;
+    }
+    
+    // 3. Validar dimensiones (si se ingresó alguna, deben ser mayores a 0)
+    if (altura !== '' && parseFloat(altura) <= 0) {
+        alerta("Error", "La altura debe ser mayor a 0", "error");
+        document.getElementById("altura").focus();
+        return;
+    }
+    
+    if (largo !== '' && parseFloat(largo) <= 0) {
+        alerta("Error", "El largo debe ser mayor a 0", "error");
+        document.getElementById("largo").focus();
+        return;
+    }
+    
+    if (ancho !== '' && parseFloat(ancho) <= 0) {
+        alerta("Error", "El ancho debe ser mayor a 0", "error");
+        document.getElementById("ancho").focus();
+        return;
+    }
+    
+    // 4. CRÍTICO: Si hay peso volumétrico calculado, verificar que las 3 dimensiones existan
+    if (pesoVolumetrico !== '' && parseFloat(pesoVolumetrico) > 0) {
+        if (altura === '' || largo === '' || ancho === '' || 
+            parseFloat(altura) <= 0 || parseFloat(largo) <= 0 || parseFloat(ancho) <= 0) {
+            alerta("Error", "Si hay peso volumétrico, debe ingresar altura, largo y ancho válidos (mayores a 0)", "error");
+            return;
+        }
+    }
+    
+    // 5. Validar cajas por cama (si se ingresó, debe ser entero positivo)
+    if (cajasPorCama !== '' && (parseFloat(cajasPorCama) <= 0 || !Number.isInteger(parseFloat(cajasPorCama)))) {
+        alerta("Error", "Cajas por cama debe ser un número entero mayor a 0", "error");
+        document.getElementById("cajas_por_cama").focus();
+        return;
+    }
+    
+    // 6. Validar camas por pallet (si se ingresó, debe ser entero positivo)
+    if (camasPorPallet !== '' && (parseFloat(camasPorPallet) <= 0 || !Number.isInteger(parseFloat(camasPorPallet)))) {
+        alerta("Error", "Camas por pallet debe ser un número entero mayor a 0", "error");
+        document.getElementById("camas_por_pallet").focus();
+        return;
+    }
+    
+    // 7. Validar peso soportado (si se ingresó, debe ser mayor a 0)
+    if (pesoSoportado !== '' && parseFloat(pesoSoportado) <= 0) {
+        alerta("Error", "El peso soportado debe ser mayor a 0", "error");
+        document.getElementById("peso_soportado").focus();
+        return;
+    }
+    
+    // 8. Validar unidades en existencia (si se ingresó, debe ser no negativo)
+    if (unidadesExistencia !== '' && parseFloat(unidadesExistencia) < 0) {
+        alerta("Error", "Las unidades en existencia no pueden ser negativas", "error");
+        document.getElementById("unidades_existencia").focus();
+        return;
+    }
+    
+    // ========== SI PASA TODAS LAS VALIDACIONES, CREAR OBJETO Y GUARDAR ==========
+    
+    const datos = {
+        id_producto: idProducto,
+        nombre_producto: nombreProducto,
+        cajas_por_cama: cajasPorCama,
+        peso: peso,
+        altura: altura,
+        largo: largo,
+        ancho: ancho,
+        peso_volumetrico: pesoVolumetrico,
+        tipo_de_embalaje: tipoEmbalaje,
+        ubicacion_producto: ubicacion,
+        camas_por_pallet: camasPorPallet,
+        peso_soportado: pesoSoportado,
+        unidades_existencia: unidadesExistencia,
+        tipo_de_mercancia: tipoMercancia,
+        observaciones: document.getElementById("observaciones").value.trim()
+    };
+    
     confirmar("¿Actualizar Producto?", "¿Deseas guardar los cambios?")
         .then(r => {
             if (!r.isConfirmed) return;
-
+            
             apiRequestProductos("actualizar_producto", datos)
                 .then(r => r.text())
                 .then(resp => {
@@ -527,7 +647,8 @@ function limpiarFormulario() {
     document.getElementById("peso_soportado").value = "";
     document.getElementById("unidades_existencia").value = "";
     document.getElementById("tipo_de_mercancia").value = "";
-
+    document.getElementById("observaciones").value = "";  // NUEVO
+    
     document.querySelector(".botones").style.display = "none";
     document.getElementById("sugerencias").classList.remove("activo");
 }

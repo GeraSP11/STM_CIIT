@@ -247,78 +247,92 @@ $seccion = 'Actualizar Productos';
         </div>
 
         <div class="form-container">
-            <div class="form-col">
-                <input type="hidden" name="id_producto" id="id_producto">
+    <div class="form-col">
+        <input type="hidden" name="id_producto" id="id_producto">
 
-                <div class="form-group">
-                    <label for="nombre_producto">Nombre del Producto:</label>
-                    <input type="text" id="nombre_producto" name="nombre_producto">
-                </div>
+        <div class="form-group">
+            <label for="nombre_producto">Nombre del Producto:</label>
+            <input type="text" id="nombre_producto" name="nombre_producto">
+        </div>
 
-                <div class="form-group">
-                    <label for="cajas_por_cama">Cajas por Cama:</label>
-                    <input type="number" id="cajas_por_cama" name="cajas_por_cama">
-                </div>
+        <div class="form-group">
+            <label for="cajas_por_cama">Cajas por Cama:</label>
+            <input type="number" id="cajas_por_cama" name="cajas_por_cama" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+        </div>
 
-                <div class="form-group">
-                    <label for="peso">Peso (kg):</label>
-                    <input type="number" id="peso" name="peso" step="0.01">
-                </div>
+        <div class="form-group">
+            <label for="peso">Peso (kg):</label>
+            <input type="number" id="peso" name="peso" step="0.01" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+        </div>
 
-                <div class="form-row-triple">
-                    <div class="form-group">
-                        <label for="altura">Altura (cm):</label>
-                        <input type="number" id="altura" name="altura" step="1" oninput="calcularPesoVolumetrico()">
-                    </div>
-                    <div class="form-group">
-                        <label for="largo">Largo (cm):</label>
-                        <input type="number" id="largo" name="largo" step="1" oninput="calcularPesoVolumetrico()">
-                    </div>
-                    <div class="form-group">
-                        <label for="ancho">Ancho (cm):</label>
-                        <input type="number" id="ancho" name="ancho" step="1" oninput="calcularPesoVolumetrico()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="peso_volumetrico">Peso Volumetrico:</label>
-                    <input type="number" id="peso_volumetrico" name="peso_volumetrico" step="0.01" class="readonly"
-                        readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="tipo_de_embalaje">Tipo de embalaje:</label>
-                    <input type="text" id="tipo_de_embalaje" name="tipo_de_embalaje">
-                </div>
+        <div class="form-row-triple">
+            <div class="form-group">
+                <label for="altura">Altura (m):</label>
+                <input type="number" id="altura" name="altura" step="0.01" oninput="calcularPesoVolumetrico(); soloNumeros(this);">
             </div>
-
-            <div class="form-col">
-                <div class="form-group">
-                    <label for="ubicacion_producto">Ubicación (id_localidad):</label>
-                    <input type="number" id="ubicacion_producto" name="ubicacion_producto">
-                </div>
-
-                <div class="form-group">
-                    <label for="camas_por_pallet">Cajas por Pallet:</label>
-                    <input type="number" id="camas_por_pallet" name="camas_por_pallet">
-                </div>
-
-                <div class="form-group">
-                    <label for="peso_soportado">Peso soportado (Kg):</label>
-                    <input type="number" id="peso_soportado" name="peso_soportado" step="0.01">
-                </div>
-
-                <div class="form-group" style="margin-top: 97px;">
-                    <label for="unidades_existencia">Unidades en existencia:</label>
-                    <input type="number" id="unidades_existencia" name="unidades_existencia" step="0.01">
-                </div>
-
-                <div class="form-group">
-                    <label for="tipo_de_mercancia">Tipo de mercancía:</label>
-                    <input type="text" id="tipo_de_mercancia" name="tipo_de_mercancia">
-                </div>
+            <div class="form-group">
+                <label for="largo">Largo (m):</label>
+                <input type="number" id="largo" name="largo" step="0.01" oninput="calcularPesoVolumetrico(); soloNumeros(this);">
+            </div>
+            <div class="form-group">
+                <label for="ancho">Ancho (m):</label>
+                <input type="number" id="ancho" name="ancho" step="0.01" oninput="calcularPesoVolumetrico(); soloNumeros(this);">
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="peso_volumetrico">Peso Volumétrico (kg):</label>
+            <input type="number" id="peso_volumetrico" name="peso_volumetrico" step="0.01" class="readonly" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="tipo_de_embalaje">Tipo de embalaje:</label>
+            <select id="tipo_de_embalaje" name="tipo_de_embalaje">
+                <option value="">Seleccione un tipo</option>
+                <!-- Las opciones se cargarán dinámicamente -->
+            </select>
+        </div>
+    </div>
+
+    <div class="form-col">
+        <div class="form-group">
+            <label for="ubicacion_producto">Ubicación (Localidad):</label>
+            <select id="ubicacion_producto" name="ubicacion_producto">
+                <option value="">Seleccione una localidad</option>
+                <!-- Las opciones se cargarán dinámicamente -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="camas_por_pallet">Camas por Pallet:</label>
+            <input type="number" id="camas_por_pallet" name="camas_por_pallet" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+        </div>
+
+        <div class="form-group">
+            <label for="peso_soportado">Peso soportado (Kg):</label>
+            <input type="number" id="peso_soportado" name="peso_soportado" step="0.01" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+        </div>
+
+        <div class="form-group">
+            <label for="unidades_existencia">Unidades en existencia:</label>
+            <input type="number" id="unidades_existencia" name="unidades_existencia" step="0.01" oninput="this.value = this.value.replace(/[^0-9.]/g, '');">
+        </div>
+
+        <div class="form-group">
+            <label for="tipo_de_mercancia">Tipo de mercancía:</label>
+            <select id="tipo_de_mercancia" name="tipo_de_mercancia">
+                <option value="">Seleccione un tipo</option>
+                <!-- Las opciones se cargarán dinámicamente -->
+            </select>
+        </div>
+
+        <!-- NUEVO CAMPO: Observaciones -->
+        <div class="form-group">
+            <label for="observaciones">Observaciones:</label>
+            <textarea id="observaciones" name="observaciones" rows="3" style="padding: 10px 15px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 0.95rem; background-color: #e8e8e8; resize: vertical; font-family: inherit;"></textarea>
+        </div>
+    </div>
+</div>
 
         <div class="botones">
             <button class="btn-guardar" onclick="guardarProducto()">Guardar Cambios</button>

@@ -189,37 +189,42 @@ class ProductosModel
     public function actualizarProducto($data)
     {
         global $pdo;
-
-        // SQL sin largo y ancho
+        
+        // SQL CON largo, ancho y observaciones
         $sql = "UPDATE productos SET 
-            nombre_producto = ?,
-            peso = ?,
-            altura = ?,
-            cajas_por_cama = ?,
-            camas_por_pallet = ?,
-            peso_soportado = ?,
-            peso_volumetrico = ?,
-            ubicacion_producto = ?,
-            tipo_de_embalaje = ?,
-            tipo_de_mercancia = ?,
-            unidades_existencia = ?
-            WHERE id_producto = ?";
-
+                nombre_producto = ?,
+                peso = ?,
+                altura = ?,
+                largo = ?,
+                ancho = ?,
+                cajas_por_cama = ?,
+                camas_por_pallet = ?,
+                peso_soportado = ?,
+                peso_volumetrico = ?,
+                ubicacion_producto = ?,
+                tipo_de_embalaje = ?,
+                tipo_de_mercancia = ?,
+                unidades_existencia = ?,
+                observaciones = ?
+                WHERE id_producto = ?";
+        
         $stmt = $pdo->prepare($sql);
-
-        // Execute sin largo y ancho
+        
         return $stmt->execute([
             $data["nombre_producto"],
-            $data["peso"],
-            $data["altura"],
-            $data["cajas_por_cama"],
-            $data["camas_por_pallet"],
-            $data["peso_soportado"],
-            $data["peso_volumetrico"],
+            $data["peso"] ?? null,
+            $data["altura"] ?? null,
+            $data["largo"] ?? null,  // NUEVO - Ahora SÍ se guarda
+            $data["ancho"] ?? null,  // NUEVO - Ahora SÍ se guarda
+            $data["cajas_por_cama"] ?? null,
+            $data["camas_por_pallet"] ?? null,
+            $data["peso_soportado"] ?? null,
+            $data["peso_volumetrico"] ?? null,
             $data["ubicacion_producto"],
             $data["tipo_de_embalaje"],
             $data["tipo_de_mercancia"],
-            $data["unidades_existencia"],
+            $data["unidades_existencia"] ?? null,
+            $data["observaciones"] ?? null,  // NUEVO
             $data["id_producto"]
         ]);
     }
