@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formRegistro) {
         cargarTiposEmbalaje();
         cargarTiposMercancia();
-        cargarLocalidadesEnSelect();
+        cargarLocalidades("ubicacion_producto");
         initValidacionesProductos()
         configurarRegistroProductos();
     }
@@ -208,7 +208,7 @@ function configurarConsultaProductos() {
             selectTipo.appendChild(opt);
         });
     }
-    cargarLocalidadesEnSelect("filter_ubicacion");
+    cargarLocalidades("filter_ubicacion");
 
     // función para mostrar/ocultar filtros secundarios
     function onFiltroChange() {
