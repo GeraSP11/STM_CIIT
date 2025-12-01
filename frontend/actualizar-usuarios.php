@@ -237,9 +237,6 @@ $seccion = 'Actualizar Usuarios';
             <li class="breadcrumb-item">
                 <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
             </li>
-            <li class="breadcrumb-item">
-                <a href="index.php" style="color: #4D2132;">Inicio</a>
-            </li>
             <li class="breadcrumb-item active" aria-current="page">
                 <?php echo $seccion; ?>
             </li>
