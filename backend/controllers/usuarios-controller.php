@@ -73,10 +73,10 @@ class UsuariosController
 
         // Formato JSON que tu JS espera
         return json_encode([
-            "usuario"         => $usuario['nombre_usuario'],
+            "usuario" => $usuario['nombre_usuario'],
             "nombre_completo" => $nombreCompleto,
-            "correo"          => $usuario['correo_electronico'],
-            "clave_personal"  => $usuario['curp']
+            "correo" => $usuario['correo_electronico'],
+            "clave_personal" => $usuario['curp']
         ]);
     }
     //Eliminar Usuarios
@@ -105,55 +105,56 @@ class UsuariosController
         }
     }
 
-public function buscarUsuario($data)
-{
-    $curp = trim($data['curp'] ?? '');
+    public function buscarUsuario($data)
+    {
+        $curp = trim($data['curp'] ?? '');
 
-    if (empty($curp)) {
+        if (empty($curp)) {
+            return json_encode([
+                "error" => true,
+                "message" => "La CURP es obligatoria"
+            ]);
+        }
+
+        $model = new UsuariosModel();
+        $usuario = $model->buscarUsuarioPorCurp($curp);
+
+        if (!$usuario) {
+            return json_encode([
+                "error" => true,
+                "message" => "No se encontró ningún usuario con esa CURP"
+            ]);
+        }
+
+        $nombreCompleto = $usuario['nombre_personal'] . " " .
+            $usuario['apellido_paterno'] . " " .
+            $usuario['apellido_materno'];
+
+        // 🔧 SOLUCIÓN: Si nombre_usuario está vacío, usar la CURP
+        $nombreUsuario = !empty(trim($usuario['nombre_usuario'] ?? ''))
+            ? $usuario['nombre_usuario']
+            : $usuario['curp'];
+
         return json_encode([
-            "error" => true,
-            "message" => "La CURP es obligatoria"
+            "error" => false,
+            "id_usuario" => $usuario['id_usuario'],
+            "nombre_usuario" => $nombreUsuario,  // ✅ Siempre tendrá valor
+            "correo_electronico" => $usuario['correo_electronico'],
+            "curp_actual" => $usuario['curp'],
+            "id_personal" => $usuario['identificador_de_rh'],
+            "nombre_completo" => $nombreCompleto
         ]);
     }
-
-    $model = new UsuariosModel();
-    $usuario = $model->buscarUsuarioPorCurp($curp);
-
-    if (!$usuario) {
-        return json_encode([
-            "error" => true,
-            "message" => "No se encontró ningún usuario con esa CURP"
-        ]);
-    }
-
-    $nombreCompleto = $usuario['nombre_personal'] . " " .
-        $usuario['apellido_paterno'] . " " .
-        $usuario['apellido_materno'];
-
-    // 🔧 SOLUCIÓN: Si nombre_usuario está vacío, usar la CURP
-    $nombreUsuario = !empty(trim($usuario['nombre_usuario'] ?? '')) 
-        ? $usuario['nombre_usuario'] 
-        : $usuario['curp'];
-
-    return json_encode([
-        "error" => false,
-        "id_usuario" => $usuario['id_usuario'],
-        "nombre_usuario" => $nombreUsuario,  // ✅ Siempre tendrá valor
-        "correo_electronico" => $usuario['correo_electronico'],
-        "curp_actual" => $usuario['curp'],
-        "id_personal" => $usuario['identificador_de_rh'],
-        "nombre_completo" => $nombreCompleto
-    ]);
-}
 
     public function actualizarUsuario($data)
     {
-        $id_usuario = trim($data['id_usuario'] ?? '');
-        $curp = trim($data['curp'] ?? '');
-        $nombre_usuario = trim($data['nombre_usuario'] ?? '');
-        $correo = trim($data['correo_electronico'] ?? '');
-        $id_personal = trim($data['identificador_de_rh'] ?? '');
-        $password = trim($data['contrasena'] ?? '');
+        $id_usuario = trim($_POST['id_usuario'] ?? '');
+        $curp = trim($_POST['curp'] ?? '');
+        $nombre_usuario = trim($_POST['nombre_usuario'] ?? '');
+        $correo = trim($_POST['correo_electronico'] ?? '');
+        $id_personal = trim($_POST['identificador_de_rh'] ?? '');
+        $password = trim($_POST['contrasena'] ?? '');
+
 
         if (
             empty($id_usuario) || empty($curp) || empty($nombre_usuario) ||
@@ -203,38 +204,38 @@ public function buscarUsuario($data)
         return json_encode($model->obtenerTodoPersonal());
     }
     public function verificarPassword($data)
-{
-    $id_usuario = trim($data['id_usuario'] ?? '');
-    $password_actual = trim($data['password_actual'] ?? '');
+    {
+        $id_usuario = trim($data['id_usuario'] ?? '');
+        $password_actual = trim($data['password_actual'] ?? '');
 
-    if (empty($id_usuario) || empty($password_actual)) {
-        return json_encode([
-            "error" => true,
-            "message" => "Datos incompletos"
-        ]);
+        if (empty($id_usuario) || empty($password_actual)) {
+            return json_encode([
+                "error" => true,
+                "message" => "Datos incompletos"
+            ]);
+        }
+
+        $model = new UsuariosModel();
+        $passwordGuardada = $model->obtenerPasswordUsuario($id_usuario);
+
+        if ($passwordGuardada === null) {
+            return json_encode([
+                "error" => true,
+                "message" => "Usuario no encontrado"
+            ]);
+        }
+
+        // COMPARACIÓN DIRECTA - Igual que tu login
+        if ($password_actual === $passwordGuardada) {
+            return json_encode([
+                "error" => false,
+                "message" => "Contraseña correcta"
+            ]);
+        } else {
+            return json_encode([
+                "error" => true,
+                "message" => "Contraseña incorrecta"
+            ]);
+        }
     }
-
-    $model = new UsuariosModel();
-    $passwordGuardada = $model->obtenerPasswordUsuario($id_usuario);
-
-    if ($passwordGuardada === null) {
-        return json_encode([
-            "error" => true,
-            "message" => "Usuario no encontrado"
-        ]);
-    }
-
-    // COMPARACIÓN DIRECTA - Igual que tu login
-    if ($password_actual === $passwordGuardada) {
-        return json_encode([
-            "error" => false,
-            "message" => "Contraseña correcta"
-        ]);
-    } else {
-        return json_encode([
-            "error" => true,
-            "message" => "Contraseña incorrecta"
-        ]);
-    }
-}
 }

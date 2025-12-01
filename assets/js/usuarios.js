@@ -97,8 +97,8 @@ function configurarConsultaUsuarios() {
         }
 
         apiRequestUsuarios("consultar-usuario", { criterio })
-            
-        .then(r => r.json())
+
+            .then(r => r.json())
             .then(data => {
 
                 if (!data || data.error) {
@@ -137,35 +137,35 @@ function configurarConsultaUsuarios() {
 function configurarActualizacionUsuarios() {
     const formActualizar = document.getElementById("updateForm");
     if (!formActualizar) return;
-    
+
     const inputCurpBusqueda = document.getElementById("curp_busqueda");
     const btnBuscar = document.getElementById("btnBuscarUsuario");
-    
+
     // Buscar con Enter
     if (inputCurpBusqueda) {
-        inputCurpBusqueda.addEventListener('keypress', function(e) {
+        inputCurpBusqueda.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 buscarUsuarioActualizar();
             }
         });
     }
-    
+
     // Buscar con botón
     if (btnBuscar) {
-        btnBuscar.addEventListener('click', function(e) {
+        btnBuscar.addEventListener('click', function (e) {
             e.preventDefault();
             buscarUsuarioActualizar();
         });
     }
-    
+
     // Submit del formulario
-    formActualizar.addEventListener('submit', async function(e) {
+    formActualizar.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         const password = document.getElementById('contrasena').value;
         const passwordConfirm = document.getElementById('contrasena_confirmar').value;
-        
+
         // Validar contraseñas solo si se ingresó alguna
         if (password !== '' || passwordConfirm !== '') {
             if (password !== passwordConfirm) {
@@ -177,7 +177,7 @@ function configurarActualizacionUsuarios() {
                 return;
             }
         }
-        
+
         // Pedir contraseña actual del usuario
         const result = await Swal.fire({
             title: 'Confirmar cambios',
@@ -199,20 +199,20 @@ function configurarActualizacionUsuarios() {
                     Swal.showValidationMessage('Debe ingresar la contraseña actual');
                     return false;
                 }
-                
+
                 try {
                     const response = await apiRequestUsuarios('verificar-password', {
                         id_usuario: document.getElementById('id_usuario').value,
                         password_actual: passwordActual
                     });
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.error) {
                         Swal.showValidationMessage(data.message || 'Contraseña incorrecta');
                         return false;
                     }
-                    
+
                     return true;
                 } catch (error) {
                     console.error('Error:', error);
@@ -222,7 +222,7 @@ function configurarActualizacionUsuarios() {
             },
             allowOutsideClick: () => !Swal.isLoading()
         });
-        
+
         if (result.isConfirmed) {
             actualizarUsuarioFinal();
         }
@@ -230,87 +230,50 @@ function configurarActualizacionUsuarios() {
 }
 
 function actualizarUsuarioFinal() {
-    // Crear FormData y agregar manualmente todos los campos necesarios
-    const formData = new FormData();
-    
-    // Obtener valores y validar que existan
-    const id_usuario = document.getElementById('id_usuario')?.value || '';
-    const curp = document.getElementById('curp')?.value || '';
-    const nombre_usuario = document.getElementById('nombre_usuario')?.value || '';
-    const identificador_de_rh = document.getElementById('identificador_de_rh')?.value || '';
-    const correo_electronico = document.getElementById('correo_electronico')?.value || '';
-    const contrasena = document.getElementById('contrasena')?.value || '';
-    
-    // Debug: Verificar que los campos ocultos tengan valores
-    console.log('Datos a enviar:', {
-        id_usuario,
-        curp,
-        nombre_usuario,
-        identificador_de_rh,
-        correo_electronico,
-        contrasena: contrasena ? '***' : '(vacío)'
-    });
-    
-    // Validar campos obligatorios
-    if (!id_usuario || !curp || !nombre_usuario || !identificador_de_rh || !correo_electronico) {
-        alerta("Error", "Faltan datos obligatorios. Por favor, busque el usuario nuevamente.", "error");
-        return;
+    const formActualizar = document.getElementById('updateForm');
+
+    // Debug: mostrar valores en consola antes de enviar
+    console.log('FormData a enviar:');
+    for (const [key, value] of new FormData(formActualizar)) {
+        console.log(key, value);
     }
-    
-    // Agregar todos los campos al FormData
-    formData.append('id_usuario', id_usuario);
-    formData.append('curp', curp);
-    formData.append('nombre_usuario', nombre_usuario);
-    formData.append('identificador_de_rh', identificador_de_rh);
-    formData.append('correo_electronico', correo_electronico);
-    formData.append('contrasena', contrasena);
-    formData.append('action', 'actualizar-usuario');
-    
-    // Hacer la petición con la ruta correcta
-    fetch('/ajax/usuarios-ajax.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(r => r.text())
-    .then(resp => {
-        console.log('Respuesta del servidor:', resp); // Debug
-        manejarRespuestaCRUD(
+
+    apiRequestUsuarios("actualizar-usuario", formActualizar)
+        .then(r => r.text())
+        .then(resp => manejarRespuestaCRUD(
             resp,
             "Usuario actualizado correctamente.",
             "actualizar-usuarios.php"
-        );
-    })
-    .catch(err => {
-        console.error('Error en la petición:', err);
-        alerta("Error", "Ocurrió un error al actualizar el usuario.", "error");
-    });
+        ))
+        .catch(() => alerta("Error", "Ocurrió un error al actualizar el usuario.", "error"));
 }
+
 function buscarUsuarioActualizar() {
     const curp = document.getElementById('curp_busqueda').value.trim().toUpperCase();
     const formUpdate = document.getElementById('updateForm');
-    
+
     if (!curp) {
         mostrarAlerta('Ingrese una CURP para buscar', 'alert-info');
         return;
     }
-    
+
     if (curp.length !== 18) {
         mostrarAlerta('La CURP debe tener 18 caracteres', 'alert-error');
         return;
     }
-    
+
     apiRequestUsuarios('buscar-usuario', { curp })
         .then(r => r.json())
         .then(data => {
             if (data.error) {
-                mostrarAlerta(data.message, 'alert-error');
+                alerta(data.message, 'error');
                 formUpdate.classList.remove('active');
                 return;
             }
-            
+
             llenarFormularioActualizar(data);
             formUpdate.classList.add('active');
-            mostrarAlerta('Usuario encontrado. Puede editar los datos.', 'alert-success');
+            alerta('Actualizar usuario', 'Usuario encontrado. Puede editar los datos.', 'success');
         })
         .catch(err => {
             console.error('Error:', err);
@@ -319,33 +282,36 @@ function buscarUsuarioActualizar() {
 }
 
 function llenarFormularioActualizar(data) {
-    // Campos ocultos
+
+    // Campos ocultos requeridos
     document.getElementById('id_usuario').value = data.id_usuario || '';
     document.getElementById('curp').value = data.curp_actual || '';
     document.getElementById('nombre_usuario').value = data.nombre_usuario || '';
     document.getElementById('identificador_de_rh').value = data.id_personal || '';
-    
-    // Campos de solo lectura
-    const nombres = data.nombre_completo.split(' ');
-    document.getElementById('nombre_personal').value = nombres[0] || '';
-    document.getElementById('apellido_paterno').value = nombres[1] || '';
-    document.getElementById('apellido_materno').value = nombres.slice(2).join(' ') || '';
-    
-    // Campo editable
+
+    // Partes del nombre completo
+    const partes = data.nombre_completo.trim().split(' ');
+
+    document.getElementById('nombre_personal').value = partes[0] || '';
+    document.getElementById('apellido_paterno').value = partes[1] || '';
+    document.getElementById('apellido_materno').value = partes.slice(2).join(' ') || '';
+
+    // Correo editable
     document.getElementById('correo_electronico').value = data.correo_electronico || '';
-    
-    // Limpiar contraseñas
+
+    // Contraseñas siempre vacías
     document.getElementById('contrasena').value = '';
     document.getElementById('contrasena_confirmar').value = '';
 }
 
+
 function mostrarAlerta(mensaje, tipo) {
     const alertDiv = document.getElementById('alertMessage');
     if (!alertDiv) return;
-    
+
     alertDiv.className = `alert ${tipo} show`;
     alertDiv.textContent = mensaje;
-    
+
     setTimeout(() => {
         alertDiv.classList.remove('show');
     }, 5000);
@@ -355,29 +321,29 @@ function mostrarAlerta(mensaje, tipo) {
    ===================================================== */
 
 function configurarEliminacionUsuarios() {
-    
+
     const formEliminar = document.getElementById("formEliminarUsuario");
     if (!formEliminar) return;
-    
+
     const inputCurp = document.getElementById("input_curp_eliminar");
     const btnBuscar = formEliminar.querySelector('button[type="submit"]');
-    
+
     if (!btnBuscar || !inputCurp) return;
-    
+
     btnBuscar.addEventListener("click", function (e) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         const curp = inputCurp.value.trim();
-        
+
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
             return;
         }
-        
+
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
                 if (!r.isConfirmed) return;
-                
+
                 apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(
@@ -403,9 +369,9 @@ function cargarPersonalParaSelect() {
         .then(data => {
             const select = document.getElementById('identificador_de_rh');
             if (!select) return;
-            
+
             select.innerHTML = '<option value="">Seleccione una persona</option>';
-            
+
             data.forEach(p => {
                 const nombreCompleto = `${p.nombre_personal} ${p.apellido_paterno} ${p.apellido_materno} (${p.curp})`;
                 const option = document.createElement('option');
@@ -417,77 +383,17 @@ function cargarPersonalParaSelect() {
         .catch(err => console.error('Error al cargar personal:', err));
 }
 
-// Función para buscar usuario por CURP
-function buscarUsuarioActualizar() {
-    const curp = document.getElementById('curp_busqueda').value.trim().toUpperCase();
-    const formUpdate = document.getElementById('updateForm');
-    
-    if (!curp) {
-        mostrarAlerta('Ingrese una CURP para buscar', 'alert-info');
-        return;
-    }
-    
-    if (curp.length !== 18) {
-        mostrarAlerta('La CURP debe tener 18 caracteres', 'alert-error');
-        return;
-    }
-    
-    apiRequestUsuarios('buscar-usuario', { curp })
-        .then(r => r.json())
-        .then(data => {
-            if (data.error) {
-                mostrarAlerta(data.message, 'alert-error');
-                formUpdate.classList.remove('active');
-                return;
-            }
-            
-            llenarFormularioActualizar(data);
-            formUpdate.classList.add('active');
-            mostrarAlerta('Usuario encontrado. Puede editar los datos.', 'alert-success');
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            mostrarAlerta('Error al buscar el usuario', 'alert-error');
-        });
-}
 
-// Función para llenar el formulario con los datos del usuario
-function llenarFormularioActualizar(data) {
-    // Campos ocultos
-    document.getElementById('id_usuario').value = data.id_usuario;
-    document.getElementById('curp').value = data.curp_actual;
-    
-    // Separar el nombre completo que viene del backend
-    const partesNombre = data.nombre_completo.trim().split(' ');
-    
-    // Asignar las partes del nombre (si los campos existen en el HTML)
-    const campoNombre = document.getElementById('nombre_personal');
-    const campoPaterno = document.getElementById('apellido_paterno');
-    const campoMaterno = document.getElementById('apellido_materno');
-    
-    if (campoNombre) campoNombre.value = partesNombre[0] || '';
-    if (campoPaterno) campoPaterno.value = partesNombre[1] || '';
-    if (campoMaterno) campoMaterno.value = partesNombre.slice(2).join(' ') || '';
-    
-    // Campo editable de correo
-    const campoCorreo = document.getElementById('correo_electronico');
-    if (campoCorreo) campoCorreo.value = data.correo_electronico;
-    
-    // Limpiar contraseñas
-    const campoPassword = document.getElementById('contrasena');
-    const campoPasswordConfirm = document.getElementById('contrasena_confirmar');
-    
-    if (campoPassword) campoPassword.value = '';
-    if (campoPasswordConfirm) campoPasswordConfirm.value = '';
-}
+
+
 // Función para mostrar alertas personalizadas
 function mostrarAlerta(mensaje, tipo) {
     const alertDiv = document.getElementById('alertMessage');
     if (!alertDiv) return;
-    
+
     alertDiv.className = `alert ${tipo} show`;
     alertDiv.textContent = mensaje;
-    
+
     setTimeout(() => {
         alertDiv.classList.remove('show');
     }, 5000);
@@ -498,7 +404,7 @@ function limpiarFormulario() {
     document.getElementById('updateForm').reset();
     document.getElementById('updateForm').classList.remove('active');
     document.getElementById('curp_busqueda').value = '';
-    
+
     const alertDiv = document.getElementById('alertMessage');
     if (alertDiv) alertDiv.classList.remove('show');
 }
@@ -695,29 +601,29 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
 }
 
 function configurarEliminacionUsuarios() {
-    
+
     const formEliminar = document.getElementById("formEliminarUsuario");
     if (!formEliminar) return;
-    
+
     const inputCurp = document.getElementById("input_curp_eliminar");
     const btnBuscar = formEliminar.querySelector('button[type="submit"]');
-    
+
     if (!btnBuscar || !inputCurp) return;
-    
+
     btnBuscar.addEventListener("click", function (e) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         const curp = inputCurp.value.trim();
-        
+
         if (curp === "") {
             alerta("Eliminación", "Debes ingresar una CURP.", "warning");
             return;
         }
-        
+
         confirmar("¿Eliminar Usuario?", "Esta acción no se puede deshacer. ¿Deseas continuar?")
             .then(r => {
                 if (!r.isConfirmed) return;
-                
+
                 apiRequestUsuarios("eliminar-usuario", { curp })
                     .then(r => r.text())
                     .then(resp => manejarRespuestaCRUD(
