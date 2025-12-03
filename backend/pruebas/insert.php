@@ -73,6 +73,7 @@ try {
     /* ============================================================
         3️⃣ INSERTAR USUARIOS
     ============================================================ */
+    /*
     $sql_usuarios = "INSERT INTO usuarios
         (nombre_usuario, contrasena, correo_electronico, identificador_de_rh)
         VALUES (:nombre_usuario, :contrasena, :correo_electronico, :identificador_de_rh)";
@@ -94,6 +95,7 @@ try {
             ':identificador_de_rh' => $u[3]
         ]);
     }
+        */
 
     /* ============================================================
         4️⃣ INSERTAR PRODUCTOS (adaptados a tu nueva estructura)

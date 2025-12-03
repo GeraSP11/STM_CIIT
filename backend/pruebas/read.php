@@ -27,13 +27,14 @@ try {
     /* ============================
        USUARIOS
     ============================ */
+    /*
     echo "<h2>Usuarios</h2>";
     $stmt = $pdo->query("SELECT * FROM usuarios ORDER BY id_usuario");
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $u) {
         echo "ID: {$u['id_usuario']} | Usuario: {$u['nombre_usuario']} | Correo: {$u['correo_electronico']} | RH: {$u['identificador_de_rh']}<br>";
         echo "Password: {$u['contrasena']}<br><br>";
     }
-
+    */
 
     /* ============================
        PRODUCTOS

@@ -1,4 +1,7 @@
 <?php
+
+require_once "../backend/middleware/no-cache.php";
+
 $page_title = 'MARINA Corredor Interoceánico';
 ?>
 <!DOCTYPE html>
@@ -264,9 +267,9 @@ $page_title = 'MARINA Corredor Interoceánico';
                     <input type="checkbox" id="showPassword"
                         onchange="document.getElementById('password').type = this.checked ? 'text' : 'password'">
                     <div class="form-floating">
-                    <!-- DESPUÉS (bien) -->
-<input type="password" class="form-control pe-5" id="password" name="password"
-    placeholder="Contraseña" required minlength="8">
+                        <!-- DESPUÉS (bien) -->
+                        <input type="password" class="form-control pe-5" id="password" name="password"
+                            placeholder="Contraseña" required minlength="8">
                         <label for="password">Contraseña</label>
                     </div>
                     <label for="showPassword" class="password-toggle">
@@ -290,7 +293,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
     <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- JavaScript del login -->
     <script src="/assets/js/login.js"></script>
 </body>

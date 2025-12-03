@@ -1,4 +1,9 @@
 <?php
+
+require_once "../backend/middleware/role.php";
+require_once "../backend/middleware/no-cache.php";
+requireRole(["Autoridad", "Administrador del TMS", "Operador Logístico", "Jefe de Almacén"]);
+
 $page_title = 'MARINA Corredor Interoceánico';
 $titulo_seccion = 'Gestión de Productos';
 $seccion = 'Eliminar Productos';

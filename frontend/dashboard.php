@@ -1,4 +1,9 @@
 <?php
+require_once "../backend/middleware/role.php";
+require_once "../backend/middleware/no-cache.php";
+
+requireRole(["Autoridad", "Administrador del TMS", "Operador Logístico", "Cliente", "Jefe de Almacén"]);
+
 $page_title = 'MARINA Corredor Interoceánico';
 ?>
 <!DOCTYPE html>
@@ -18,7 +23,8 @@ $page_title = 'MARINA Corredor Interoceánico';
             padding: 0;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             width: 100%;
             overflow: hidden;
@@ -123,7 +129,9 @@ $page_title = 'MARINA Corredor Interoceánico';
 
         /* Móviles */
         @media screen and (max-width: 768px) {
-            html, body {
+
+            html,
+            body {
                 overflow-y: auto;
                 overflow-x: hidden;
             }
@@ -156,55 +164,74 @@ $page_title = 'MARINA Corredor Interoceánico';
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!-- Personal -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Personal</a>
-                        <ul class="dropdown-menu" aria-labelledby="personalDropdown">
-                            <li><a class="dropdown-item" href="/registro-personal.php">Registrar</a></li>
-                            <li><a class="dropdown-item" href="/consultar-personal.php">Consultar</a></li>
-                            <li><a class="dropdown-item" href="/actualizar-personal.php">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="/eliminar-personal.php">Eliminar</a></li>
-                        </ul>
-                    </li>
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Personal</a>
+                            <ul class="dropdown-menu" aria-labelledby="personalDropdown">
+                                <li><a class="dropdown-item" href="/registro-personal.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="/consultar-personal.php">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-personal.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-personal.php">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
 
                     <!-- Usuarios -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="usuariosDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Usuarios</a>
-                        <ul class="dropdown-menu" aria-labelledby="usuariosDropdown">
-                            <li><a class="dropdown-item" href="/consultar-usuarios.php">Consultar</a></li>
-                            <li><a class="dropdown-item" href="/actualizar-usuarios.php">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="/eliminar-usuarios.php">Eliminar</a></li>
-                        </ul>
-                    </li>
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="usuariosDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Usuarios</a>
+                            <ul class="dropdown-menu" aria-labelledby="usuariosDropdown">
+                                <li><a class="dropdown-item" href="/consultar-usuarios.php">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-usuarios.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-usuarios.php">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
 
                     <!-- Productos -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="productosDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Productos</a>
-                        <ul class="dropdown-menu" aria-labelledby="productosDropdown">
-                            <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
-                            <li><a class="dropdown-item" href="/consultar-productos.php">Consultar</a></li>
-                            <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
-                        </ul>
-                    </li>
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Operador Logístico", "Cliente", "Jefe de Almacén"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="productosDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Productos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="productosDropdown">
+
+                                <?php if ($_SESSION['cargo'] !== "Cliente"): ?>
+                                    <!-- Todos pueden ver estas excepto Cliente -->
+                                    <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
+                                    <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
+                                    <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
+                                <?php endif; ?>
+
+                                <!-- Cliente solo ve Consultar, los demás también -->
+                                <li><a class="dropdown-item" href="/consultar-productos.php">Consultar</a></li>
+
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+
 
                     <!-- Localidades -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Localidades</a>
-                        <ul class="dropdown-menu" aria-labelledby="localidadesDropdown">
-                            <li><a class="dropdown-item" href="/registro-localidades.php">Registrar</a></li>
-                            <li><a class="dropdown-item" href="/consultar-localidades.php">Consultar</a></li>
-                            <li><a class="dropdown-item" href="/actualizar-localidades.php">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="/eliminar-localidades.php">Eliminar</a></li>
-                        </ul>
-                    </li>
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Localidades</a>
+                            <ul class="dropdown-menu" aria-labelledby="localidadesDropdown">
+                                <li><a class="dropdown-item" href="/registro-localidades.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="/consultar-localidades.php">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-localidades.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-localidades.php">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
                 </ul>
 
+
                 <span class="navbar-text">
-                    <a class="nav-link" href="#">Cerrar sesión</a>
+                    <a class="nav-link" href="#" onclick="confirmarLogout();">Cerrar sesión</a>
                 </span>
             </div>
         </div>
@@ -223,6 +250,15 @@ $page_title = 'MARINA Corredor Interoceánico';
 
     <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function confirmarLogout() {
+            if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                window.location.href = "/backend/middleware/logout.php";
+            }
+        }
+    </script>
+
 </body>
 
 </html>
