@@ -113,7 +113,7 @@ CREATE TABLE carrocerias (
     peso_vehicular FLOAT,
     numero_ejes_vehiculares INT,
     tipo_carroceria VARCHAR(20) CHECK (tipo_carroceria IN 
-        ('Unidad de arrastre', 'Unidad de carga'))
+        ('Unidad de arrastre', 'Unidad de carga', 'Mixta'))
 );
 
 

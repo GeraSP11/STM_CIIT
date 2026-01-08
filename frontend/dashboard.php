@@ -227,6 +227,20 @@ $page_title = 'MARINA Corredor Interoceánico';
                             </ul>
                         </li>
                     <?php endif; ?>
+
+                    <!-- Pedidos -->
+                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Cliente"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Pedidos</a>
+                            <ul class="dropdown-menu" aria-labelledby="localidadesDropdown">
+                                <li><a class="dropdown-item" href="/registro-pedido.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="#">Consultar</a></li>
+                                <li><a class="dropdown-item" href="#">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
                 </ul>
 
 
