@@ -90,12 +90,10 @@ $seccion = 'Documentos';
 
 <body>
 
-    <!-- ENCABEZADO -->
     <div class="top-bar">
         SISTEMA DE TRANSPORTE MULTIMODAL - CORREDOR INTEROCEÁNICO DEL ISTMO DE TEHUANTEPEC
     </div>
 
-    <!-- MENÚ PRINCIPAL -->
     <nav class="navbar navbar-expand-lg menu-bar">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
@@ -105,7 +103,6 @@ $seccion = 'Documentos';
             <div class="collapse navbar-collapse" id="navbarContent">
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Menú igual al original -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Personal</a>
                         <ul class="dropdown-menu">
@@ -144,6 +141,16 @@ $seccion = 'Documentos';
                             <li><a class="dropdown-item" href="/eliminar-localidades.php">Eliminar</a></li>
                         </ul>
                     </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Carrocerías</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/registro-carrocerias.php">Registrar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-carrocerias.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-carrocerias.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-carrocerias.php">Eliminar</a></li>
+                        </ul>
+                    </li>
                 </ul>
 
                 <span class="navbar-text">
@@ -154,7 +161,6 @@ $seccion = 'Documentos';
         </div>
     </nav>
 
-    <!-- Breadcrumb como en la imagen -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -164,7 +170,6 @@ $seccion = 'Documentos';
         </ol>
     </nav>
 
-    <!-- CONTENIDO -->
     <div class="content-area">
         <h1 class="title-doc">Documentos</h1>
 

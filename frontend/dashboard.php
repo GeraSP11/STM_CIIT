@@ -13,7 +13,6 @@ $page_title = 'MARINA Corredor Interoceánico';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
-    <!-- Bootstrap CSS local -->
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -148,12 +147,10 @@ $page_title = 'MARINA Corredor Interoceánico';
 </head>
 
 <body>
-    <!-- HEADER PRINCIPAL -->
     <div class="top-bar">
         SISTEMA DE TRANSPORTE MULTIMODAL - CORREDOR INTEROCEÁNICO DEL ISTMO DE TEHUANTEPEC
     </div>
 
-    <!-- MENÚ -->
     <nav class="navbar navbar-expand-lg menu-bar">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
@@ -163,7 +160,6 @@ $page_title = 'MARINA Corredor Interoceánico';
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Personal -->
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button"
@@ -177,7 +173,6 @@ $page_title = 'MARINA Corredor Interoceánico';
                         </li>
                     <?php endif; ?>
 
-                    <!-- Usuarios -->
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="usuariosDropdown" role="button"
@@ -190,7 +185,6 @@ $page_title = 'MARINA Corredor Interoceánico';
                         </li>
                     <?php endif; ?>
 
-                    <!-- Productos -->
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Operador Logístico", "Cliente", "Jefe de Almacén"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="productosDropdown" role="button"
@@ -198,23 +192,16 @@ $page_title = 'MARINA Corredor Interoceánico';
                                 Productos
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="productosDropdown">
-
                                 <?php if ($_SESSION['cargo'] !== "Cliente"): ?>
-                                    <!-- Todos pueden ver estas excepto Cliente -->
                                     <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
                                     <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
                                     <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
                                 <?php endif; ?>
-
-                                <!-- Cliente solo ve Consultar, los demás también -->
                                 <li><a class="dropdown-item" href="/consultar-productos.php">Consultar</a></li>
-
                             </ul>
                         </li>
                     <?php endif; ?>
 
-
-                    <!-- Localidades -->
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
@@ -228,12 +215,24 @@ $page_title = 'MARINA Corredor Interoceánico';
                         </li>
                     <?php endif; ?>
 
-                    <!-- Pedidos -->
-                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Cliente"])): ?>
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="localidadesDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="#" id="carroceriasDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Carrocerías</a>
+                            <ul class="dropdown-menu" aria-labelledby="carroceriasDropdown">
+                                <li><a class="dropdown-item" href="/registro-carrocerias.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="/consultar-carrocerias.php">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-carrocerias.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-carrocerias.php">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Cliente"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="pedidosDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">Pedidos</a>
-                            <ul class="dropdown-menu" aria-labelledby="localidadesDropdown">
+                            <ul class="dropdown-menu" aria-labelledby="pedidosDropdown">
                                 <li><a class="dropdown-item" href="/registro-pedido.php">Registrar</a></li>
                                 <li><a class="dropdown-item" href="#">Consultar</a></li>
                                 <li><a class="dropdown-item" href="#">Actualizar</a></li>
@@ -243,7 +242,6 @@ $page_title = 'MARINA Corredor Interoceánico';
                     <?php endif; ?>
                 </ul>
 
-
                 <span class="navbar-text">
                     <a class="nav-link" href="#" onclick="confirmarLogout();">Cerrar sesión</a>
                 </span>
@@ -251,18 +249,15 @@ $page_title = 'MARINA Corredor Interoceánico';
         </div>
     </nav>
 
-    <!-- CONTENIDO -->
     <div class="section-links d-flex justify-content-between">
         <a href="/documentos.php" class="section-link">Documentos</a>
         <a href="/mision-y-vision.php" class="section-link">Misión y Visión</a>
     </div>
 
-    <!-- Logo centrado -->
     <div class="logo-container">
         <img src="/assets/img/logo_principal.jpeg" alt="Encabezado MARINA-CIIT" class="imagen-encabezado">
     </div>
 
-    <!-- Bootstrap JS local -->
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script>
