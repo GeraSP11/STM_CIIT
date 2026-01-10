@@ -1,11 +1,11 @@
 // =====================================================
-//  CRUD DE VEHÍCULOS
-//  Secciones: 
-//      1. Registrar
-//      2. Consultar
-//      3. Actualizar
-//      4. Eliminar
-//      5. Funciones reutilizables
+//   CRUD DE VEHÍCULOS
+//   Secciones: 
+//       1. Registrar
+//       2. Consultar
+//       3. Actualizar
+//       4. Eliminar
+//       5. Funciones reutilizables
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -54,67 +54,32 @@ function configurarRegistroVehiculos() {
    2. CONSULTAR (READ)
    ===================================================== */
 function configurarVistaConsultarVehiculos() {
-    const selectFiltros = document.getElementById("selectFiltroVehiculo");
-    const botonAgregarFiltro = document.getElementById("btnAddFiltro");
-    const contenedorFiltros = document.getElementById("filtrosContainer");
-    const contenedorBotonConsultar = document.getElementById("contenedorConsultar");
+    const btnVolver = document.getElementById("btnVolver");
+    if (!btnVolver) return;
 
-    if (!selectFiltros || !botonAgregarFiltro || !contenedorFiltros) return;
-
-    botonAgregarFiltro.addEventListener("click", () => {
-        const valorFiltro = selectFiltros.value;
-        const textoFiltro = selectFiltros.options[selectFiltros.selectedIndex].text;
-
-        if (!valorFiltro) {
-            alerta("Filtros", "Selecciona un criterio de búsqueda", "warning");
-            return;
-        }
-
-        const fila = document.createElement("div");
-        fila.classList.add("filter-row");
-        fila.innerHTML = `
-            <input type="text" class="form-control" value="${textoFiltro}" readonly style="width: 40%;">
-            <input type="text" class="form-control" name="${valorFiltro}" placeholder="Ingrese ${textoFiltro}" required style="width: 40%;">
-            <button class="delete-btn"><i class="fas fa-trash"></i></button>
-        `;
-        contenedorFiltros.appendChild(fila);
-
-        contenedorBotonConsultar.style.display = "flex";
-        selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = true;
-        selectFiltros.selectedIndex = 0;
-
-        fila.querySelector(".delete-btn").addEventListener("click", () => {
-            fila.remove();
-            contenedorBotonConsultar.style.display = contenedorFiltros.children.length ? "flex" : "none";
-            selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = false;
-        });
+    btnVolver.addEventListener("click", () => {
+        document.getElementById("tablaResultados").style.display = "none";
+        document.getElementById("formContainer").style.display = "block";
     });
 }
 
 function consultarVehiculos() {
     const formularioConsulta = document.getElementById("formConsultarVehiculos");
-    const contenedorFiltros = document.getElementById("filtrosContainer");
-    const contenedorResultados = document.getElementById("tablaResultadosVehiculos");
     const cuerpoTabla = document.querySelector("#tablaVehiculos tbody");
-    const botonVolver = document.getElementById("btnVolver");
 
     if (!formularioConsulta) return;
 
     formularioConsulta.addEventListener("submit", (e) => {
         e.preventDefault();
         
-        const filtros = {};
-        // Captura dinámica de filtros (placas, modelo, marca, etc)
-        const inputs = contenedorFiltros.querySelectorAll('input[name]');
-        inputs.forEach(input => {
-            if (input.value.trim()) filtros[input.name] = input.value.trim();
-        });
+        const formData = new FormData(formularioConsulta);
+        const filtros = Object.fromEntries(formData.entries());
 
         apiRequest("consultar-vehiculos", filtros)
             .then(res => res.json())
             .then(datos => {
                 if (!datos || datos.length === 0) {
-                    alerta("Consulta", "No se encontraron vehículos con esos criterios", "warning");
+                    alerta("Consulta", "No se encontraron vehículos", "warning");
                     return;
                 }
 
@@ -131,15 +96,10 @@ function consultarVehiculos() {
                     cuerpoTabla.appendChild(fila);
                 });
 
-                contenedorResultados.style.display = "block";
-                formularioConsulta.parentElement.style.display = "none";
+                document.getElementById("tablaResultados").style.display = "block";
+                document.getElementById("formContainer").style.display = "none";
             })
             .catch(() => alerta("Error", "Error al conectar con el servidor", "error"));
-    });
-
-    botonVolver.addEventListener("click", () => {
-        contenedorResultados.style.display = "none";
-        formularioConsulta.parentElement.style.display = "block";
     });
 }
 
@@ -147,45 +107,48 @@ function consultarVehiculos() {
    3. ACTUALIZAR (UPDATE)
    ===================================================== */
 function actualizarVehiculos() {
-    const inputBusqueda = document.getElementById('inputBuscarPlaca');
+    const inputBusqueda = document.getElementById('inputBuscarVehiculo');
     const datalist = document.getElementById('listaVehiculos');
     const formulario = document.getElementById('formActualizarVehiculo');
 
     if (!inputBusqueda) return;
 
+    // Al escribir, cargar placas en el datalist
     inputBusqueda.addEventListener('input', () => {
         const texto = inputBusqueda.value.trim();
         if (texto.length < 2) return;
 
-        apiRequest('buscar-vehiculo-placa', { placas: texto })
+        apiRequest('listar-placas', { busqueda: texto })
             .then(r => r.json())
-            .then(vehiculos => {
+            .then(datos => {
                 datalist.innerHTML = '';
-                vehiculos.forEach(v => {
+                datos.forEach(v => {
                     const opt = document.createElement('option');
                     opt.value = v.placas;
-                    // Guardamos datos en dataset para el autocompletado
-                    opt.dataset.id = v.id_vehiculo;
-                    opt.dataset.marca = v.marca;
-                    opt.dataset.modelo = v.modelo;
-                    opt.dataset.capacidad = v.capacidad_carga;
                     datalist.appendChild(opt);
                 });
             });
     });
 
+    // Al seleccionar una placa, traer datos del vehículo
     inputBusqueda.addEventListener('change', () => {
-        const seleccion = Array.from(datalist.options).find(o => o.value === inputBusqueda.value);
-        if (!seleccion) return;
+        const placa = inputBusqueda.value;
+        apiRequest('obtener-vehiculo-unico', { campo: 'placas', valor: placa })
+            .then(r => r.json())
+            .then(v => {
+                if (!v.id_vehiculo) return;
+                
+                document.getElementById('inputIdVehiculo').value = v.id_vehiculo;
+                document.getElementById('inputIdVehiculoDisplay').value = v.id_vehiculo;
+                document.getElementById('inputPlacas').value = v.placas;
+                document.getElementById('inputMarca').value = v.marca;
+                document.getElementById('inputModelo').value = v.modelo;
+                document.getElementById('inputCapacidad').value = v.capacidad_carga;
+                document.getElementById('selectTipoVehiculo').value = v.tipo_vehiculo;
+                document.getElementById('selectCarroceria').value = v.id_carroceria;
 
-        // Llenar campos del formulario
-        document.getElementById('inputIdVehiculo').value = seleccion.dataset.id;
-        document.getElementById('inputMarca').value = seleccion.dataset.marca;
-        document.getElementById('inputModelo').value = seleccion.dataset.modelo;
-        document.getElementById('inputCapacidad').value = seleccion.dataset.capacidad;
-
-        document.getElementById('contenedorBusqueda').classList.add('oculto');
-        document.getElementById('contenedorBotones').style.display = 'block';
+                document.getElementById('contenedorBotones').style.display = 'block';
+            });
     });
 
     formulario.addEventListener('submit', e => {
@@ -204,13 +167,12 @@ function actualizarVehiculos() {
    4. ELIMINAR (DELETE)
    ===================================================== */
 function configurarVistaEliminarVehiculos() {
-    const select = document.getElementById('filtroBusquedaVehiculo');
+    const select = document.getElementById('filtroBusqueda');
     if (!select) return;
 
     select.addEventListener('change', function () {
-        document.querySelectorAll(".campo-dinamico").forEach(c => c.style.display = "none");
-        const target = document.getElementById('campo' + this.value);
-        if (target) target.style.display = "block";
+        document.getElementById('campoId').style.display = (this.value === 'id') ? 'block' : 'none';
+        document.getElementById('campoPlacas').style.display = (this.value === 'placas') ? 'block' : 'none';
     });
 }
 
@@ -220,33 +182,43 @@ function eliminarVehiculos() {
 
     formulario.addEventListener('submit', function (e) {
         e.preventDefault();
-        const filtro = document.getElementById('filtroBusquedaVehiculo').value;
-        const valor = document.querySelector(`#campo${filtro} input`).value;
+        const filtro = document.getElementById('filtroBusqueda').value;
+        const valor = (filtro === 'id') ? document.getElementById('inputId').value : document.getElementById('inputPlacas').value;
 
-        apiRequest("mostrar-eliminar-vehiculo", { [filtro]: valor })
+        apiRequest("obtener-vehiculo-unico", { campo: filtro, valor: valor })
             .then(res => res.json())
-            .then(data => {
-                if (!data || data.length === 0) {
+            .then(v => {
+                if (!v || !v.id_vehiculo) {
                     alerta("No encontrado", "El vehículo no existe", "warning");
                     return;
                 }
-                const v = data[0];
-                // Llenar vista previa de eliminación
-                document.getElementById("res_placas").value = v.placas;
-                document.getElementById("resultadosVehiculo").style.display = "block";
 
-                document.getElementById("btnEliminarVehiculo").onclick = () => {
-                    confirmar("¿Eliminar vehículo?", "Esta acción puede afectar fletes programados", "warning")
-                        .then(res => {
-                            if (res.isConfirmed) {
-                                apiRequest("eliminar-vehiculo", { id_vehiculo: v.id_vehiculo })
-                                    .then(r => r.text())
-                                    .then(resp => manejarRespuestaCRUD(resp, "Vehículo eliminado.", "dashboard.php"));
-                            }
-                        });
-                };
+                document.getElementById("res_id").value = v.id_vehiculo;
+                document.getElementById("res_placas").value = v.placas;
+                document.getElementById("res_marca").value = v.marca;
+                document.getElementById("res_modelo").value = v.modelo;
+                document.getElementById("res_tipo").value = v.tipo_vehiculo;
+                document.getElementById("res_capacidad").value = v.capacidad_carga;
+
+                document.getElementById("filtroEliminar").style.display = "none";
+                document.getElementById("resultadosBusqueda").style.display = "block";
             });
     });
+
+    const btnEliminar = document.getElementById("btnEliminar");
+    if (btnEliminar) {
+        btnEliminar.onclick = () => {
+            const id = document.getElementById("res_id").value;
+            confirmar("¿Eliminar vehículo?", "Esta acción no se puede deshacer", "warning")
+                .then(res => {
+                    if (res.isConfirmed) {
+                        apiRequest("eliminar-vehiculo", { id_vehiculo: id })
+                            .then(r => r.text())
+                            .then(resp => manejarRespuestaCRUD(resp, "Vehículo eliminado.", "dashboard.php"));
+                    }
+                });
+        };
+    }
 }
 
 /* =====================================================
@@ -259,7 +231,6 @@ function apiRequest(accion, datos = null) {
     }
     formData.append("action", accion);
 
-    // Cambiado a la ruta de vehículos
     return fetch('/ajax/vehiculo-ajax.php', {
         method: "POST",
         body: formData

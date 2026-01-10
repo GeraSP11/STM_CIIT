@@ -160,6 +160,7 @@ $page_title = 'MARINA Corredor Interoceánico';
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button"
@@ -188,9 +189,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                     <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Operador Logístico", "Cliente", "Jefe de Almacén"])): ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="productosDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                Productos
-                            </a>
+                                data-bs-toggle="dropdown" aria-expanded="false">Productos</a>
                             <ul class="dropdown-menu" aria-labelledby="productosDropdown">
                                 <?php if ($_SESSION['cargo'] !== "Cliente"): ?>
                                     <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
@@ -224,6 +223,19 @@ $page_title = 'MARINA Corredor Interoceánico';
                                 <li><a class="dropdown-item" href="/consultar-carrocerias.php">Consultar</a></li>
                                 <li><a class="dropdown-item" href="/actualizar-carrocerias.php">Actualizar</a></li>
                                 <li><a class="dropdown-item" href="/eliminar-carrocerias.php">Eliminar</a></li>
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Operador Logístico"])): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="vehiculosDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Vehículos</a>
+                            <ul class="dropdown-menu" aria-labelledby="vehiculosDropdown">
+                                <li><a class="dropdown-item" href="/registro-vehiculos.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="/consultar-vehiculos.php">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-vehiculos.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-vehiculos.php">Eliminar</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>

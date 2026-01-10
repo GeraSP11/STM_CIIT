@@ -1,4 +1,10 @@
 <?php
+require_once "../backend/middleware/role.php";
+require_once "../backend/middleware/no-cache.php";
+
+// Mantener los mismos permisos que el Dashboard para consistencia
+requireRole(["Autoridad", "Administrador del TMS", "Operador Logístico", "Cliente", "Jefe de Almacén"]);
+
 $page_title = 'MARINA Corredor Interoceánico';
 $seccion = 'Documentos';
 ?>
@@ -101,8 +107,9 @@ $seccion = 'Documentos';
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Personal</a>
                         <ul class="dropdown-menu">
@@ -112,7 +119,9 @@ $seccion = 'Documentos';
                             <li><a class="dropdown-item" href="/eliminar-personal.php">Eliminar</a></li>
                         </ul>
                     </li>
+                    <?php endif; ?>
 
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Usuarios</a>
                         <ul class="dropdown-menu">
@@ -121,17 +130,21 @@ $seccion = 'Documentos';
                             <li><a class="dropdown-item" href="/eliminar-usuarios.php">Eliminar</a></li>
                         </ul>
                     </li>
+                    <?php endif; ?>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Productos</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
+                            <?php if ($_SESSION['cargo'] !== "Cliente"): ?>
+                                <li><a class="dropdown-item" href="/registro-productos.php">Registrar</a></li>
+                                <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
+                            <?php endif; ?>
                             <li><a class="dropdown-item" href="/consultar-productos.php">Consultar</a></li>
-                            <li><a class="dropdown-item" href="/actualizar-productos.php">Actualizar</a></li>
-                            <li><a class="dropdown-item" href="/eliminar-productos.php">Eliminar</a></li>
                         </ul>
                     </li>
 
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Localidades</a>
                         <ul class="dropdown-menu">
@@ -141,7 +154,9 @@ $seccion = 'Documentos';
                             <li><a class="dropdown-item" href="/eliminar-localidades.php">Eliminar</a></li>
                         </ul>
                     </li>
+                    <?php endif; ?>
 
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS"])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Carrocerías</a>
                         <ul class="dropdown-menu">
@@ -151,10 +166,23 @@ $seccion = 'Documentos';
                             <li><a class="dropdown-item" href="/eliminar-carrocerias.php">Eliminar</a></li>
                         </ul>
                     </li>
+                    <?php endif; ?>
+
+                    <?php if (in_array($_SESSION['cargo'], ["Autoridad", "Administrador del TMS", "Operador Logístico"])): ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Vehículos</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/registro-vehiculos.php">Registrar</a></li>
+                            <li><a class="dropdown-item" href="/consultar-vehiculos.php">Consultar</a></li>
+                            <li><a class="dropdown-item" href="/actualizar-vehiculos.php">Actualizar</a></li>
+                            <li><a class="dropdown-item" href="/eliminar-vehiculos.php">Eliminar</a></li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
                 </ul>
 
                 <span class="navbar-text">
-                    <a class="nav-link" href="#">Cerrar sesión</a>
+                    <a class="nav-link" href="#" onclick="confirmarLogout();">Cerrar sesión</a>
                 </span>
 
             </div>
@@ -184,5 +212,12 @@ $seccion = 'Documentos';
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmarLogout() {
+            if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                window.location.href = "/backend/middleware/logout.php";
+            }
+        }
+    </script>
 </body>
 </html>
