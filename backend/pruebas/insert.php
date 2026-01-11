@@ -167,6 +167,148 @@ try {
         ]);
     }
 
+
+        /* ============================================================
+        5️⃣ INSERTAR PEDIDOS
+    ============================================================ */
+    $sql_pedidos = "INSERT INTO pedidos
+        (clave_pedido, localidad_origen, localidad_destino, estatus_pedido, 
+         fecha_solicitud, fecha_entrega, observaciones)
+        VALUES (:clave_pedido, :localidad_origen, :localidad_destino, :estatus_pedido,
+         :fecha_solicitud, :fecha_entrega, :observaciones)
+        RETURNING id_pedido";
+
+    $stmt_pedidos = $pdo->prepare($sql_pedidos);
+
+    $pedidos = [
+        // Pedido 1: Centro Productivo Oaxaca → Centro de Distribución Istmo (Entregado)
+        [
+            'PED-2024-001', 
+            $ids_localidades[0], // Oaxaca
+            $ids_localidades[1], // Istmo
+            'Entregado',
+            '2024-01-15',
+            '2024-01-20',
+            'Envío de quesos frescos - Entrega exitosa'
+        ],
+        
+        // Pedido 2: Centro de Distribución Istmo → PODEBI Huatulco (En tránsito)
+        [
+            'PED-2024-002',
+            $ids_localidades[1], // Istmo
+            $ids_localidades[2], // Huatulco
+            'En tránsito',
+            '2024-01-22',
+            '2024-01-25',
+            'Yogurt y productos lácteos - En camino'
+        ],
+        
+        // Pedido 3: Almacén Central Puebla → Centro Productivo Oaxaca (En preparación)
+        [
+            'PED-2024-003',
+            $ids_localidades[3], // Puebla
+            $ids_localidades[0], // Oaxaca
+            'En preparación',
+            '2024-01-23',
+            '2024-01-28',
+            'Material de embalaje y pallets'
+        ],
+        
+        // Pedido 4: Centro Productivo Oaxaca → Almacén Central Puebla (Enviado)
+        [
+            'PED-2024-004',
+            $ids_localidades[0], // Oaxaca
+            $ids_localidades[3], // Puebla
+            'Enviado',
+            '2024-01-20',
+            '2024-01-26',
+            'Productos terminados para redistribución'
+        ],
+        
+        // Pedido 5: PODEBI Huatulco → Centro de Distribución Istmo (En captura)
+        [
+            'PED-2024-005',
+            $ids_localidades[2], // Huatulco
+            $ids_localidades[1], // Istmo
+            'En captura',
+            '2024-01-24',
+            null, // Sin fecha de entrega aún
+            'Pedido en proceso de captura'
+        ],
+        
+        // Pedido 6: Centro de Distribución Istmo → Almacén Central Puebla (En recolección)
+        [
+            'PED-2024-006',
+            $ids_localidades[1], // Istmo
+            $ids_localidades[3], // Puebla
+            'En recolección',
+            '2024-01-23',
+            '2024-01-30',
+            'Productos perecederos - Urgente'
+        ],
+        
+        // Pedido 7: Almacén Central Puebla → PODEBI Huatulco (En reparto)
+        [
+            'PED-2024-007',
+            $ids_localidades[3], // Puebla
+            $ids_localidades[2], // Huatulco
+            'En reparto',
+            '2024-01-21',
+            '2024-01-24',
+            'Último tramo de entrega'
+        ],
+        
+        // Pedido 8: Centro Productivo Oaxaca → Centro de Distribución Istmo (Entregado)
+        [
+            'PED-2024-008',
+            $ids_localidades[0], // Oaxaca
+            $ids_localidades[1], // Istmo
+            'Entregado',
+            '2024-01-10',
+            '2024-01-15',
+            'Pedido anterior completado'
+        ],
+        
+        // Pedido 9: PODEBI Huatulco → Almacén Central Puebla (En tránsito)
+        [
+            'PED-2024-009',
+            $ids_localidades[2], // Huatulco
+            $ids_localidades[3], // Puebla
+            'En tránsito',
+            '2024-01-22',
+            '2024-01-27',
+            'Traslado de materiales'
+        ],
+        
+        // Pedido 10: Centro de Distribución Istmo → Centro Productivo Oaxaca (Enviado)
+        [
+            'PED-2024-010',
+            $ids_localidades[1], // Istmo
+            $ids_localidades[0], // Oaxaca
+            'Enviado',
+            '2024-01-23',
+            '2024-01-26',
+            'Devolución de envases vacíos'
+        ]
+    ];
+
+    $ids_pedidos = [];
+
+    foreach ($pedidos as $ped) {
+        $stmt_pedidos->execute([
+            ':clave_pedido'      => $ped[0],
+            ':localidad_origen'  => $ped[1],
+            ':localidad_destino' => $ped[2],
+            ':estatus_pedido'    => $ped[3],
+            ':fecha_solicitud'   => $ped[4],
+            ':fecha_entrega'     => $ped[5],
+            ':observaciones'     => $ped[6]
+        ]);
+        $ids_pedidos[] = $stmt_pedidos->fetchColumn();
+    }
+
+    echo "\n✅ Se insertaron " . count($ids_pedidos) . " pedidos correctamente.\n";
+
     $pdo->commit();
     echo "✅ Datos insertados correctamente.";
 } catch (Exception $e) {
