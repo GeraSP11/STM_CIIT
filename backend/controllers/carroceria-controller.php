@@ -16,51 +16,55 @@ class CarroceriaController {
     /**
      * Registra una carrocería y sus detalles (si aplican)
      */
-    public function registrarCarroceria($datos) {
-        // 1. Limpieza de datos básicos
+public function registrarCarroceria($data)
+{
+    try {
+        $model = new CarroceriaModel();
+
+        // 1. Datos principales
         $carroceria = [
-            'modalidad'    => $datos['modalidad_carroceria'],
-            'matricula'    => trim($datos['matricula']),
-            'localidad'    => $datos['localidad_pertenece'],
-            'responsable'  => $datos['responsable_carroceria'],
-            'tipo'         => $datos['tipo_carroceria'],
-            'peso'         => floatval($datos['peso_vehicular']),
-            'ejes'         => isset($datos['numero_ejes_vehiculares']) ? intval($datos['numero_ejes_vehiculares']) : 0,
-            'contenedores' => isset($datos['numero_contenedores']) ? intval($datos['numero_contenedores']) : 0,
-            'estatus'      => 'Disponible' // Valor por defecto bloqueado
+            'modalidad'    => $data['modalidad_carroceria'],
+            'matricula'    => strtoupper(trim($data['matricula'])),
+            'localidad'    => $data['localidad_pertenece'],
+            'responsable'  => $data['responsable_carroceria'],
+            'tipo'         => $data['tipo_carroceria'],
+            'peso'         => $data['peso_vehicular'],
+            'ejes'         => !empty($data['numero_ejes_vehiculares']) ? $data['numero_ejes_vehiculares'] : 0,
+            // --- AQUÍ ESTABA EL ERROR: Faltaba esta línea ---
+            'contenedores' => !empty($data['numero_contenedores']) ? $data['numero_contenedores'] : 0, 
+            'estatus'      => 'Disponible'
         ];
 
-        // 2. Iniciar Proceso de Almacenamiento (Paso 1: Tabla carrocerias)
-        $id_carroceria = $this->model->insertarCarroceria($carroceria);
-
-        if (!$id_carroceria) {
-            return "Error al registrar los datos principales de la carrocería.";
+        if ($model->matriculaExiste($carroceria['matricula'])) {
+            return "La matrícula " . $carroceria['matricula'] . " ya existe.";
         }
 
-        // 3. Paso 2: Insertar detalles si el tipo es Carga o Mixta
-        if (in_array($carroceria['tipo'], ['Unidad de carga', 'Mixta']) && isset($datos['detalles'])) {
-            foreach ($datos['detalles'] as $detalle) {
-                // Validar que las dimensiones sean correctas antes de insertar
-                if ($detalle['altura'] <= 0 || $detalle['anchura'] <= 0 || $detalle['longitud'] <= 0) {
-                    return "Por favor ingresar las dimensiones correctas para el contenedor #" . $detalle['numero_contenedor'];
-                }
+        $id_carroceria = $model->insertarCarroceria($carroceria);
+        if (!$id_carroceria) return "Error al registrar los datos principales.";
 
-                $exitoDetalle = $this->model->insertarDetalleCarroceria(
-                    $id_carroceria,
-                    $detalle['numero_contenedor'],
-                    $detalle['longitud'],
-                    $detalle['anchura'],
-                    $detalle['altura']
-                );
-
-                if (!$exitoDetalle) {
-                    return "Error al registrar el detalle del contenedor #" . $detalle['numero_contenedor'];
+        // 2. CORRECCIÓN ERROR 2: Bucle de detalles
+        // Verificamos si vienen arreglos de dimensiones (longitud[], anchura[], altura[])
+        if (isset($data['longitud']) && is_array($data['longitud'])) {
+            foreach ($data['longitud'] as $index => $valorLongitud) {
+                $detalle = [
+                    'id_carroceria'     => $id_carroceria,
+                    'numero_contenedor' => ($index + 1),
+                    'longitud'          => $data['longitud'][$index],
+                    'anchura'           => $data['anchura'][$index],
+                    'altura'            => $data['altura'][$index]
+                ];
+                
+                if (!$model->insertarDetalleCarroceria($detalle)) {
+                    return "Error al registrar el contenedor #" . ($index + 1);
                 }
             }
         }
 
         return "OK";
+    } catch (Exception $e) {
+        return "Error: " . $e->getMessage();
     }
+}
 
     /**
      * Consulta con filtros aplicados

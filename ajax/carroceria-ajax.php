@@ -13,35 +13,19 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 switch ($action) {
     case 'registrar-carroceria':
-        // Validaciones de Campos Obligatorios según PDF
-        $campos_obligatorios = [
-            'modalidad_carroceria' => 'Modalidad',
-            'matricula' => 'Matrícula',
-            'localidad_pertenece' => 'Localidad',
-            'responsable_carroceria' => 'Responsable',
-            'tipo_carroceria' => 'Tipo de Carrocería',
-            'peso_vehicular' => 'Peso Vehicular'
-        ];
-
-        foreach ($campos_obligatorios as $campo => $nombre) {
-            if (empty($_POST[$campo])) {
-                echo "Por favor ingresar el " . $nombre . ", el campo no puede estar vacío.";
-                exit;
-            }
+        // Validación de seguridad: Si no hay matrícula, no procesar
+        if (empty($_POST['matricula'])) {
+            echo "Error: La matrícula es obligatoria.";
+            exit;
         }
 
-        // Validación adicional para número de ejes (excepto Marítimo/Aéreo) 
-        if (!in_array($_POST['modalidad_carroceria'], ['Marítimo', 'Aéreo'])) {
-            if (empty($_POST['numero_ejes_vehiculares']) || $_POST['numero_ejes_vehiculares'] <= 0) {
-                echo "Por favor ingresar el número de ejes correcto.";
-                exit;
-            }
-        }
-
+        // Asegurar valores por defecto para campos que podrían estar bloqueados
+        $_POST['numero_ejes_vehiculares'] = !empty($_POST['numero_ejes_vehiculares']) ? $_POST['numero_ejes_vehiculares'] : 0;
+        $_POST['numero_contenedores'] = !empty($_POST['numero_contenedores']) ? $_POST['numero_contenedores'] : 0;
+        
         $controller = new CarroceriaController();
         echo $controller->registrarCarroceria($_POST);
         break;
-
     case 'consultar-carrocerias':
         $controller = new CarroceriaController();
         $resultados = $controller->consultarCarrocerias($_POST);

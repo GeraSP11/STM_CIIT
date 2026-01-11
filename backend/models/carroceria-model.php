@@ -9,6 +9,22 @@ require_once __DIR__ . "/../config/conexion.php";
 class CarroceriaModel
 {
     /**
+     * Valida si una matrícula ya existe en la base de datos.
+     * Retorna true si existe, false si no.
+     */
+    public function matriculaExiste($matricula)
+    {
+        global $pdo;
+        try {
+            $sql = "SELECT COUNT(*) FROM carrocerias WHERE matricula = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([strtoupper(trim($matricula))]);
+            return $stmt->fetchColumn() > 0;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+    /**
      * Paso 1: Registrar los datos principales de la carrocería.
      * Retorna el ID generado para ser usado en los detalles.
      */
@@ -19,7 +35,7 @@ class CarroceriaModel
             // Nota: Se usa RETURNING id_carroceria para obtener el ID en PostgreSQL
             $sql = "INSERT INTO carrocerias 
                     (matricula, localidad_pertenece, responsable_carroceria, numero_contenedores, 
-                     peso_vehicular, numero_ejes_vehiculares, tipo_carroceria, modalidad_carroceria, estatus_carroceria)
+                     peso_vehicular, numero_ejes_vehiculares, tipo_carroceria, estatus_carroceria, modalidad_carroceria)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_carroceria";
 
             $stmt = $pdo->prepare($sql);
@@ -31,8 +47,8 @@ class CarroceriaModel
                 $d['peso'], 
                 $d['ejes'], 
                 $d['tipo'], 
-                $d['modalidad'], 
-                $d['estatus']
+                $d['estatus'], 
+                $d['modalidad']
             ]);
             
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -44,8 +60,9 @@ class CarroceriaModel
 
     /**
      * Paso 2: Registrar los detalles de cada contenedor.
+     * Recibe un array asociativo con los datos.
      */
-    public function insertarDetalleCarroceria($id_carroceria, $num_con, $largo, $ancho, $alto)
+    public function insertarDetalleCarroceria($d)
     {
         global $pdo;
         try {
@@ -54,7 +71,13 @@ class CarroceriaModel
                     VALUES (?, ?, ?, ?, ?)";
 
             $stmt = $pdo->prepare($sql);
-            return $stmt->execute([$id_carroceria, $num_con, $largo, $ancho, $alto]);
+            return $stmt->execute([
+                $d['id_carroceria'], 
+                $d['numero_contenedor'], // <--- Esto es lo que acabamos de arreglar en el controlador
+                $d['longitud'], 
+                $d['anchura'], 
+                $d['altura']
+            ]);
         } catch (PDOException $e) {
             return false;
         }

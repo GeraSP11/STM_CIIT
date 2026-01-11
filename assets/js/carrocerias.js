@@ -25,6 +25,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 4. Eliminar ----
     /* configurarVistaEliminarCarrocerias();
     */eliminarCarrocerias();  
+
+    const form = document.getElementById("formCarrocerias");
+    form.addEventListener("submit", function(e) {
+        e.preventDefault(); // <--- ESTO evita que la página se salga/recargue
+        ejecutarRegistroFinal();
+    });
 });
 
 /* =====================================================
@@ -92,7 +98,7 @@ const ValidadoresMatricula = {
         }
         return sum % 10 === 0;
     },
-    Maritimo: (v) => {
+    Marítimo: (v) => {
         if (!/^\d{7}$/.test(v)) return false;
         let checkSum = 0;
         let pesos = [7, 6, 5, 4, 3, 2];
@@ -101,7 +107,7 @@ const ValidadoresMatricula = {
         }
         return (checkSum % 10) === parseInt(v[6]);
     },
-    Aereo: (v) => {
+    Aéreo: (v) => {
         return /^[A-Z]{1,2}[A-Z0-9]{1,5}$/.test(v);
     }
 };
@@ -136,6 +142,10 @@ function gestionarCamposCondicionales() {
     selectTipo.addEventListener("change", actualizarVisibilidad);
 }
 
+/* =====================================================
+   1. REGISTRAR (CORREGIDO)
+   ===================================================== */
+
 function configurarRegistroCarroceria() {
     const formPrincipal = document.querySelector("#formCarrocerias");
     const btnSiguiente = document.getElementById("btnSiguiente");
@@ -143,26 +153,81 @@ function configurarRegistroCarroceria() {
 
     if (!formPrincipal) return;
 
+    // Validación en tiempo real para habilitar el botón
     formPrincipal.addEventListener("input", () => {
         const mod = document.getElementById("modalidad_carroceria").value;
         const mat = document.getElementById("matricula").value;
         const peso = parseFloat(document.getElementById("peso_vehicular").value);
         
-        const matValida = ValidadoresMatricula[mod] ? ValidadoresMatricula[mod](mat) : false;
-        const pesoValido = peso > 0; 
+        // Simplificamos la validación de matrícula para que no sea tan estricta 
+        // y permita avanzar si hay texto (puedes volver a usar ValidadoresMatricula[mod] si lo prefieres)
+        const matValida = mat.trim().length >= 3; 
+        
+        const pesoValido = !isNaN(peso) && peso > 0;
+        const formValido = formPrincipal.checkValidity();
 
-        btnSiguiente.disabled = !(matValida && pesoValido && formPrincipal.checkValidity());
+        btnSiguiente.disabled = !(matValida && pesoValido && formValido);
     });
 
+    // Acción del botón Siguiente
     btnSiguiente?.addEventListener("click", () => {
         const tipo = document.getElementById("tipo_carroceria").value;
+        
+        // ASEGURAMOS QUE LOS CAMPOS SEAN ENVIABLES
+        // Usar readOnly garantiza que el valor sea visible y se incluya en el FormData
+        const camposParaBloquear = ["matricula", "peso_vehicular", "numero_ejes_vehiculares", "numero_contenedores"];
+        
+        camposParaBloquear.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.readOnly = true;
+                el.classList.add("bg-light"); // Feedback visual de que está bloqueado
+            }
+        });
+        
+        // Para los SELECTS (que no tienen readOnly), bloqueamos la interacción visual
+        const selects = ["modalidad_carroceria", "localidad_pertenece", "responsable_carroceria", "tipo_carroceria"];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.pointerEvents = "none";
+                el.style.backgroundColor = "#e9ecef"; // Color grisáceo de Bootstrap
+            }
+        });
+
         if (tipo === "Unidad de arrastre") {
-            ejecutarRegistroFinal(formPrincipal);
+            ejecutarRegistroFinal();
         } else {
             generarFormularioDetalles();
             document.getElementById("seccionPrincipal").style.display = "none";
-            seccionDetalles.style.display = "block";
+            document.getElementById("seccionDetalles").style.display = "block";
         }
+    });
+
+    document.getElementById("btnAnterior")?.addEventListener("click", () => {
+        // 1. Mostrar sección principal y ocultar detalles
+        document.getElementById("seccionPrincipal").style.display = "block";
+        document.getElementById("seccionDetalles").style.display = "none";
+
+        // 2. DESBLOQUEAR los campos para que el usuario pueda corregir
+        const campos = ["matricula", "peso_vehicular", "numero_ejes_vehiculares", "numero_contenedores"];
+        campos.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.readOnly = false;
+                el.classList.remove("bg-light");
+            }
+        });
+
+        // 3. Habilitar de nuevo los Selects
+        const selects = ["modalidad_carroceria", "localidad_pertenece", "responsable_carroceria", "tipo_carroceria"];
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.pointerEvents = "auto";
+                el.style.backgroundColor = "";
+            }
+        });
     });
 }
 
@@ -194,14 +259,43 @@ function generarFormularioDetalles() {
     }
 }
 
-function ejecutarRegistroFinal(form) {
-    confirmar("¿Guardar Registro?", "Se enviarán los datos a la base de datos.")
+// MODIFICA ESTA FUNCIÓN: Es la que envía los datos al servidor
+function ejecutarRegistroFinal() {
+    // 1. Usamos tu función 'confirmar' que ya tienes en el proyecto
+    confirmar("¿Registrar Carrocería?", "¿Deseas continuar con el registro?")
         .then(r => {
+            // Si el usuario cancela, no hacemos nada
             if (!r.isConfirmed) return;
-            apiRequest("registrar-carroceria", form)
-                .then(r => r.text())
-                .then(resp => manejarRespuestaCRUD(resp, "Registro exitoso", "consultar-carrocerias.php"));
+
+            const formulario = document.getElementById("formCarrocerias");
+            
+            // Aseguramos que los campos bloqueados se envíen (tu estándar)
+            const elementosBloqueados = formulario.querySelectorAll('[readonly], :disabled');
+            elementosBloqueados.forEach(el => el.disabled = false);
+
+            // 2. Usamos tu función 'apiRequest' que ya definiste en carrocerias.js
+            // Pasamos el formulario completo como segundo parámetro
+            apiRequest("registrar-carroceria", formulario)
+                .then(res => res.text())
+                .then(resp => {
+                    // 3. Usamos tu función 'manejarRespuestaCRUD' que ya tienes por defecto
+                    // Esta función ya muestra el mensaje de éxito y recarga la página
+                    manejarRespuestaCRUD(resp, "Carrocería registrada correctamente.");
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alerta("Error", "No se pudo conectar con el servidor", "error");
+                });
         });
+}
+// ASEGÚRATE DE QUE LOS SELECTS NO ESTÉN DISABLED
+// En la función donde pasas a la sección de detalles, usa esto:
+function bloquearCamposSeccion1() {
+    // En lugar de .disabled = true, usa esto:
+    document.getElementById("matricula").readOnly = true;
+    document.getElementById("modalidad_carroceria").style.pointerEvents = "none";
+    document.getElementById("tipo_carroceria").style.pointerEvents = "none";
+    // Esto hace que no se puedan editar pero que SÍ se envíen.
 }
 
 /* =====================================================
@@ -430,11 +524,14 @@ function apiRequest(accion, datos = null) {
 
 function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
     if (respuesta.trim() === "OK") {
+        // Usa tu función 'alerta' de alertas.js para el ÉXITO
         alerta("Éxito", mensajeExito, "success").then(() => {
             if (redireccion) window.location.href = redireccion;
             else location.reload();
         });
     } else {
+        // Usa tu función 'alerta' de alertas.js para el ERROR
+        // Esto pondrá automáticamente el botón rojo y el texto "Aceptar"
         alerta("Error", respuesta, "error");
     }
 }
