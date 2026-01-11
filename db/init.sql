@@ -1,3 +1,7 @@
+-- version_1_4
+
+CREATE DATABASE ciit_tms;
+
 CREATE TABLE localidades (
     id_localidad SERIAL PRIMARY KEY,
     nombre_centro_trabajo VARCHAR(100),
@@ -95,6 +99,7 @@ CREATE TABLE transacciones_productos (
 
 CREATE TABLE vehiculos (
     id_vehiculo SERIAL PRIMARY KEY,
+    clave_vehiculo VARCHAR(50),
     modalidad_vehiculo VARCHAR(50) CHECK (modalidad_vehiculo IN 
         ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo')),
     descripcion_vehiculo VARCHAR(100),
@@ -102,7 +107,7 @@ CREATE TABLE vehiculos (
         ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
-CREATE TABLE carrocerias (
+CREATE TABLE carrocerias ( 
     id_carroceria SERIAL PRIMARY KEY,
     matricula VARCHAR(50),
     localidad_pertenece INT REFERENCES localidades(id_localidad)
@@ -112,8 +117,12 @@ CREATE TABLE carrocerias (
     numero_contenedores INT,
     peso_vehicular FLOAT,
     numero_ejes_vehiculares INT,
-    tipo_carroceria VARCHAR(20) CHECK (tipo_carroceria IN 
-        ('Unidad de arrastre', 'Unidad de carga', 'Mixta'))
+    tipo_carroceria varchar (30) CHECK (tipo_carroceria IN 
+        ('Unidad de arrastre', 'Unidad de carga', 'Mixta')),
+    estatus_carroceria varchar(15) CHECK (estatus_carroceria IN 
+        ('Disponible', 'Ensamblada', 'En mantenimiento', 'En reparación')),
+    modalidad_carroceria VARCHAR (30) CHECK (modalidad_carroceria IN
+        ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo'))
 );
 
 
@@ -171,12 +180,13 @@ CREATE TABLE rutas (
 
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
-    clave_producto VARCHAR(30),
+    clave_pedido VARCHAR(30) NOT NULL,
     localidad_origen INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
     localidad_destino INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    estatus_pedido VARCHAR(50),
+    estatus_pedido VARCHAR(50) CHECK (estatus_pedido  IN 
+        ('En captura', 'En preparación', 'En recolección', 'Enviado', 'En tránsito', 'En reparto', 'Entregado')) ,
     fecha_solicitud DATE,
     fecha_entrega DATE,
     observaciones varchar(200)
