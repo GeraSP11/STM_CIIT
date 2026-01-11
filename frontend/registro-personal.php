@@ -96,6 +96,7 @@ $seccion = 'Registro de personal';
                                 <option value="Operador Logístico">Operador Logístico</option>
                                 <option value="Cliente">Cliente</option>
                                 <option value="Jefe de Almacén">Jefe de Almacén</option>
+                                <option value="Chófer">Chófer</option> 
                             </select>
                         </div>
 
