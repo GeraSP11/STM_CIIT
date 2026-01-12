@@ -248,7 +248,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                                 <li><a class="dropdown-item" href="/registro-pedido.php">Registrar</a></li>
                                 <li><a class="dropdown-item" href="#">Consultar</a></li>
                                 <li><a class="dropdown-item" href="/actualizar-pedidos.php">Actualizar</a></li>
-                                <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-pedidos.php">Eliminar</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>

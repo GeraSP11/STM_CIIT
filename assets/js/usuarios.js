@@ -508,7 +508,9 @@ function checkPassword() {
         upper: /[A-Z]/.test(val),
         lower: /[a-z]/.test(val),
         number: /[0-9]/.test(val),
-        special: /[@$!%*?&]/.test(val)
+        // special: /[@$!%*?&]/.test(val)
+        special: /[^a-zA-Z0-9]/.test(val)
+
     };
 
     const fails = [];
