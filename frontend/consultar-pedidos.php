@@ -20,6 +20,7 @@ $seccion = 'Consulta de Pedidos';
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/icons/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="/assets/css/headers-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
         .form-container {
@@ -100,25 +101,25 @@ $seccion = 'Consulta de Pedidos';
 
 <?php include('includes/header-dinamico.php'); ?>
 
-<nav aria-label="breadcrumb" class="mt-2 ps-3 fs-5">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="/dashboard.php">
-                <i class="bi bi-house-fill" style="color:#4a1026;"></i>
-            </a>
+            <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
         </li>
-        <li class="breadcrumb-item active"><?php echo $seccion; ?></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <?php echo $seccion; ?>
+        </li>
     </ol>
 </nav>
 
-<h2><?php echo $seccion; ?></h2>
-
-<!-- FORM -->
+<!-- FORMULARIO -->
 <div class="form-container">
-    <form>
+    <form id="formConsulta">
         <div class="form-label-box">Filtro de búsqueda: *</div>
 
-        <input class="form-control-custom" placeholder="Identificador del pedido">
+        <input id="idPedido" class="form-control-custom" placeholder="Identificador del pedido">
 
         <div class="d-flex align-items-center my-3">
             <div class="flex-grow-1 border-top"></div>
@@ -126,14 +127,15 @@ $seccion = 'Consulta de Pedidos';
             <div class="flex-grow-1 border-top"></div>
         </div>
 
-        <input class="form-control-custom" placeholder="Localidad origen">
-        <input class="form-control-custom" placeholder="Localidad destino">
+        <input id="origen" class="form-control-custom" placeholder="Localidad origen">
+        <input id="destino" class="form-control-custom" placeholder="Localidad destino">
 
         <div class="text-center">
             <button class="btn btn-custom">Consultar</button>
         </div>
     </form>
 </div>
+
 
 
 <!-- Contenedor resultados -->
@@ -253,6 +255,16 @@ $seccion = 'Consulta de Pedidos';
     </div>
 </div>
 
-<script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- CRIPT DEL FORMULARIO -->
+    <script src="/assets/js/pedidos.js"></script>
 </body>
 </html>

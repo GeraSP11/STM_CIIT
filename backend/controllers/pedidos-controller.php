@@ -124,4 +124,24 @@ class PedidosController
         $d = DateTime::createFromFormat('Y-m-d', $fecha);
         return $d && $d->format('Y-m-d') === $fecha;
     }
+
+
+   public function consultarPedido($data) {
+        $idPedido = isset($data['idPedido']) ? trim($data['idPedido']) : '';
+        $origen   = isset($data['origen']) ? trim($data['origen']) : '';
+        $destino  = isset($data['destino']) ? trim($data['destino']) : '';
+
+        $model = new PedidosModel();
+        $pedidos = $model->obtenerPedidos($idPedido, $origen, $destino);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'pedidos' => $pedidos
+        ]);
+    }
+
+
+
+
+
 }

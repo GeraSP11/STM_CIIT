@@ -29,7 +29,12 @@ try {
         case 'actualizar':
             actualizarPedido($controller);
             break;
-            
+        case 'consultar-pedidos':
+            $controller = new PedidosController();
+            $controller->consultarPedido($_POST);
+            break;
+
+
         default:
             echo json_encode([
                 'success' => false,

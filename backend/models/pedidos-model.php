@@ -232,4 +232,77 @@ class PedidosModel
             throw new Exception("Error al verificar existencia del pedido: " . $e->getMessage());
         }
     }
+
+
+
+
+
+
+
+    // FUNCIONALIDAD PARA CONSULTAR PEDIDOS
+    // Obtener pedidos con filtros opcionales
+    public function obtenerPedidos($idPedido = null, $origen = null, $destino = null) {
+        global $pdo;
+
+        if (!$pdo) {
+            throw new Exception("No hay conexión a la base de datos");
+        }
+
+        $query = "SELECT 
+                    p.id_pedido, 
+                    p.clave_pedido, 
+                    p.estatus_pedido, 
+                    p.fecha_solicitud, 
+                    p.fecha_entrega, 
+                    o.nombre AS origen, 
+                    d.nombre AS destino, 
+                    p.observaciones
+                FROM pedidos p
+                JOIN localidades o ON p.localidad_origen = o.id_localidad
+                JOIN localidades d ON p.localidad_destino = d.id_localidad
+                WHERE 1=1";
+
+        $params = [];
+
+        if ($idPedido) {
+            $query .= " AND p.clave_pedido = :idPedido";
+            $params[':idPedido'] = $idPedido;
+        }
+        if ($origen) {
+            $query .= " AND o.nombre ILIKE :origen";
+            $params[':origen'] = "%$origen%";
+        }
+        if ($destino) {
+            $query .= " AND d.nombre ILIKE :destino";
+            $params[':destino'] = "%$destino%";
+        }
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Obtener detalles de un pedido
+    public function obtenerDetallesPedido($idPedido) {
+        global $pdo;
+
+        if (!$pdo) {
+            throw new Exception("No hay conexión a la base de datos");
+        }
+
+        $query = "SELECT 
+                    pd.id_pedido_detalles, 
+                    pr.nombre AS producto, 
+                    pd.cantidad_producto AS cantidad, 
+                    pd.observaciones
+                FROM pedidos_detalles pd
+                JOIN productos pr ON pd.identificador_producto = pr.id_producto
+                WHERE pd.id_pedido = :idPedido";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([':idPedido' => $idPedido]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

@@ -504,3 +504,147 @@ function mostrarAlerta(tipo, mensaje) {
 function mostrarLoading(mostrar) {
     document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
 }
+
+
+
+// =======================================================
+// FUNCIONALIDAD CONSULTAR PEDIDOS
+// =======================================================
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Referencias a elementos del DOM
+    const formConsulta = document.getElementById("formConsulta");
+
+    // Si no existe el formulario en esta vista, salimos
+    if (!formConsulta) return;
+
+    const inputIdPedido = document.getElementById("idPedido");
+    const inputOrigen = document.getElementById("origen");
+    const inputDestino = document.getElementById("destino");
+    const divTablaResultados = document.getElementById("tablaResultados");
+    const tablaPedidosTbody = document.querySelector("#tablaPedidos tbody");
+
+    // Modal y campos detalle
+    const modalPedido = new bootstrap.Modal(document.getElementById("modalPedido"));
+    const detalleCampos = {
+        id: document.getElementById("detalle-id"),
+        estatus: document.getElementById("detalle-estatus"),
+        fechaSolicitud: document.getElementById("detalle-fecha-solicitud"),
+        fechaEntrega: document.getElementById("detalle-fecha-entrega"),
+        producto: document.getElementById("detalle-producto"),
+        origen: document.getElementById("detalle-origen"),
+        destino: document.getElementById("detalle-destino"),
+        cantidad: document.getElementById("detalle-cantidad"),
+        unidad: document.getElementById("detalle-unidad"),
+        observaciones: document.getElementById("detalle-observaciones")
+    };
+
+    // Listener del submit
+    formConsulta.addEventListener("submit", function(e) {
+        e.preventDefault();
+        consultarPedidos();
+    });
+
+    // Función que consulta los pedidos
+    function consultarPedidos() {
+
+        const filtros = {
+            idPedido: inputIdPedido.value.trim(),
+            origen: inputOrigen.value.trim(),
+            destino: inputDestino.value.trim()
+        };
+
+        // Validación: al menos un filtro debe estar lleno
+        if (!filtros.idPedido && !filtros.origen && !filtros.destino) {
+            alerta("Aviso", "Ingresa al menos un filtro para buscar.", "info");
+            return;
+        }
+
+        // Limpiamos resultados previos
+        tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">Cargando...</td></tr>`;
+
+      enviarPeticionPOST("consultar-pedidos", filtros)
+        .then(res => {
+            console.log("Status HTTP:", res.status, res.statusText);
+            return res.text();
+        })
+        .then(text => {
+            console.log("Texto recibido del backend:", text);
+            try {
+                const data = JSON.parse(text);
+                console.log("JSON parseado:", data);
+            } catch (e) {
+                console.error("No es JSON válido:", e);
+            }
+        })
+        .catch(err => {
+            console.error("Error en fetch:", err);
+        });
+
+
+    }
+
+    // Función que muestra los detalles del pedido en el modal
+    function mostrarModalPedido(pedido) {
+        detalleCampos.id.textContent = pedido.id || "";
+        detalleCampos.estatus.textContent = pedido.estatus || "";
+        detalleCampos.fechaSolicitud.textContent = pedido.fechaSolicitud || "";
+        detalleCampos.fechaEntrega.textContent = pedido.fechaEntrega || "";
+        detalleCampos.producto.textContent = pedido.producto || "";
+        detalleCampos.origen.textContent = pedido.origen || "";
+        detalleCampos.destino.textContent = pedido.destino || "";
+        detalleCampos.cantidad.textContent = pedido.cantidad || "";
+        detalleCampos.unidad.textContent = pedido.unidad || "";
+        detalleCampos.observaciones.textContent = pedido.observaciones || "";
+
+        modalPedido.show();
+    }
+
+    // Opcional: cargar la tabla al inicio
+    // consultarPedidos();
+});
+
+
+// =======================================================
+// FUNCIONES AUXILIARES
+// =======================================================
+
+/**
+ * Envía una petición POST al backend con acción y datos opcionales
+ */
+function enviarPeticionPOST(accion, datos = null) {
+
+    const formData = datos instanceof HTMLFormElement
+        ? new FormData(datos)
+        : new FormData();
+
+    if (datos && !(datos instanceof HTMLFormElement)) {
+        for (const clave in datos) {
+            formData.append(clave, datos[clave]);
+        }
+    }
+
+    formData.append("accion", accion);
+
+
+    return fetch('/ajax/pedidos-ajax.php', {
+        method: "POST",
+        body: formData
+    });
+}
+
+/**
+ * Maneja respuestas del backend para cualquier operación del CRUD.
+ */
+function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
+
+    if (respuesta.trim() === "OK") {
+        alerta("Éxito", mensajeExito, "success")
+            .then(() => {
+                if (redireccion) window.location.href = redireccion;
+            });
+
+    } else {
+        alerta("Error", respuesta, "error");
+    }
+}
