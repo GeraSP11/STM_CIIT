@@ -57,7 +57,8 @@ $seccion = 'Registro de Carrocerías';
         }
 
         .btn-custom:hover {
-            background-color: #3b0d20;
+            background-color: #4a1026;
+            color: #ffe6e6;
         }
 
         .btn-custom:disabled {
@@ -100,70 +101,68 @@ $seccion = 'Registro de Carrocerías';
     <h2><?php echo $seccion; ?></h2>
 
     <div class="form-container">
- <form id="formCarrocerias">
-    <div id="seccionPrincipal">
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="modalidad_carroceria" class="form-label">Modalidad *</label>
-                <select id="modalidad_carroceria" name="modalidad_carroceria" class="form-select" required>
-                    <option value="">Seleccione modalidad</option>
-                    <option value="Carretero">Carretero</option>
-                    <option value="Ferroviario">Ferroviario</option>
-                    <option value="Marítimo">Marítimo</option>
-                    <option value="Aéreo">Aéreo</option>
-                </select>
+    <form id="formCarrocerias">
+        <div id="seccionPrincipal">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="modalidad_carroceria" class="form-label">Modalidad *</label>
+                    <select id="modalidad_carroceria" name="modalidad_carroceria" class="form-select" required>
+                        <option value="">Seleccione modalidad</option>
+                        <option value="Carretero">Carretero</option>
+                        <option value="Ferroviario">Ferroviario</option>
+                        <option value="Marítimo">Marítimo</option>
+                        <option value="Aéreo">Aéreo</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="matricula" class="form-label">Matrícula / NIV *</label>
+                    <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej. ABC-1234" required maxlength="100">
+                </div>
+                <div class="col-md-4">
+                    <label for="tipo_carroceria" class="form-label">Tipo de carrocería *</label>
+                    <select id="tipo_carroceria" name="tipo_carroceria" class="form-select" required>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="matricula" class="form-label">Matrícula / NIV *</label>
-                <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej. ABC-1234" required maxlength="100">
-            </div>
-            <div class="col-md-4">
-                <label for="tipo_carroceria" class="form-label">Tipo de carrocería *</label>
-                <select id="tipo_carroceria" name="tipo_carroceria" class="form-select" required>
-                    <option value="">Seleccione tipo</option>
-                    <option value="Unidad de arrastre">Unidad de arrastre</option>
-                    <option value="Unidad de carga">Unidad de carga</option>
-                    <option value="Mixta">Mixta</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="peso_vehicular" class="form-label">Peso Vehicular (kg) *</label>
-                <input type="number" step="0.01" id="peso_vehicular" name="peso_vehicular" class="form-input" placeholder="Ej. 1500.50" required min="1">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="peso_vehicular" class="form-label">Peso Vehicular (kg) *</label>
+                    <input type="number" step="0.01" id="peso_vehicular" name="peso_vehicular" class="form-input" placeholder="Ej. 1500.50" required min="1">
+                </div>
+                <div class="col-md-4">
+                    <label for="numero_ejes_vehiculares" class="form-label">Número de Ejes</label>
+                    <input type="number" id="numero_ejes_vehiculares" name="numero_ejes_vehiculares" class="form-input" placeholder="Ej. 2" min="1" max="20">
+                </div>
+                <div class="col-md-4">
+                    <label for="numero_contenedores" class="form-label">Número de Contenedores</label>
+                    <input type="number" id="numero_contenedores" name="numero_contenedores" class="form-input" placeholder="Ej. 1" min="0" max="10">
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="numero_ejes_vehiculares" class="form-label">Número de Ejes</label>
-                <input type="number" id="numero_ejes_vehiculares" name="numero_ejes_vehiculares" class="form-input" placeholder="Ej. 2" min="1" max="20">
-            </div>
-            <div class="col-md-4">
-                <label for="numero_contenedores" class="form-label">Número de Contenedores</label>
-                <input type="number" id="numero_contenedores" name="numero_contenedores" class="form-input" placeholder="Ej. 1" min="0" max="10">
-            </div>
-        </div>
 
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="localidad_pertenece" class="form-label">Localidad de Pertenencia *</label>
-                <select id="localidad_pertenece" name="localidad_pertenece" class="form-select" required>
-                    <option value="">Seleccione localidad</option>
-                </select>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label for="localidad_pertenece" class="form-label">Localidad de Pertenencia *</label>
+                    <select id="localidad_pertenece" name="localidad_pertenece" class="form-select" required>
+                        <option value="">Seleccione localidad</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="responsable_carroceria" class="form-label">Responsable Asignado *</label>
+                    <select id="responsable_carroceria" name="responsable_carroceria" class="form-select" required>
+                        <option value="">Seleccione responsable</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label for="responsable_carroceria" class="form-label">Responsable Asignado *</label>
-                <select id="responsable_carroceria" name="responsable_carroceria" class="form-select" required>
-                    <option value="">Seleccione responsable</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="d-flex justify-content-center">
-            <button class="btn btn-custom" type="button" id="btnSiguiente">
-                Siguiente <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-    </div> <div id="seccionDetalles" style="display: none;">
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-custom" type="button" id="btnSiguiente" disabled>
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div> <div id="seccionDetalles" style="display: none;">
+
+
         <h4 class="mb-4"><i class="fas fa-boxes"></i> Detalles de Contenedores</h4>
         
         <div id="contenedor-detalles"></div>

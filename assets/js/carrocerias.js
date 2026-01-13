@@ -63,13 +63,16 @@ function cargarPersonal() {
             const select = document.getElementById('responsable_carroceria');
             if (!select) return;
 
-            if (data.length === 0) {
-                select.innerHTML = '<option value="">Sin personal registrado</option>';
+            // Filtrar solo el personal que sea "Jefe de Almacén" (el backend incluye el cargo en nombre_completo)
+            const jefesAlmacen = data.filter(p => p.nombre_completo.includes('(Jefe de Almacén)'));
+
+            if (jefesAlmacen.length === 0) {
+                select.innerHTML = '<option value="">Sin jefes de almacén registrados</option>';
                 select.disabled = true;
             } else {
                 select.disabled = false;
                 select.innerHTML = '<option value="">Seleccione responsable</option>';
-                data.forEach(p => {
+                jefesAlmacen.forEach(p => {
                     select.add(new Option(p.nombre_completo, p.id_personal));
                 });
             }
@@ -123,11 +126,16 @@ function gestionarCamposCondicionales() {
     const actualizarVisibilidad = () => {
         const mod = selectModalidad.value;
         if (["Marítimo", "Aéreo"].includes(mod)) {
+            selectTipo.innerHTML = '<option value="Mixta">Mixta</option>';
             selectTipo.value = "Mixta";
             selectTipo.disabled = true;
             inputEjes.disabled = true;
             inputEjes.required = false;
+        } else if( mod === "Ferroviario") {
+            selectTipo.innerHTML = '<option value="">Seleccione tipo</option><option value="Unidad de carga">Unidad de carga</option><option value="Unidad de arrastre">Unidad de arrastre</option>';
+            selectTipo.disabled = false;
         } else {
+            selectTipo.innerHTML = '<option value="">Seleccione tipo</option><option value="Unidad de arrastre">Unidad de arrastre</option><option value="Unidad de carga">Unidad de carga</option><option value="Mixta">Mixta</option>';
             selectTipo.disabled = false;
             inputEjes.disabled = false;
             inputEjes.required = true;
