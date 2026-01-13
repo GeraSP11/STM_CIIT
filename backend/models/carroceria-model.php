@@ -89,27 +89,44 @@ class CarroceriaModel
     public function listarCarrocerias($filtros = [])
     {
         global $pdo;
-        $sql = "SELECT c.*, l.nombre_centro_trabajo AS localidad_nombre, 
-                       (p.nombre_personal || ' ' || p.apellido_paterno) AS responsable_nombre
+
+        // 1. Base de la consulta con los ALIAS para que el JS los reconozca
+        $sql = "SELECT c.*, 
+                    l.nombre_centro_trabajo AS nombre_localidad, 
+                    (p.nombre_personal || ' ' || p.apellido_paterno) AS nombre_responsable
                 FROM carrocerias c
                 LEFT JOIN localidades l ON c.localidad_pertenece = l.id_localidad
                 LEFT JOIN personal p ON c.responsable_carroceria = p.id_personal
                 WHERE 1=1";
 
         $params = [];
-        if (!empty($filtros['modalidad'])) {
-            $sql .= " AND c.modalidad_carroceria = ?";
-            $params[] = $filtros['modalidad'];
-        }
+
+        // 2. Mapeo de filtros dinámicos (Igual que en tu ejemplo de Localidades)
+        // Estos nombres ('matricula', 'modalidad', etc.) deben coincidir con el 'name' de tus inputs en el JS
         if (!empty($filtros['matricula'])) {
-            $sql .= " AND c.matricula ILIKE ?";
-            $params[] = "%" . $filtros['matricula'] . "%";
+            $sql .= " AND c.matricula ILIKE :matricula";
+            $params[':matricula'] = "%" . $filtros['matricula'] . "%";
         }
 
-        $sql .= " ORDER BY c.id_carroceria DESC";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($filtros['modalidad_carroceria'])) {
+            $sql .= " AND c.modalidad_carroceria = :modalidad";
+            $params[':modalidad'] = $filtros['modalidad_carroceria'];
+        }
+
+        if (!empty($filtros['estatus_carroceria'])) {
+            $sql .= " AND c.estatus_carroceria = :estatus";
+            $params[':estatus'] = $filtros['estatus_carroceria'];
+        }
+
+        $sql .= " ORDER BY c.matricula ASC";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return ["error" => $e->getMessage()];
+        }
     }
 
     /**

@@ -27,10 +27,38 @@ switch ($action) {
         echo $controller->registrarCarroceria($_POST);
         break;
     case 'consultar-carrocerias':
-        $controller = new CarroceriaController();
-        $resultados = $controller->consultarCarrocerias($_POST);
         header('Content-Type: application/json');
-        echo json_encode($resultados);
+        $controller = new CarroceriaController();
+        $carrocerias = $controller->consultarCarrocerias($_POST);
+
+        global $pdo; 
+        
+        foreach ($carrocerias as &$carro) {
+            // Ajuste: Las columnas reales en la tabla 'carrocerias' son estas:
+            $idLoc = $carro['localidad_pertenece'] ?? null;
+            $idPers = $carro['responsable_carroceria'] ?? null;
+
+            // 1. Buscar y concatenar Localidad
+            if ($idLoc) {
+                $stmtL = $pdo->prepare("SELECT (nombre_centro_trabajo || ' - ' || poblacion) as display FROM localidades WHERE id_localidad = ?");
+                $stmtL->execute([$idLoc]);
+                $loc = $stmtL->fetch(PDO::FETCH_ASSOC);
+                $carro['nombre_display_localidad'] = $loc ? $loc['display'] : "Localidad no encontrada";
+            } else {
+                $carro['nombre_display_localidad'] = "No asignada";
+            }
+
+            // 2. Buscar y concatenar Responsable
+            if ($idPers) {
+                $stmtP = $pdo->prepare("SELECT (nombre_personal || ' ' || apellido_paterno || ' (' || cargo || ')') as completo FROM personal WHERE id_personal = ?");
+                $stmtP->execute([$idPers]);
+                $pers = $stmtP->fetch(PDO::FETCH_ASSOC);
+                $carro['nombre_completo_personal'] = $pers ? $pers['completo'] : "Personal no encontrado";
+            } else {
+                $carro['nombre_completo_personal'] = "Sin responsable";
+            }
+        }
+        echo json_encode($carrocerias);
         break;
 
     case 'buscar-carrocerias':
@@ -83,24 +111,24 @@ switch ($action) {
     }
     exit;
 
-case 'obtener-personal':
-    global $pdo;
-    header('Content-Type: application/json');
-    try {
-        // Eliminamos "WHERE estatus_personal = 'Activo'" ya que la columna no existe
-        $sql = "SELECT id_personal, 
-                (nombre_personal || ' ' || apellido_paterno || ' (' || cargo || ')') as nombre_completo 
-                FROM personal 
-                ORDER BY nombre_personal ASC";
-        
-        $stmt = $pdo->query($sql);
-        $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($resultados);
-    } catch (Exception $e) {
-        // Es vital enviar el error para saber si algo más falla
-        echo json_encode(["error" => $e->getMessage()]);
-    }
-    exit;
+    case 'obtener-personal':
+        global $pdo;
+        header('Content-Type: application/json');
+        try {
+            // Eliminamos "WHERE estatus_personal = 'Activo'" ya que la columna no existe
+            $sql = "SELECT id_personal, 
+                    (nombre_personal || ' ' || apellido_paterno || ' (' || cargo || ')') as nombre_completo 
+                    FROM personal 
+                    ORDER BY nombre_personal ASC";
+            
+            $stmt = $pdo->query($sql);
+            $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode($resultados);
+        } catch (Exception $e) {
+            // Es vital enviar el error para saber si algo más falla
+            echo json_encode(["error" => $e->getMessage()]);
+        }
+        exit;
 
     default:
         header('HTTP/1.1 400 Bad Request');

@@ -4,6 +4,7 @@ require_once "../backend/middleware/no-cache.php";
 requireRole(["Autoridad", "Administrador del TMS"]);
 
 $page_title = 'MARINA Corredor Interoceánico';
+$titulo_seccion = 'Gestión de Carrocerías';
 $seccion = 'Consultar Carrocerías';
 ?>
 <!DOCTYPE html>
@@ -70,7 +71,7 @@ $seccion = 'Consultar Carrocerías';
                 <tbody></tbody>
             </table>
             <div class="d-flex justify-content-center">
-                <button id="btnVolver" class="btn btn-custom">Nueva Consulta</button>
+                <button id="btnVolver" class="btn btn-custom">Volver</button>
             </div>
         </div>
     </div>

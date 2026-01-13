@@ -301,14 +301,19 @@ function bloquearCamposSeccion1() {
 /* =====================================================
    2. CONSULTAR (READ)
    ===================================================== */
+/* =====================================================
+   2. CONSULTAR (READ) - VERSIÓN INTEGRAL CON SELECTS
+   ===================================================== */
 function configurarVistaConsultarCarrocerias() {
     const selectFiltros = document.getElementById("selectFiltro");
     const botonAgregarFiltro = document.getElementById("btnAddFiltro");
     const contenedorFiltros = document.getElementById("filtrosContainer");
     const contenedorBotonConsultar = document.getElementById("contenedorConsultar");
+    const btnVolver = document.getElementById("btnVolver");
 
     if (!selectFiltros || !botonAgregarFiltro || !contenedorFiltros) return;
 
+    // EVENTO AGREGAR FILTRO (Con lógica de Selects)
     botonAgregarFiltro.addEventListener("click", () => {
         const valorFiltro = selectFiltros.value;
         const textoFiltro = selectFiltros.options[selectFiltros.selectedIndex].text;
@@ -319,68 +324,140 @@ function configurarVistaConsultarCarrocerias() {
         }
 
         const fila = document.createElement("div");
-        fila.classList.add("filter-row", "mb-2", "d-flex", "gap-2");
+        fila.classList.add("filter-row", "mb-2", "d-flex", "gap-2", "animated", "fadeIn");
+        
+        // REINCORPORACIÓN DE LISTAS DESPLEGABLES
         fila.innerHTML = `
             <input type="text" class="form-control" value="${textoFiltro}" readonly style="width: 40%;">
-            <input type="text" class="form-control" name="${valorFiltro}" placeholder="Valor a buscar..." required style="width: 40%;">
-            <button class="btn btn-danger delete-btn"><i class="fas fa-trash"></i></button>
+            ${valorFiltro === 'modalidad_carroceria' ? `
+            <select name="modalidad_carroceria" class="form-select" required style="width: 50%;">
+                <option value="">Seleccione</option>
+                <option value="Carretero">Carretero</option>
+                <option value="Ferroviario">Ferroviario</option>
+                <option value="Marítimo">Marítimo</option>
+                <option value="Aéreo">Aéreo</option>
+            </select>` : valorFiltro === 'estatus_carroceria' ? `
+            <select name="estatus_carroceria" class="form-select" required style="width: 50%;">
+                <option value="">Seleccione</option>
+                <option value="Disponible">Disponible</option>
+                <option value="Ensamblada">Ensamblada</option>
+                <option value="En mantenimiento">En mantenimiento</option>
+                <option value="En reparación">En reparación</option>
+            </select>` : `
+            <input type="text" class="form-control" name="${valorFiltro}" placeholder="Valor a buscar..." required style="width: 50%;">
+            `}
+            <button type="button" class="btn btn-danger delete-btn"><i class="fas fa-trash"></i></button>
         `;
+
         contenedorFiltros.appendChild(fila);
         contenedorBotonConsultar.style.display = "flex";
-        selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = true;
+
+        // Deshabilitar opción en el combo principal
+        const opcionOriginal = selectFiltros.querySelector(`option[value="${valorFiltro}"]`);
+        if (opcionOriginal) opcionOriginal.disabled = true;
         selectFiltros.selectedIndex = 0;
 
+        // Botón eliminar del filtro individual
         fila.querySelector(".delete-btn").addEventListener("click", () => {
             fila.remove();
+            if (opcionOriginal) opcionOriginal.disabled = false;
             contenedorBotonConsultar.style.display = contenedorFiltros.children.length ? "flex" : "none";
-            selectFiltros.querySelector(`option[value="${valorFiltro}"]`).disabled = false;
         });
     });
+
+    // BOTÓN VOLVER (Comportamiento Localidades)
+    if (btnVolver) {
+        btnVolver.addEventListener("click", () => {
+            // 1. Limpiar contenedor de filtros
+            contenedorFiltros.innerHTML = "";
+            
+            // 2. Habilitar todas las opciones del select principal
+            const opciones = selectFiltros.querySelectorAll("option");
+            opciones.forEach(opt => opt.disabled = false);
+            selectFiltros.selectedIndex = 0;
+
+            // 3. Resetear formulario y tabla
+            const form = document.getElementById("formConsultarCarrocerias");
+            if (form) form.reset();
+            document.querySelector("#tablaCarrocerias tbody").innerHTML = "";
+
+            // 4. Alternar vistas
+            document.getElementById("formContainer").style.display = "block";
+            document.getElementById("tablaResultados").style.display = "none";
+            contenedorBotonConsultar.style.display = "none";
+        });
+    }
 }
 
 function consultarCarrocerias() {
-    const formularioConsulta = document.getElementById("formConsultarCarrocerias");
-    const contenedorResultados = document.getElementById("tablaResultados");
-    const cuerpoTabla = document.querySelector("#tablaCarrocerias tbody");
+    const form = document.getElementById("formConsultarCarrocerias");
+    const contenedorFiltros = document.getElementById("filtrosContainer");
 
-    if (!formularioConsulta) return;
+    if (!form) return;
 
-    formularioConsulta.addEventListener("submit", (e) => {
+    form.addEventListener("submit", function (e) {
         e.preventDefault();
-        const formData = new FormData(formularioConsulta);
+
+        // Recolectar filtros dinámicos (Inputs y Selects)
         const filtros = {};
-        formData.forEach((value, key) => { if(key !== 'action') filtros[key] = value; });
+        const elementos = contenedorFiltros.querySelectorAll('input:not([readonly]), select');
+        
+        elementos.forEach(el => {
+            if (el.value.trim() !== "") {
+                filtros[el.name] = el.value.trim();
+            }
+        });
 
         apiRequest("consultar-carrocerias", filtros)
             .then(res => res.json())
-            .then(datos => {
-                if (!datos || datos.length === 0) {
-                    alerta("Sin resultados", "No hay carrocerías con esos filtros.", "info");
+            .then(data => {
+                const tbody = document.querySelector("#tablaCarrocerias tbody");
+                tbody.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    alerta("Sin resultados", "No se encontraron carrocerías", "info");
                     return;
                 }
-                cuerpoTabla.innerHTML = "";
-                datos.forEach(item => {
-                    cuerpoTabla.innerHTML += `
-                        <tr>
-                            <td>${item.matricula}</td>
-                            <td>${item.modalidad}</td>
-                            <td>${item.tipo}</td>
-                            <td>${item.localidad}</td>
-                            <td><span class="badge ${item.estatus === 'Disponible' ? 'bg-success' : 'bg-warning'}">${item.estatus}</span></td>
-                        </tr>`;
-                });
-                contenedorResultados.style.display = "block";
-                formularioConsulta.parentElement.style.display = "none";
-            })
-            .catch(() => alerta("Error", "Error al procesar la consulta.", "error"));
-    });
 
-    document.getElementById("btnVolver")?.addEventListener("click", () => {
-        contenedorResultados.style.display = "none";
-        formularioConsulta.parentElement.style.display = "block";
+                data.forEach(carro => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${carro.matricula || ''}</td>
+                        <td>${carro.modalidad_carroceria || carro.modalidad || ''}</td>
+                        <td>${carro.tipo_carroceria || carro.tipo || ''}</td>
+                        <td>
+                            <span class="badge ${typeof getBadgeClass === 'function' ? getBadgeClass(carro.estatus_carroceria || carro.estatus) : 'bg-primary'}">
+                                ${carro.estatus_carroceria || carro.estatus || ''}
+                            </span>
+                        </td>
+                        <td>${carro.nombre_display_localidad || 'N/A'}</td> 
+                        <td>${carro.nombre_completo_personal || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById("formContainer").style.display = "none";
+                document.getElementById("tablaResultados").style.display = "block";
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alerta("Error", "Error al procesar la respuesta del servidor", "error");
+            });
     });
 }
 
+// Función auxiliar para colores de estatus
+function getBadgeClass(estatus) {
+    switch(estatus) {
+        case 'Disponible': return 'bg-success';
+        case 'Ensamblada': return 'bg-primary';
+        case 'En mantenimiento': return 'bg-warning text-dark';
+        case 'En reparación': return 'bg-danger';
+        default: return 'bg-secondary';
+    }
+
+
+}
 /* =====================================================
    3. ACTUALIZAR (UPDATE)
    ===================================================== */
