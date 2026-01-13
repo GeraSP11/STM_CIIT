@@ -246,7 +246,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                                 data-bs-toggle="dropdown" aria-expanded="false">Pedidos</a>
                             <ul class="dropdown-menu" aria-labelledby="pedidosDropdown">
                                 <li><a class="dropdown-item" href="/registro-pedido.php">Registrar</a></li>
-                                <li><a class="dropdown-item" href="#">Consultar</a></li>
+                                <li><a class="dropdown-item" href="/consultar-pedidos.php">Consultar</a></li>
                                 <li><a class="dropdown-item" href="/actualizar-pedidos.php">Actualizar</a></li>
                                 <li><a class="dropdown-item" href="/eliminar-pedidos.php">Eliminar</a></li>
                             </ul>
