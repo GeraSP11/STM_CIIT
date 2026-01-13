@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Inicializar eventos
 function inicializarEventos() {
+
+    // Formulrio de registro
+    //document.getElementById('form-registro').addEventListener('submit', registrarPedido);
+
     // Formulario de búsqueda
     document.getElementById('form-busqueda').addEventListener('submit', buscarPedidos);
     

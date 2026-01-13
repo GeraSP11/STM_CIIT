@@ -29,7 +29,7 @@ $seccion = 'Registrar pedidos';
         }
 
         .captura-card {
-            width: 90%;
+            width: 100%;
             max-width: 900px;
             border: 1px solid #ccc;
         }
@@ -43,6 +43,20 @@ $seccion = 'Registrar pedidos';
 
         .form-control {
             height: 32px;
+        }
+
+        .btn-custom {
+            background-color: #6A0025;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-custom:hover {
+            background-color: #50001c;
         }
     </style>
 </head>
@@ -68,78 +82,79 @@ $seccion = 'Registrar pedidos';
     <h2><?php echo $seccion; ?></h2>
 
     <!-- Contenedor principal -->
-    <div class="container-fluid d-flex justify-content-center align-items-center">
-        <form class="card captura-card" method="post" action="#">
+    <div class="container-fluid d-flex  justify-content-center align-items-center">
+        <form id="formRegistroProductos" method="POST">
+            <input type="hidden" name="action" value="registrar">
+            <div class="card captura-card">
+                <!-- Encabezado -->
+                <div class="captura-header">
+                    En captura
+                </div>
 
-            <!-- Encabezado -->
-            <div class="captura-header">
-                En captura
+                <!-- Cuerpo del formulario -->
+                <div class="card-body">
+
+                    <!-- Fechas -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fechaSolicitud" class="form-label">Fecha de Solicitud:</label>
+                            <input
+                                type="date"
+                                id="fechaSolicitud"
+                                name="fechaSolicitud"
+                                class="form-control"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fechaEntrega" class="form-label">Fecha estimada de entrega:</label>
+                            <input
+                                type="date"
+                                id="fechaEntrega"
+                                name="fechaEntrega"
+                                class="form-control"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Localidades -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="origen" class="form-label">Localidad origen:</label>
+                            <select class="form-control" id="localidad-origen">
+                                <option value="">Localidad Origen</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="destino" class="form-label">Localidad destino:</label>
+                            <select class="form-control" id="localidad-destino">
+                                <option value="">Localidad Destino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Productos -->
+                    <div class="text-center mb-3">
+                        <label class="form-label me-2">Productos:</label>
+                        <button
+                            type="button"
+                            class="btn btn-outline-dark btn-sm rounded-circle"
+                            id="btnAgregarProducto"
+                            title="Agregar producto">
+                            +
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Botones -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-custom me-2">Registrar</button>
+                <button type="reset" class="btn btn-custom me-2">Cancelar</button>
+                <button type="reset" class="btn btn-custom">Limpiar</button>
             </div>
 
-            <!-- Cuerpo del formulario -->
-            <div class="card-body">
-
-                <!-- Fechas -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="fechaSolicitud" class="form-label">Fecha de Solicitud:</label>
-                        <input
-                            type="date"
-                            id="fechaSolicitud"
-                            name="fechaSolicitud"
-                            class="form-control"
-                            required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="fechaEntrega" class="form-label">Fecha estimada de entrega:</label>
-                        <input
-                            type="date"
-                            id="fechaEntrega"
-                            name="fechaEntrega"
-                            class="form-control"
-                            required>
-                    </div>
-                </div>
-
-                <!-- Localidades -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label for="origen" class="form-label">Localidad origen:</label>
-                        <input
-                            type="text"
-                            id="origen"
-                            name="origen"
-                            class="form-control"
-                            placeholder="Ciudad de origen"
-                            required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label for="destino" class="form-label">Localidad destino:</label>
-                        <input
-                            type="text"
-                            id="destino"
-                            name="destino"
-                            class="form-control"
-                            placeholder="Ciudad de destino"
-                            required>
-                    </div>
-                </div>
-
-                <!-- Productos -->
-                <div class="text-center mb-3">
-                    <label class="form-label me-2">Productos:</label>
-                    <button
-                        type="button"
-                        class="btn btn-outline-dark btn-sm rounded-circle"
-                        id="btnAgregarProducto"
-                        title="Agregar producto">
-                        +
-                    </button>
-                </div>
-
-            </div>
         </form>
     </div>
 
@@ -153,6 +168,7 @@ $seccion = 'Registrar pedidos';
     <script src="/assets/js/alertas.js"></script>
 
     <!-- CRIPT DEL FORMULARIO -->
+    <script src="/assets/js/pedidos.js"></script>
 
 
 </body>

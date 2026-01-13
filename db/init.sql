@@ -1,4 +1,4 @@
--- version_1_4
+-- version_1_5
 
 CREATE DATABASE ciit_tms;
 
@@ -105,6 +105,11 @@ CREATE TABLE vehiculos (
     descripcion_vehiculo VARCHAR(100),
     chofer_asignado INT REFERENCES personal(id_personal) 
         ON DELETE RESTRICT ON UPDATE RESTRICT
+    clase VARCHAR(2),
+    nomenclatura VARCHAR(8),
+    numero_de_ejes INT,
+    numero_de_llantas INT,
+    peso_bruto_vehicular FLOAT
 );
 
 CREATE TABLE carrocerias ( 
@@ -118,13 +123,12 @@ CREATE TABLE carrocerias (
     peso_vehicular FLOAT,
     numero_ejes_vehiculares INT,
     tipo_carroceria varchar (30) CHECK (tipo_carroceria IN 
-        ('Unidad de arrastre', 'Unidad de carga', 'Mixta')),
+        ('Unidad de arrastre', 'Unidad de carga', 'Unidad mixta')),
     estatus_carroceria varchar(15) CHECK (estatus_carroceria IN 
         ('Disponible', 'Ensamblada', 'En mantenimiento', 'En reparación')),
     modalidad_carroceria VARCHAR (30) CHECK (modalidad_carroceria IN
         ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo'))
 );
-
 
 CREATE TABLE vehiculos_carrocerias (
     id_vehiculo_carroceria SERIAL PRIMARY KEY,
@@ -150,6 +154,7 @@ CREATE TABLE maniobras (
         ON DELETE CASCADE ON UPDATE CASCADE,
     localidad INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
+    tipo_vehiculo VARCHAR(10),
     tiempo_carga INT,
     tiempo_descarga INT,
     tiempo_almacenaje INT
@@ -175,6 +180,7 @@ CREATE TABLE rutas (
     tipo_ruta INT REFERENCES carrocerias(id_carroceria)
         ON DELETE CASCADE ON UPDATE CASCADE,
     distancia FLOAT,
+    peso_soportado FLOAT,
     descripcion VARCHAR(200)
 );
 
