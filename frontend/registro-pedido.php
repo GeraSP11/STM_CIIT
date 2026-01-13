@@ -58,6 +58,102 @@ $seccion = 'Registrar pedidos';
         .btn-custom:hover {
             background-color: #50001c;
         }
+
+        .contenedor-productos {
+            max-width: 1000px;
+            margin: 2rem auto;
+            /* centra horizontalmente */
+        }
+
+
+        /* ===== BUSCADOR ===== */
+        .buscador-productos {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .buscador-productos label {
+            background-color: #541C33;
+            color: #fff;
+            padding: 6px 20px;
+            border-radius: 4px 0 0 4px;
+            font-weight: bold;
+        }
+
+        .buscador-productos input {
+            border-radius: 0 4px 4px 0;
+            height: 32px;
+        }
+
+        /* ===== TEXTO AYUDA ===== */
+        .texto-ayuda {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        /* ===== TABLA ===== */
+        .tabla-productos {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .tabla-productos thead {
+            background-color: #5b1d3b;
+            color: #fff;
+        }
+
+        .tabla-productos th {
+            background-color: #541C33;
+            color: #fff;
+
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .tabla-productos td {
+            height: 30px;
+            vertical-align: middle;
+        }
+
+        .tabla-productos input[type="radio"] {
+            transform: scale(1.1);
+        }
+
+        /* Scroll interno */
+        .tabla-scroll {
+            max-height: 230px;
+            overflow-y: auto;
+        }
+
+        /* ===== BOTONES ===== */
+        .btn-vino {
+            background-color: #6A0025;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        .btn-vino:hover {
+            background-color: #50001c;
+        }
+
+        .btn-gris {
+            background-color: #9e9e9e;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        .btn-gris:hover {
+            background-color: #7f7f7f;
+        }
     </style>
 </head>
 
@@ -78,85 +174,158 @@ $seccion = 'Registrar pedidos';
         </ol>
     </nav>
 
-    <!-- Título de sección -->
-    <h2><?php echo $seccion; ?></h2>
 
-    <!-- Contenedor principal -->
-    <div class="container-fluid d-flex  justify-content-center align-items-center">
-        <form id="formRegistroProductos" method="POST">
-            <input type="hidden" name="action" value="registrar">
-            <div class="card captura-card">
-                <!-- Encabezado -->
-                <div class="captura-header">
-                    En captura
+
+    <!-- VISTA 1: REGISTRAR PEDIDO -->
+    <div id="vista-registro">
+        <!-- Título de sección -->
+        <h2><?php echo $seccion; ?></h2>
+        <div class="container-fluid d-flex  justify-content-center align-items-center">
+            <form id="formRegistroProductos" method="POST">
+                <input type="hidden" name="action" value="registrar">
+                <div class="card captura-card">
+                    <!-- Encabezado -->
+                    <div class="captura-header">
+                        En captura
+                    </div>
+
+                    <!-- Cuerpo del formulario -->
+                    <div class="card-body">
+
+                        <!-- Fechas -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="fechaSolicitud" class="form-label">Fecha de Solicitud:</label>
+                                <input
+                                    type="date"
+                                    id="fechaSolicitud"
+                                    name="fechaSolicitud"
+                                    class="form-control"
+                                    required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="fechaEntrega" class="form-label">Fecha estimada de entrega:</label>
+                                <input
+                                    type="date"
+                                    id="fechaEntrega"
+                                    name="fechaEntrega"
+                                    class="form-control"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Localidades -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="origen" class="form-label">Localidad origen:</label>
+                                <select class="form-control" id="localidad-origen">
+                                    <option value="">Localidad Origen</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="destino" class="form-label">Localidad destino:</label>
+                                <select class="form-control" id="localidad-destino">
+                                    <option value="">Localidad Destino</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Productos -->
+                        <div class="text-center mb-3">
+                            <label class="form-label me-2">Productos:</label>
+                            <button
+                                type="button"
+                                class="btn btn-outline-dark btn-sm rounded-circle"
+                                id="btnAgregarProducto"
+                                title="Agregar producto">
+                                +
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Botones -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-custom me-2">Registrar</button>
+                    <button type="reset" class="btn btn-custom me-2">Cancelar</button>
+                    <button type="reset" class="btn btn-custom">Limpiar</button>
                 </div>
 
-                <!-- Cuerpo del formulario -->
-                <div class="card-body">
-
-                    <!-- Fechas -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="fechaSolicitud" class="form-label">Fecha de Solicitud:</label>
-                            <input
-                                type="date"
-                                id="fechaSolicitud"
-                                name="fechaSolicitud"
-                                class="form-control"
-                                required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="fechaEntrega" class="form-label">Fecha estimada de entrega:</label>
-                            <input
-                                type="date"
-                                id="fechaEntrega"
-                                name="fechaEntrega"
-                                class="form-control"
-                                required>
-                        </div>
-                    </div>
-
-                    <!-- Localidades -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="origen" class="form-label">Localidad origen:</label>
-                            <select class="form-control" id="localidad-origen">
-                                <option value="">Localidad Origen</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="destino" class="form-label">Localidad destino:</label>
-                            <select class="form-control" id="localidad-destino">
-                                <option value="">Localidad Destino</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Productos -->
-                    <div class="text-center mb-3">
-                        <label class="form-label me-2">Productos:</label>
-                        <button
-                            type="button"
-                            class="btn btn-outline-dark btn-sm rounded-circle"
-                            id="btnAgregarProducto"
-                            title="Agregar producto">
-                            +
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-            <!-- Botones -->
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-custom me-2">Registrar</button>
-                <button type="reset" class="btn btn-custom me-2">Cancelar</button>
-                <button type="reset" class="btn btn-custom">Limpiar</button>
-            </div>
-
-        </form>
+            </form>
+        </div>
     </div>
+
+    <!-- VISTA 2: PRODUCTOS -->
+    <div id="vista-productos" style="display:none;">
+
+        <div class="container-fluid">
+            <div class="contenedor-productos">
+
+                <!-- Buscador -->
+                <div class="buscador-productos">
+                    <label>Productos</label>
+                    <input
+                        type="text"
+                        id="buscarProducto"
+                        class="form-control"
+                        placeholder="Escribe el nombre del producto">
+                </div>
+
+                <div class="texto-ayuda">
+                    *Seleccione los productos que desee agregar al pedido.
+                </div>
+
+                <!-- Tabla -->
+                <div class="tabla-productos">
+                    <div class="tabla-scroll">
+                        <table class="table table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"></th>
+                                    <th>Nombre del producto</th>
+                                    <th>Peso</th>
+                                    <th>Localidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaProductos">
+                                <!-- Filas ejemplo -->
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="radio" name="producto">
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <!-- Dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="text-center mt-4">
+                    <button
+                        type="button"
+                        class="btn-vino me-2"
+                        id="btnRegresar">
+                        Regresar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-gris">
+                        Agregar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 

@@ -3,31 +3,146 @@ let pedidoSeleccionado = null;
 let localidades = [];
 
 // Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     cargarLocalidades();
     inicializarEventos();
 });
 
 // Inicializar eventos
 function inicializarEventos() {
+
+    // Formulario de registro
+    if (document.getElementById('formRegistroProductos')) {
+        configurarVistaProductos();
+    }
+
     // Formulario de búsqueda
     document.getElementById('form-busqueda').addEventListener('submit', buscarPedidos);
-    
+
     // Botón actualizar
     document.getElementById('btn-actualizar').addEventListener('click', irAActualizar);
-    
+
     // Botón guardar
     document.getElementById('btn-guardar').addEventListener('click', guardarCambios);
-    
+
     // Navegación breadcrumb
     document.getElementById('breadcrumb-nav').addEventListener('click', manejarNavegacion);
 }
+
+// Iniciar la dinamica de vistas entre registro de pedido y lista de productos
+function configurarVistaProductos() {
+    const btnAgregarProducto = document.getElementById('btnAgregarProducto');
+    const btnRegresar = document.getElementById('btnRegresar');
+    const inputBuscarProducto = document.getElementById('buscarProducto');
+
+    if (btnAgregarProducto) {
+        btnAgregarProducto.addEventListener('click', mostrarVistaProductos);
+    }
+
+    if (btnRegresar) {
+        btnRegresar.addEventListener('click', mostrarVistaRegistro);
+    }
+
+    if (inputBuscarProducto) {
+        inputBuscarProducto.addEventListener('input', function () {
+            cargarProductos(this.value.trim());
+        });
+    }
+}
+// Mostrar u ocultar la seccion de productos
+function mostrarVistaProductos() {
+    const vistaRegistro = document.getElementById('vista-registro');
+    const vistaProductos = document.getElementById('vista-productos');
+
+    if (vistaRegistro && vistaProductos) {
+        vistaRegistro.style.display = 'none';
+        vistaProductos.style.display = 'block';
+        cargarProductos();
+        scrollArriba();
+    }
+}
+// Mostrar u ocultar la seccion de registro
+function mostrarVistaRegistro() {
+    const vistaRegistro = document.getElementById('vista-registro');
+    const vistaProductos = document.getElementById('vista-productos');
+
+    if (vistaRegistro && vistaProductos) {
+        vistaProductos.style.display = 'none';
+        vistaRegistro.style.display = 'block';
+        scrollArriba();
+    }
+}
+function scrollArriba() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Cargar Productos para la vista de seleccion en el registro
+function cargarProductos(filtro = '') {
+
+    const formData = new FormData();
+    formData.append('accion', 'listarProductos');
+    formData.append('busqueda', filtro);
+
+    fetch('/ajax/pedidos-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                console.error(data.message);
+                return;
+            }
+            renderizarTablaProductos(data.data);
+        })
+        .catch(error => console.error(error));
+}
+// Renderizar la tabla de productos
+function renderizarTablaProductos(productos) {
+    const tablaProductosBody = document.getElementById('tablaProductos'); 
+    tablaProductosBody.innerHTML = '';
+
+    if (productos.length === 0) {
+        tablaProductosBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No se encontraron productos
+                </td>
+            </tr>`;
+        return;
+    }
+
+    productos.forEach(p => {
+
+        tablaProductosBody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="text-center">
+                    <input type="radio" name="productoSeleccionado"
+                           value="${p.id_producto}">
+                </td>
+                <td>${p.nombre_producto}</td>
+                <td>${p.peso}</td>
+                <td>${p.localidad}</td>
+            </tr>
+        `);
+    });
+}
+// Buscador de productos
+function filtrarProductos(e) {
+    cargarProductos(e.target.value.trim());
+}
+
+
+
 
 // Cargar localidades para los selects
 function cargarLocalidades() {
     const formData = new FormData();
     formData.append('accion', 'obtener_localidades');
-    
+
     fetch('/ajax/pedidos-ajax.php', {
         method: 'POST',
         body: formData
@@ -65,13 +180,13 @@ function cargarLocalidades() {
 function llenarSelectsLocalidades() {
     const selectOrigen = document.getElementById('localidad-origen');
     const selectDestino = document.getElementById('localidad-destino');
-    
+
     localidades.forEach(loc => {
         const optionOrigen = document.createElement('option');
         optionOrigen.value = loc.id_localidad;
         optionOrigen.textContent = loc.nombre_completo;
         selectOrigen.appendChild(optionOrigen);
-        
+
         const optionDestino = document.createElement('option');
         optionDestino.value = loc.id_localidad;
         optionDestino.textContent = loc.nombre_completo;
@@ -82,48 +197,48 @@ function llenarSelectsLocalidades() {
 // Buscar pedidos
 function buscarPedidos(e) {
     e.preventDefault();
-    
+
     const clavePedido = document.getElementById('clave-pedido').value.trim();
     const localidadOrigen = document.getElementById('localidad-origen').value;
     const localidadDestino = document.getElementById('localidad-destino').value;
-    
+
     // Validar que al menos un campo esté lleno
     if (!clavePedido && !localidadOrigen && !localidadDestino) {
         mostrarAlerta('warning', 'Por favor ingrese al menos un criterio de búsqueda');
         return;
     }
-    
+
     const formData = new FormData();
     formData.append('accion', 'buscar');
     if (clavePedido) formData.append('clave_pedido', clavePedido);
     if (localidadOrigen) formData.append('localidad_origen', localidadOrigen);
     if (localidadDestino) formData.append('localidad_destino', localidadDestino);
-    
+
     mostrarLoading(true);
-    
+
     fetch('/ajax/pedidos-ajax.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        mostrarLoading(false);
-        
-        if (data.success) {
-            if (data.pedidos.length > 0) {
-                mostrarResultados(data.pedidos);
+        .then(response => response.json())
+        .then(data => {
+            mostrarLoading(false);
+
+            if (data.success) {
+                if (data.pedidos.length > 0) {
+                    mostrarResultados(data.pedidos);
+                } else {
+                    mostrarAlerta('info', 'No se encontraron pedidos con los criterios especificados');
+                }
             } else {
-                mostrarAlerta('info', 'No se encontraron pedidos con los criterios especificados');
+                mostrarAlerta('error', data.message || 'Error al buscar pedidos');
             }
-        } else {
-            mostrarAlerta('error', data.message || 'Error al buscar pedidos');
-        }
-    })
-    .catch(error => {
-        mostrarLoading(false);
-        console.error('Error:', error);
-        mostrarAlerta('error', 'Error de conexión al buscar pedidos');
-    });
+        })
+        .catch(error => {
+            mostrarLoading(false);
+            console.error('Error:', error);
+            mostrarAlerta('error', 'Error de conexión al buscar pedidos');
+        });
 }
 
 // Mostrar resultados
@@ -131,19 +246,19 @@ function mostrarResultados(pedidos) {
     // Ocultar vista de búsqueda y mostrar resultados
     document.getElementById('vista-busqueda').style.display = 'none';
     document.getElementById('vista-resultados').style.display = 'block';
-    
+
     // Actualizar breadcrumb
     actualizarBreadcrumb('resultados');
-    
+
     // Cargar resultados
     const listaResultados = document.getElementById('lista-resultados');
     listaResultados.innerHTML = '';
-    
+
     if (pedidos.length === 0) {
         listaResultados.innerHTML = '<div class="mensaje-vacio">No se encontraron pedidos</div>';
         return;
     }
-    
+
     pedidos.forEach(pedido => {
         const item = document.createElement('div');
         item.className = 'resultado-item';
@@ -156,9 +271,9 @@ function mostrarResultados(pedidos) {
                   Estatus: ${pedido.estatus_pedido}</span>
         `;
         listaResultados.appendChild(item);
-        
+
         // Hacer que todo el item sea clickeable
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             if (e.target.tagName !== 'INPUT') {
                 const checkbox = item.querySelector('input[type="checkbox"]');
                 checkbox.checked = !checkbox.checked;
@@ -166,7 +281,7 @@ function mostrarResultados(pedidos) {
             }
         });
     });
-    
+
     // Manejar cambios en checkboxes
     document.querySelectorAll('.checkbox-resultado').forEach(checkbox => {
         checkbox.addEventListener('change', actualizarSeleccion);
@@ -176,7 +291,7 @@ function mostrarResultados(pedidos) {
 // Actualizar selección
 function actualizarSeleccion() {
     const checkboxes = document.querySelectorAll('.checkbox-resultado:checked');
-    
+
     // Permitir solo una selección
     if (checkboxes.length > 1) {
         checkboxes.forEach((cb, index) => {
@@ -185,7 +300,7 @@ function actualizarSeleccion() {
             }
         });
     }
-    
+
     const seleccionado = document.querySelector('.checkbox-resultado:checked');
     if (seleccionado) {
         pedidoSeleccionado = {
@@ -203,14 +318,14 @@ function irAActualizar() {
         mostrarAlerta('warning', 'Por favor seleccione un pedido');
         return;
     }
-    
+
     mostrarLoading(true);
-    
+
     fetch(`/ajax/pedidos-ajax.php?accion=obtener&id=${pedidoSeleccionado.id}`)
         .then(response => response.json())
         .then(data => {
             mostrarLoading(false);
-            
+
             if (data.success) {
                 mostrarVistaActualizar(data.pedido);
             } else {
@@ -229,10 +344,10 @@ function mostrarVistaActualizar(pedido) {
     // Ocultar vista de resultados y mostrar vista de actualización
     document.getElementById('vista-resultados').style.display = 'none';
     document.getElementById('vista-actualizar').style.display = 'block';
-    
+
     // Actualizar breadcrumb
     actualizarBreadcrumb('actualizar');
-    
+
     // Llenar campos
     document.getElementById('detalle-id').textContent = pedido.id_pedido;
     document.getElementById('detalle-clave').textContent = pedido.clave_pedido;
@@ -251,13 +366,13 @@ function guardarCambios() {
     const fechaSolicitud = document.getElementById('detalle-fecha-solicitud').value;
     const fechaEntrega = document.getElementById('detalle-fecha-entrega').value;
     const observaciones = document.getElementById('detalle-observaciones').value;
-    
+
     // Validaciones
     if (!estatus || !fechaSolicitud) {
         mostrarAlerta('warning', 'Por favor complete los campos requeridos');
         return;
     }
-    
+
     const formData = new FormData();
     formData.append('accion', 'actualizar');
     formData.append('id_pedido', idPedido);
@@ -265,31 +380,31 @@ function guardarCambios() {
     formData.append('fecha_solicitud', fechaSolicitud);
     formData.append('fecha_entrega', fechaEntrega);
     formData.append('observaciones', observaciones);
-    
+
     mostrarLoading(true);
-    
+
     fetch('/ajax/pedidos-ajax.php', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        mostrarLoading(false);
-        
-        if (data.success) {
-            mostrarAlerta('success', 'Pedido actualizado exitosamente');
-            setTimeout(() => {
-                volverAInicio();
-            }, 2000);
-        } else {
-            mostrarAlerta('error', data.message || 'Error al actualizar el pedido');
-        }
-    })
-    .catch(error => {
-        mostrarLoading(false);
-        console.error('Error:', error);
-        mostrarAlerta('error', 'Error de conexión al actualizar el pedido');
-    });
+        .then(response => response.json())
+        .then(data => {
+            mostrarLoading(false);
+
+            if (data.success) {
+                mostrarAlerta('success', 'Pedido actualizado exitosamente');
+                setTimeout(() => {
+                    volverAInicio();
+                }, 2000);
+            } else {
+                mostrarAlerta('error', data.message || 'Error al actualizar el pedido');
+            }
+        })
+        .catch(error => {
+            mostrarLoading(false);
+            console.error('Error:', error);
+            mostrarAlerta('error', 'Error de conexión al actualizar el pedido');
+        });
 }
 
 // Volver a inicio
@@ -297,13 +412,13 @@ function volverAInicio() {
     document.getElementById('vista-busqueda').style.display = 'block';
     document.getElementById('vista-resultados').style.display = 'none';
     document.getElementById('vista-actualizar').style.display = 'none';
-    
+
     actualizarBreadcrumb('inicio');
-    
+
     // Limpiar formulario
     document.getElementById('form-busqueda').reset();
     pedidoSeleccionado = null;
-    
+
     // Limpiar mensaje de alerta
     document.getElementById('mensaje-alerta').innerHTML = '';
 }
@@ -311,8 +426,8 @@ function volverAInicio() {
 // Actualizar breadcrumb
 function actualizarBreadcrumb(vista) {
     const breadcrumb = document.getElementById('breadcrumb-nav');
-    
-    switch(vista) {
+
+    switch (vista) {
         case 'inicio':
             breadcrumb.innerHTML = `
                 <li class="breadcrumb-item">
@@ -323,7 +438,7 @@ function actualizarBreadcrumb(vista) {
                 </li>
             `;
             break;
-            
+
         case 'resultados':
             breadcrumb.innerHTML = `
                 <li class="breadcrumb-item">
@@ -334,7 +449,7 @@ function actualizarBreadcrumb(vista) {
                 <li class="breadcrumb-item active" aria-current="page">Resultados de búsqueda</li>
             `;
             break;
-            
+
         case 'actualizar':
             breadcrumb.innerHTML = `
                 <li class="breadcrumb-item">
@@ -371,14 +486,14 @@ function mostrarAlerta(tipo, mensaje) {
         'warning': 'alert-warning',
         'info': 'alert-info'
     };
-    
+
     alertaDiv.innerHTML = `
         <div class="alert ${tipoClase[tipo]} alert-dismissible fade show" role="alert">
             ${mensaje}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
-    
+
     // Auto-cerrar después de 5 segundos
     setTimeout(() => {
         alertaDiv.innerHTML = '';
