@@ -104,7 +104,7 @@ CREATE TABLE vehiculos (
         ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo')),
     descripcion_vehiculo VARCHAR(100),
     chofer_asignado INT REFERENCES personal(id_personal) 
-        ON DELETE RESTRICT ON UPDATE RESTRICT
+        ON DELETE RESTRICT ON UPDATE RESTRICT,
     clase VARCHAR(2),
     nomenclatura VARCHAR(8),
     numero_de_ejes INT,
