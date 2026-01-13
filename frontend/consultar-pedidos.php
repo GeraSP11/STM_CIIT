@@ -16,34 +16,31 @@ $seccion = 'Consulta de Pedidos';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title; ?></title>
 
+    <!-- Bootstrap -->
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/icons/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="/assets/css/headers-styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
         .form-container {
             background-color: #f8f9fa;
             padding: 30px;
             border-radius: 8px;
-            width: 100%;
             max-width: 600px;
             margin: 40px auto;
         }
 
-        /* Etiqueta "Filtro de búsqueda" */
         .form-label-box {
             background-color: #4a1026;
-            color: white;
-            width: fit-content;
+            color: #fff;
             padding: 8px 16px;
             font-weight: bold;
-            margin: 0 0 15px 0;
-            text-align: left;
             border-radius: 4px;
             font-size: 14px;
+            margin-bottom: 15px;
+            width: fit-content;
         }
 
-        /* Inputs */
         .form-control-custom {
             width: 100%;
             max-width: 520px;
@@ -55,162 +52,207 @@ $seccion = 'Consulta de Pedidos';
             display: block;
         }
 
-        /* Botón */
         .btn-custom {
             background-color: #4a1026;
-            color: white;
+            color: #fff;
             padding: 12px 40px;
-            border: none;
             border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
         }
 
         .btn-custom:hover {
             background-color: #3b0d20;
         }
 
-        /* Título */
         h2 {
             text-align: center;
             color: #4a1026;
-            margin-top: 10px;
         }
 
-        /* Separador "o" */
-        .separador-o span {
+        /* ====== MODAL ESTILO SEGUNDA VISTA ====== */
+        .modal-header-custom {
+            background-color: #4a1026;
+            color: #fff;
+        }
+
+        .detalle-box {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px 12px;
+            height: 100%;
+        }
+
+        .detalle-box small {
+            display: block;
             font-weight: bold;
             color: #555;
+            font-size: 12px;
         }
 
-        /* Ajustes móviles */
-        @media (max-width: 576px) {
-            .form-container {
-                padding: 20px;
-                margin: 20px auto;
-            }
-
-            .btn-custom {
-                width: 100%;
-            }
+        .detalle-box span {
+            font-size: 15px;
+            color: #000;
         }
-
     </style>
 </head>
 
 <body>
 
-    <!-- Header -->
-    <?php include('includes/header-dinamico.php'); ?>
+<?php include('includes/header-dinamico.php'); ?>
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php echo $seccion; ?>
-            </li>
-        </ol>
-    </nav>
+<nav aria-label="breadcrumb" class="mt-2 ps-3 fs-5">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/dashboard.php">
+                <i class="bi bi-house-fill" style="color:#4a1026;"></i>
+            </a>
+        </li>
+        <li class="breadcrumb-item active"><?php echo $seccion; ?></li>
+    </ol>
+</nav>
 
+<h2><?php echo $seccion; ?></h2>
 
-    <!-- Título de sección -->
-    <h2><?php echo $seccion; ?></h2>
+<!-- FORM -->
+<div class="form-container">
+    <form>
+        <div class="form-label-box">Filtro de búsqueda: *</div>
 
-    <!-- Contenedor formulario consulta -->
-    <div id="consultaPedido" class="form-container">
-        <form id="formConsultaPedido">
+        <input class="form-control-custom" placeholder="Identificador del pedido">
 
-            <!-- Etiqueta -->
-            <div class="form-label-box">Filtro de búsqueda: *</div>
+        <div class="d-flex align-items-center my-3">
+            <div class="flex-grow-1 border-top"></div>
+            <span class="mx-2 fw-bold">o</span>
+            <div class="flex-grow-1 border-top"></div>
+        </div>
 
-            <!-- Identificador del pedido -->
-            <input
-                type="text"
-                class="form-control-custom"
-                id="identificadorPedido"
-                name="identificadorPedido"
-                placeholder="Identificador del pedido"
-                required
-                maxlength="30"
-            >
+        <input class="form-control-custom" placeholder="Localidad origen">
+        <input class="form-control-custom" placeholder="Localidad destino">
 
-            <!-- Separador O -->
-            <div class="d-flex align-items-center my-3">
-                <div class="flex-grow-1 border-top"></div>
-                <span class="mx-2">o</span>
-                <div class="flex-grow-1 border-top"></div>
-            </div>
-
-            <!-- Localidad Origen -->
-            <input
-                type="text"
-                class="form-control-custom"
-                id="localidadOrigen"
-                name="localidadOrigen"
-                placeholder="Localidad origen"
-                maxlength="100"
-            >
-
-            <!-- Localidad Destino -->
-            <input
-                type="text"
-                class="form-control-custom"
-                id="localidadDestino"
-                name="localidadDestino"
-                placeholder="Localidad destino"
-                maxlength="100"
-            >
-
-            <!-- Botón -->
-            <div class="d-flex justify-content-center">
-                <button
-                    id="btnConsultarPedido"
-                    type="submit"
-                    class="btn btn-custom"
-                >
-                    Consultar
-                </button>
-            </div>
-
-        </form>
-    </div>
+        <div class="text-center">
+            <button class="btn btn-custom">Consultar</button>
+        </div>
+    </form>
+</div>
 
 
-
-    <!-- Contenedor tabla resultados, oculto inicialmente -->
-    <div id="tablaResultados" class="form-container" style="display:none;">
-        <table id="tablaPersonal" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellido Paterno</th>
-                    <th>Apellido Materno</th>
-                    <th>Afiliación Laboral</th>
-                    <th>Cargo</th>
-                    <th>CURP</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <div class="d-flex justify-content-center">
-            <button id="btnVolver" class="btn btn-custom">Volver</button>
+<!-- Contenedor resultados -->
+<div id="tablaResultados" class="container mt-4" style="display:;">
+    <div class="card shadow-sm">
+        <div class="card-header text-white fw-bold" style="background:#4a1026;">
+            Resultados obtenidos:
+        </div>
+        <div class="card-body bg-light">
+            <table class="table table-bordered table-hover" id="tablaPedidos">
+                <thead>
+                    <tr style="background-color:#4a1026; color:white;">
+                        <th>ID</th>
+                        <th>Producto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas se llenan dinámicamente -->
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- MODAL DETALLE -->
+<div class="modal fade" id="modalPedido" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
 
-    <!-- SWEETALERT2 LOCAL -->
-    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
-    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title">Gestión de Pedidos</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
-    <script src="/assets/js/alertas.js"></script>
+            <div class="modal-body bg-light">
+                <div class="row g-3">
 
-    <!-- TU SCRIPT DEL FORMULARIO -->
-    <script src="/assets/js/personal.js"></script>
+                     <div class="col-md-3">
+                        <div class="detalle-box">
+                            <small>ID</small>
+                            <span id="detalle-id"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="detalle-box">
+                            <small>Estatus</small>
+                            <span id="detalle-estatus"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="detalle-box">
+                            <small>Fecha solicitud</small>
+                            <span id="detalle-fecha-solicitud"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="detalle-box">
+                            <small>Fecha entrega</small>
+                            <span id="detalle-fecha-entrega"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Producto</small>
+                            <span id="detalle-producto"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Localidad origen</small>
+                            <span id="detalle-origen"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Localidad destino</small>
+                            <span id="detalle-destino"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Cantidad</small>
+                            <span id="detalle-cantidad"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Unidad</small>
+                            <span id="detalle-unidad"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="detalle-box">
+                            <small>Observaciones</small>
+                            <span id="detalle-observaciones"></span>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
