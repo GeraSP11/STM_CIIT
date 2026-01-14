@@ -88,12 +88,12 @@ function cargarPersonal() {
 }
 
 /* =====================================================
-   1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
+    1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
    ===================================================== */
 
 const ValidadoresMatricula = {
     Carretero: (v) => {
-        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X][A-Z][A-HJ-NPR-Z0-9]{7}$/;
+        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X]{1}[A-HJ-NPR]{1}[A-HJ-NPR-Z0-9]{7}$/;
         return regex.test(v);
     },
     Ferroviario: (v) => {
