@@ -64,6 +64,19 @@ $seccion = 'Consulta de Pedidos';
             background-color: #3b0d20;
         }
 
+        .btn-nueva-busqueda {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 10px 30px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .btn-nueva-busqueda:hover {
+            background-color: #5a6268;
+            color: #fff;
+        }
+
         h2 {
             text-align: center;
             color: #4a1026;
@@ -115,31 +128,48 @@ $seccion = 'Consulta de Pedidos';
 </nav>
 
 <!-- FORMULARIO -->
+<!-- FORMULARIO -->
 <div class="form-container">
     <form id="formConsulta">
         <div class="form-label-box">Filtro de búsqueda: *</div>
-
-        <input id="idPedido" class="form-control-custom" placeholder="Identificador del pedido">
-
+        <input 
+            id="clavePedido" 
+            class="form-control-custom" 
+            placeholder="Clave del pedido (ej: PED-2024-010)"
+            pattern="PED-\d{4}-\d{3}"
+            title="Formato: PED-YYYY-XXX (ej: PED-2024-010)"
+        >
         <div class="d-flex align-items-center my-3">
             <div class="flex-grow-1 border-top"></div>
             <span class="mx-2 fw-bold">o</span>
             <div class="flex-grow-1 border-top"></div>
         </div>
-
-        <input id="origen" class="form-control-custom" placeholder="Localidad origen">
-        <input id="destino" class="form-control-custom" placeholder="Localidad destino">
-
+        <!-- Cambiado a SELECT -->
+        <select id="origen" class="form-control-custom">
+            <option value="">Seleccionar localidad origen</option>
+            <!-- Se llenan dinámicamente -->
+        </select>
+        <select id="destino" class="form-control-custom">
+            <option value="">Seleccionar localidad destino</option>
+            <!-- Se llenan dinámicamente -->
+        </select>
         <div class="text-center">
-            <button class="btn btn-custom">Consultar</button>
+            <button type="submit" class="btn btn-custom">Consultar</button>
         </div>
     </form>
 </div>
 
 
-
 <!-- Contenedor resultados -->
 <div id="tablaResultados" class="container mt-4" style="display:none;">
+    
+    <!-- Botón para nueva búsqueda -->
+    <div class="text-end mb-3">
+        <button class="btn btn-nueva-busqueda" onclick="nuevaBusqueda()">
+            <i class="bi bi-arrow-left"></i> Nueva búsqueda
+        </button>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header text-white fw-bold" style="background:#4a1026;">
             Resultados obtenidos:
@@ -149,7 +179,7 @@ $seccion = 'Consulta de Pedidos';
                 <thead>
                     <tr style="background-color:#4a1026; color:white;">
                         <th>ID</th>
-                        <th>Producto</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -264,7 +294,7 @@ $seccion = 'Consulta de Pedidos';
     <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
     <script src="/assets/js/alertas.js"></script>
 
-    <!-- CRIPT DEL FORMULARIO -->
+    <!-- SCRIPT DEL FORMULARIO -->
     <script src="/assets/js/pedidos.js"></script>
 </body>
 </html>

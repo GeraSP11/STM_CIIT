@@ -505,6 +505,20 @@ function mostrarLoading(mostrar) {
     document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =======================================================
 // FUNCIONALIDAD CONSULTAR PEDIDOS
 // =======================================================
@@ -515,8 +529,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Si no existe el formulario en esta vista, salimos
     if (!formConsulta) return;
-
-    const inputIdPedido = document.getElementById("idPedido");
+    cargarLocalidades();
+    const inputIdPedido = document.getElementById("clavePedido");
     const inputOrigen = document.getElementById("origen");
     const inputDestino = document.getElementById("destino");
     const divTablaResultados = document.getElementById("tablaResultados");
@@ -578,6 +592,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("Respuesta del servidor:", data);
                 
                 if (data.success && data.pedidos) {
+                    // Ocultar formulario de filtros
+                    const formContainer = document.querySelector('.form-container');
+                    if (formContainer) {
+                        formContainer.style.display = 'none';
+                    }
+                    
                     mostrarResultadosTabla(data.pedidos);
                 } else {
                     throw new Error(data.error || "Error desconocido");
@@ -665,14 +685,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // Procesar detalles de productos
         if (detalles && detalles.length > 0) {
             // Si hay múltiples productos, mostrar el primero o concatenar
-            const primerProducto = detalles[0];
+           /* const primerProducto = detalles[0];
             detalleCampos.producto.textContent = primerProducto.producto || "";
             detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
-            detalleCampos.unidad.textContent = "unidades"; // Ajustar según tu BD
+            detalleCampos.unidad.textContent = "unidades"*/
             
             // Si quieres mostrar todos los productos:
-            // const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
-            // detalleCampos.producto.textContent = productos;
+            const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
+            detalleCampos.producto.textContent = productos;
         } else {
             detalleCampos.producto.textContent = "Sin productos";
             detalleCampos.cantidad.textContent = "0";
@@ -683,7 +703,64 @@ document.addEventListener('DOMContentLoaded', function () {
         modalPedido.show();
     }
 
+    // ============================================
+    // Cargar localidades para los selects
+    // ============================================
+    function cargarLocalidades() {
+        enviarPeticionPOST("obtener_localidades")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.localidades) {
+                    llenarSelectLocalidades(data.localidades);
+                }
+            })
+            .catch(err => {
+                console.error("Error al cargar localidades:", err);
+            });
+    }
+
+    function llenarSelectLocalidades(localidades) {
+        const selectOrigen = document.getElementById('origen');
+        const selectDestino = document.getElementById('destino');
+
+        // Limpiar selects antes de llenarlos
+        selectOrigen.innerHTML = '<option value="">Seleccione origen</option>';
+        selectDestino.innerHTML = '<option value="">Seleccione destino</option>';
+
+        localidades.forEach(loc => {
+            const optionOrigen = document.createElement('option');
+            optionOrigen.value = loc.nombre_centro_trabajo;
+            optionOrigen.textContent = loc.nombre_centro_trabajo;
+            selectOrigen.appendChild(optionOrigen);
+
+            const optionDestino = document.createElement('option');
+            optionDestino.value = loc.nombre_centro_trabajo;
+            optionDestino.textContent = loc.nombre_centro_trabajo;
+            selectDestino.appendChild(optionDestino);
+        });
+    }
+
 });
+
+// ============================================
+// Función global para nueva búsqueda
+// ============================================
+function nuevaBusqueda() {
+    // Mostrar formulario
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+    
+    // Ocultar tabla
+    const divTablaResultados = document.getElementById("tablaResultados");
+    if (divTablaResultados) {
+        divTablaResultados.style.display = 'none';
+    }
+    
+    // Limpiar formulario
+    document.getElementById("formConsulta").reset();
+}
 
 
 // =======================================================
