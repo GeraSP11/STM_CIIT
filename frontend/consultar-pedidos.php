@@ -20,6 +20,7 @@ $seccion = 'Consulta de Pedidos';
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/icons/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="/assets/css/headers-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
         .form-container {
@@ -63,6 +64,19 @@ $seccion = 'Consulta de Pedidos';
             background-color: #3b0d20;
         }
 
+        .btn-nueva-busqueda {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 10px 30px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .btn-nueva-busqueda:hover {
+            background-color: #5a6268;
+            color: #fff;
+        }
+
         h2 {
             text-align: center;
             color: #4a1026;
@@ -100,44 +114,62 @@ $seccion = 'Consulta de Pedidos';
 
 <?php include('includes/header-dinamico.php'); ?>
 
-<nav aria-label="breadcrumb" class="mt-2 ps-3 fs-5">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="/dashboard.php">
-                <i class="bi bi-house-fill" style="color:#4a1026;"></i>
-            </a>
+            <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
         </li>
-        <li class="breadcrumb-item active"><?php echo $seccion; ?></li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <?php echo $seccion; ?>
+        </li>
     </ol>
 </nav>
 
-<h2><?php echo $seccion; ?></h2>
-
-<!-- FORM -->
+<!-- FORMULARIO -->
+<!-- FORMULARIO -->
 <div class="form-container">
-    <form>
+    <form id="formConsulta">
         <div class="form-label-box">Filtro de búsqueda: *</div>
-
-        <input class="form-control-custom" placeholder="Identificador del pedido">
-
+        <input 
+            id="clavePedido" 
+            class="form-control-custom" 
+            placeholder="Clave del pedido (ej: PED-2024-010)"
+            pattern="PED-\d{4}-\d{3}"
+            title="Formato: PED-YYYY-XXX (ej: PED-2024-010)"
+        >
         <div class="d-flex align-items-center my-3">
             <div class="flex-grow-1 border-top"></div>
             <span class="mx-2 fw-bold">o</span>
             <div class="flex-grow-1 border-top"></div>
         </div>
-
-        <input class="form-control-custom" placeholder="Localidad origen">
-        <input class="form-control-custom" placeholder="Localidad destino">
-
+        <!-- Cambiado a SELECT -->
+        <select id="origen" class="form-control-custom">
+            <option value="">Seleccionar localidad origen</option>
+            <!-- Se llenan dinámicamente -->
+        </select>
+        <select id="destino" class="form-control-custom">
+            <option value="">Seleccionar localidad destino</option>
+            <!-- Se llenan dinámicamente -->
+        </select>
         <div class="text-center">
-            <button class="btn btn-custom">Consultar</button>
+            <button type="submit" class="btn btn-custom">Consultar</button>
         </div>
     </form>
 </div>
 
 
 <!-- Contenedor resultados -->
-<div id="tablaResultados" class="container mt-4" style="display:;">
+<div id="tablaResultados" class="container mt-4" style="display:none;">
+    
+    <!-- Botón para nueva búsqueda -->
+    <div class="text-end mb-3">
+        <button class="btn btn-nueva-busqueda" onclick="nuevaBusqueda()">
+            <i class="bi bi-arrow-left"></i> Nueva búsqueda
+        </button>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header text-white fw-bold" style="background:#4a1026;">
             Resultados obtenidos:
@@ -147,7 +179,7 @@ $seccion = 'Consulta de Pedidos';
                 <thead>
                     <tr style="background-color:#4a1026; color:white;">
                         <th>ID</th>
-                        <th>Producto</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -253,6 +285,16 @@ $seccion = 'Consulta de Pedidos';
     </div>
 </div>
 
-<script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SWEETALERT2 LOCAL -->
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+
+    <!-- ARCHIVO QUE CONTIENE alerta() y confirmar() -->
+    <script src="/assets/js/alertas.js"></script>
+
+    <!-- SCRIPT DEL FORMULARIO -->
+    <script src="/assets/js/pedidos.js"></script>
 </body>
 </html>

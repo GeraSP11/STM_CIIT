@@ -124,4 +124,109 @@ class PedidosController
         $d = DateTime::createFromFormat('Y-m-d', $fecha);
         return $d && $d->format('Y-m-d') === $fecha;
     }
+
+
+    // FUNCIONALIDAD CONSULTAR PEDIDO.
+    /**
+     * Consultar pedidos con filtros
+     * Acción: consultar-pedidos
+     */
+    public function consultarPedido($data) {
+        try {
+            $idPedido = isset($data['idPedido']) ? trim($data['idPedido']) : null;
+            $origen   = isset($data['origen']) ? trim($data['origen']) : null;
+            $destino  = isset($data['destino']) ? trim($data['destino']) : null;
+
+            // Validar que al menos haya un filtro
+            if (empty($idPedido) && empty($origen) && empty($destino)) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Debe proporcionar al menos un filtro de búsqueda'
+                ]);
+                return;
+            }
+
+            $model = new PedidosModel();
+            $pedidos = $model->obtenerPedidos($idPedido, $origen, $destino);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'pedidos' => $pedidos
+            ]);
+            
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al consultar pedidos: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Obtener detalle completo de un pedido
+     * Acción: detalle-pedido
+     * 
+     * WORKAROUND: Como pedidos_detalles no tiene id_pedido,
+     * retornamos todos los detalles disponibles
+     */
+    public function obtenerDetallePedido($data) {
+        try {
+            $idPedido = isset($data['idPedido']) ? intval($data['idPedido']) : 0;
+            
+            if (!$idPedido) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'ID de pedido inválido'
+                ]);
+                return;
+            }
+
+            $model = new PedidosModel();
+            
+            // Obtener información general del pedido
+            $pedidos = $model->obtenerPedidos(null, null, null);
+            
+            // Buscar el pedido específico por id_pedido
+            $pedido = null;
+            foreach ($pedidos as $p) {
+                if ($p['id_pedido'] == $idPedido) {
+                    $pedido = $p;
+                    break;
+                }
+            }
+            
+            if (!$pedido) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Pedido no encontrado'
+                ]);
+                return;
+            }
+            
+            // WORKAROUND: Como no hay relación, obtenemos todos los detalles
+            // En producción esto mostrará productos que pueden no ser del pedido
+            $detalles = $model->obtenerTodosLosDetalles();
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'pedido' => $pedido,
+                'detalles' => $detalles,
+                'advertencia' => 'Los productos mostrados pueden no corresponder específicamente a este pedido debido a limitaciones en la estructura de la BD'
+            ]);
+            
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'error' => 'Error al obtener detalle: ' . $e->getMessage()
+            ]);
+        }
+    }
+
 }

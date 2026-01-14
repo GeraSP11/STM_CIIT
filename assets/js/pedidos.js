@@ -638,3 +638,304 @@ function mostrarAlerta(tipo, mensaje) {
 function mostrarLoading(mostrar) {
     document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =======================================================
+// FUNCIONALIDAD CONSULTAR PEDIDOS
+// =======================================================
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Referencias a elementos del DOM
+    const formConsulta = document.getElementById("formConsulta");
+
+    // Si no existe el formulario en esta vista, salimos
+    if (!formConsulta) return;
+    cargarLocalidades();
+    const inputIdPedido = document.getElementById("clavePedido");
+    const inputOrigen = document.getElementById("origen");
+    const inputDestino = document.getElementById("destino");
+    const divTablaResultados = document.getElementById("tablaResultados");
+    const tablaPedidosTbody = document.querySelector("#tablaPedidos tbody");
+
+    // Modal y campos detalle
+    const modalPedido = new bootstrap.Modal(document.getElementById("modalPedido"));
+    const detalleCampos = {
+        id: document.getElementById("detalle-id"),
+        estatus: document.getElementById("detalle-estatus"),
+        fechaSolicitud: document.getElementById("detalle-fecha-solicitud"),
+        fechaEntrega: document.getElementById("detalle-fecha-entrega"),
+        producto: document.getElementById("detalle-producto"),
+        origen: document.getElementById("detalle-origen"),
+        destino: document.getElementById("detalle-destino"),
+        cantidad: document.getElementById("detalle-cantidad"),
+        unidad: document.getElementById("detalle-unidad"),
+        observaciones: document.getElementById("detalle-observaciones")
+    };
+
+    // ============================================
+    // PASO 1: Listener del formulario de búsqueda
+    // ============================================
+    formConsulta.addEventListener("submit", function(e) {
+        e.preventDefault();
+        consultarPedidos();
+    });
+
+    // ============================================
+    // PASO 2: Función que consulta los pedidos filtrados
+    // ============================================
+    function consultarPedidos() {
+
+        const filtros = {
+            idPedido: inputIdPedido.value.trim(),
+            origen: inputOrigen.value.trim(),
+            destino: inputDestino.value.trim()
+        };
+
+        // Validación: al menos un filtro debe estar lleno
+        if (!filtros.idPedido && !filtros.origen && !filtros.destino) {
+            alerta("Aviso", "Ingresa al menos un filtro para buscar.", "info");
+            return;
+        }
+
+        // Mostrar estado de carga
+        tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">Cargando...</td></tr>`;
+        divTablaResultados.style.display = 'block';
+
+        // Llamada al backend
+        enviarPeticionPOST("consultar-pedidos", filtros)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Error HTTP: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("Respuesta del servidor:", data);
+                
+                if (data.success && data.pedidos) {
+                    // Ocultar formulario de filtros
+                    const formContainer = document.querySelector('.form-container');
+                    if (formContainer) {
+                        formContainer.style.display = 'none';
+                    }
+                    
+                    mostrarResultadosTabla(data.pedidos);
+                } else {
+                    throw new Error(data.error || "Error desconocido");
+                }
+            })
+            .catch(err => {
+                console.error("Error en la consulta:", err);
+                tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center text-danger">Error: ${err.message}</td></tr>`;
+                alerta("Error", "No se pudieron obtener los pedidos", "error");
+            });
+    }
+
+    // ============================================
+    // PASO 3: Mostrar resultados en la tabla
+    // ============================================
+    function mostrarResultadosTabla(pedidos) {
+        
+        // Si no hay resultados
+        if (pedidos.length === 0) {
+            tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">No se encontraron pedidos</td></tr>`;
+            return;
+        }
+
+        // Limpiar tabla
+        tablaPedidosTbody.innerHTML = '';
+
+        // Llenar tabla con cada pedido
+        pedidos.forEach(pedido => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td>${pedido.clave_pedido || pedido.id_pedido}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="verDetallePedido(${pedido.id_pedido})">
+                        <i class="bi bi-eye"></i> Ver detalle
+                    </button>
+                </td>
+            `;
+            tablaPedidosTbody.appendChild(fila);
+        });
+    }
+
+    // ============================================
+    // PASO 4: Función global para ver detalle (llamada desde botón)
+    // ============================================
+    window.verDetallePedido = function(idPedido) {
+        console.log("Solicitando detalle del pedido:", idPedido);
+
+        // Llamada al backend para obtener detalle completo
+        enviarPeticionPOST("detalle-pedido", { idPedido: idPedido })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Error HTTP: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("Detalle recibido:", data);
+                
+                if (data.success && data.pedido) {
+                    mostrarModalPedido(data.pedido, data.detalles);
+                } else {
+                    throw new Error(data.error || "Error al obtener detalle");
+                }
+            })
+            .catch(err => {
+                console.error("Error al obtener detalle:", err);
+                alerta("Error", "No se pudo obtener el detalle del pedido", "error");
+            });
+    };
+
+    // ============================================
+    // PASO 5: Mostrar datos en el modal
+    // ============================================
+    function mostrarModalPedido(pedido, detalles) {
+        
+        // Llenar información general del pedido
+        detalleCampos.id.textContent = pedido.clave_pedido || pedido.id_pedido || "";
+        detalleCampos.estatus.textContent = pedido.estatus_pedido || "";
+        detalleCampos.fechaSolicitud.textContent = pedido.fecha_solicitud || "";
+        detalleCampos.fechaEntrega.textContent = pedido.fecha_entrega || "";
+        detalleCampos.origen.textContent = pedido.origen || "";
+        detalleCampos.destino.textContent = pedido.destino || "";
+        detalleCampos.observaciones.textContent = pedido.observaciones || "Sin observaciones";
+
+        // Procesar detalles de productos
+        if (detalles && detalles.length > 0) {
+            // Si hay múltiples productos, mostrar el primero o concatenar
+           /* const primerProducto = detalles[0];
+            detalleCampos.producto.textContent = primerProducto.producto || "";
+            detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
+            detalleCampos.unidad.textContent = "unidades"*/
+            
+            // Si quieres mostrar todos los productos:
+            const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
+            detalleCampos.producto.textContent = productos;
+        } else {
+            detalleCampos.producto.textContent = "Sin productos";
+            detalleCampos.cantidad.textContent = "0";
+            detalleCampos.unidad.textContent = "-";
+        }
+
+        // Mostrar el modal
+        modalPedido.show();
+    }
+
+    // ============================================
+    // Cargar localidades para los selects
+    // ============================================
+    function cargarLocalidades() {
+        enviarPeticionPOST("obtener_localidades")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.localidades) {
+                    llenarSelectLocalidades(data.localidades);
+                }
+            })
+            .catch(err => {
+                console.error("Error al cargar localidades:", err);
+            });
+    }
+
+    function llenarSelectLocalidades(localidades) {
+        const selectOrigen = document.getElementById('origen');
+        const selectDestino = document.getElementById('destino');
+
+        // Limpiar selects antes de llenarlos
+        selectOrigen.innerHTML = '<option value="">Seleccione origen</option>';
+        selectDestino.innerHTML = '<option value="">Seleccione destino</option>';
+
+        localidades.forEach(loc => {
+            const optionOrigen = document.createElement('option');
+            optionOrigen.value = loc.nombre_centro_trabajo;
+            optionOrigen.textContent = loc.nombre_centro_trabajo;
+            selectOrigen.appendChild(optionOrigen);
+
+            const optionDestino = document.createElement('option');
+            optionDestino.value = loc.nombre_centro_trabajo;
+            optionDestino.textContent = loc.nombre_centro_trabajo;
+            selectDestino.appendChild(optionDestino);
+        });
+    }
+
+});
+
+// ============================================
+// Función global para nueva búsqueda
+// ============================================
+function nuevaBusqueda() {
+    // Mostrar formulario
+    const formContainer = document.querySelector('.form-container');
+    if (formContainer) {
+        formContainer.style.display = 'block';
+    }
+    
+    // Ocultar tabla
+    const divTablaResultados = document.getElementById("tablaResultados");
+    if (divTablaResultados) {
+        divTablaResultados.style.display = 'none';
+    }
+    
+    // Limpiar formulario
+    document.getElementById("formConsulta").reset();
+}
+
+
+// =======================================================
+// FUNCIONES AUXILIARES
+// =======================================================
+
+/**
+ * Envía una petición POST al backend con acción y datos opcionales
+ */
+function enviarPeticionPOST(accion, datos = null) {
+
+    const formData = datos instanceof HTMLFormElement
+        ? new FormData(datos)
+        : new FormData();
+
+    if (datos && !(datos instanceof HTMLFormElement)) {
+        for (const clave in datos) {
+            formData.append(clave, datos[clave]);
+        }
+    }
+
+    formData.append("accion", accion);
+
+    return fetch('/ajax/pedidos-ajax.php', {
+        method: "POST",
+        body: formData
+    });
+}
+
+/**
+ * Maneja respuestas del backend para cualquier operación del CRUD.
+ */
+function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
+
+    if (respuesta.trim() === "OK") {
+        alerta("Éxito", mensajeExito, "success")
+            .then(() => {
+                if (redireccion) window.location.href = redireccion;
+            });
+
+    } else {
+        alerta("Error", respuesta, "error");
+    }
+}
