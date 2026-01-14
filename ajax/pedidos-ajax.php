@@ -9,6 +9,11 @@ try {
     $controller = new PedidosController();
     
     switch ($accion) {
+        case 'listarProductos':
+            $busqueda = $_POST['busqueda'] ?? '';
+            echo json_encode($controller::listarProductos($busqueda));
+            break;
+
         case 'obtener_localidades':
             obtenerLocalidades($controller);
             break;
@@ -24,7 +29,15 @@ try {
         case 'actualizar':
             actualizarPedido($controller);
             break;
-            
+        case 'consultar-pedidos':
+            $controller->consultarPedido($_POST);
+            break;
+        
+        case 'detalle-pedido':
+            $controller->obtenerDetallePedido($_POST);
+            break;
+
+
         default:
             echo json_encode([
                 'success' => false,
