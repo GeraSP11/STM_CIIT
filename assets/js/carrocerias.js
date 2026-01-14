@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 1. Registrar ----
     configurarRegistroCarroceria();
     gestionarCamposCondicionales(); 
+    configurarValidacionMatriculaRealTime();
 
     // ---- 2. Consultar ----
     configurarVistaConsultarCarrocerias();
@@ -121,6 +122,57 @@ const ValidadoresMatricula = {
         return /^[A-Z]{1,2}[A-Z0-9]{1,5}$/.test(v);
     }
 };
+
+function configurarValidacionMatriculaRealTime() {
+    const inputMatricula = document.getElementById("matricula");
+    const selectModalidad = document.getElementById("modalidad_carroceria");
+    const msjError = document.getElementById("msj-error-matricula");
+
+    const mensajesAyuda = {
+        Carretero: "Formato VIN: 17 caracteres alfanuméricos (sin I, O, Q).",
+        Ferroviario: "Deben ser 12 dígitos numéricos exactos.",
+        Marítimo: "Deben ser 7 dígitos (el último es verificador).",
+        Aéreo: "Prefijo de 1-2 letras seguido de 1-5 caracteres."
+    };
+
+    const validarAccion = () => {
+        const modalidad = selectModalidad.value;
+        const valor = inputMatricula.value.trim();
+
+        // 1. Si está vacío o no hay modalidad, resetear estado
+        if (!modalidad || valor === "") {
+            inputMatricula.classList.remove("input-valido", "input-invalido");
+            msjError.textContent = "";
+            return;
+        }
+
+        // 2. Ejecutar validador técnico
+        const validador = ValidadoresMatricula[modalidad];
+        const esValido = validador ? validador(valor) : true;
+
+        if (esValido) {
+            // ESTADO VÁLIDO: Usamos tus clases CSS
+            inputMatricula.classList.remove("input-invalido");
+            inputMatricula.classList.add("input-valido");
+            msjError.textContent = ""; // Limpiar mensaje
+            inputMatricula.title = "Formato correcto";
+        } else {
+            // ESTADO INVÁLIDO: Usamos tus clases CSS
+            inputMatricula.classList.remove("input-valido");
+            inputMatricula.classList.add("input-invalido");
+            
+            // Mostrar el mensaje de ayuda específico en el <small> que creaste
+            msjError.textContent = mensajesAyuda[modalidad] || "Formato no válido";
+            
+            // Tooltip nativo (al pasar el mouse)
+            inputMatricula.title = mensajesAyuda[modalidad];
+        }
+    };
+
+    // Escuchar cambios en ambos campos
+    inputMatricula.addEventListener("input", validarAccion);
+    selectModalidad.addEventListener("change", validarAccion);
+}
 
 /* =====================================================
    1. GESTIÓN DE CONDICIONALES (RESTRICCIÓN FERROVIARIA)

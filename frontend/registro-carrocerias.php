@@ -20,22 +20,26 @@ $seccion = 'Registro de Carrocerías';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* Agrega esto dentro de tu etiqueta <style> existente */
+        /* Bordes reforzados y resplandor para resaltar sobre el enfoque del navegador */
         .input-valido {
-            border: 2px solid #28a745 !important; /* Verde */
+            border: 2px solid #28a745 !important;
+            outline: none !important; /* Quita el remarcado azul/negro del navegador */
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.25) !important; /* Resplandor verde suave */
         }
 
         .input-invalido {
-            border: 2px solid #dc3545 !important; /* Rojo */
+            border: 2px solid #dc3545 !important;
+            outline: none !important; /* Quita el remarcado azul/negro del navegador */
+            box-shadow: 0 0 8px rgba(220, 53, 69, 0.25) !important; /* Resplandor rojo suave */
         }
-
         .error-texto {
             color: #dc3545;
             font-size: 0.85em;
-            margin-top: -10px;
-            margin-bottom: 10px;
+            margin-top: 5px; /* Ajuste para que no choque con el borde rojo */
             display: block;
+            min-height: 1.2em; /* Mantiene el espacio aunque esté vacío */
         }
+
         .form-container {
             background-color: #f8f9fa;
             padding: 40px;
