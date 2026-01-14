@@ -184,6 +184,7 @@ CREATE TABLE rutas (
     descripcion VARCHAR(200)
 );
 
+
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
     clave_pedido VARCHAR(30) NOT NULL,
@@ -200,6 +201,8 @@ CREATE TABLE pedidos (
 
 CREATE TABLE pedidos_detalles (
     id_pedido_detalles SERIAL PRIMARY KEY,
+    pedido INT REFERENCES pedidos(id_pedido)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     identificador_producto INT REFERENCES productos(id_producto)
         ON DELETE CASCADE ON UPDATE CASCADE,
     cantidad_producto INT,
