@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 1. Registrar ----
     configurarRegistroCarroceria();
     gestionarCamposCondicionales(); 
+    configurarValidacionMatriculaRealTime();
 
     // ---- 2. Consultar ----
     configurarVistaConsultarCarrocerias();
@@ -56,6 +57,9 @@ function cargarLocalidades() {
         });
 }
 
+/* =====================================================
+   0. CARGA DE CATÁLOGOS (PERSONAL FILTRADO)
+   ===================================================== */
 function cargarPersonal() {
     apiRequest("obtener-personal")
         .then(res => res.json())
@@ -63,29 +67,33 @@ function cargarPersonal() {
             const select = document.getElementById('responsable_carroceria');
             if (!select) return;
 
-            // Filtrar solo el personal que sea "Jefe de Almacén" (el backend incluye el cargo en nombre_completo)
-            const jefesAlmacen = data.filter(p => p.nombre_completo.includes('(Jefe de Almacén)'));
+            // Limpiamos el select y ponemos la opción por defecto
+            select.innerHTML = '<option value="">Seleccione responsable</option>';
 
-            if (jefesAlmacen.length === 0) {
-                select.innerHTML = '<option value="">Sin jefes de almacén registrados</option>';
+            if (!data || data.length === 0) {
+                select.innerHTML = '<option value="">Sin Jefes de Almacén registrados</option>';
                 select.disabled = true;
             } else {
                 select.disabled = false;
-                select.innerHTML = '<option value="">Seleccione responsable</option>';
-                jefesAlmacen.forEach(p => {
+                // Simplemente recorremos los datos que envía el PHP 
+                // (el PHP ya hizo el trabajo de filtrar por 'Jefe de Almacén')
+                data.forEach(p => {
                     select.add(new Option(p.nombre_completo, p.id_personal));
                 });
             }
+        })
+        .catch(err => {
+            console.error("Error al cargar personal:", err);
         });
 }
 
 /* =====================================================
-   1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
+    1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
    ===================================================== */
 
 const ValidadoresMatricula = {
     Carretero: (v) => {
-        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X][A-Z][A-HJ-NPR-Z0-9]{7}$/;
+        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X]{1}[A-HJ-NPR]{1}[A-HJ-NPR-Z0-9]{7}$/;
         return regex.test(v);
     },
     Ferroviario: (v) => {
@@ -115,6 +123,60 @@ const ValidadoresMatricula = {
     }
 };
 
+function configurarValidacionMatriculaRealTime() {
+    const inputMatricula = document.getElementById("matricula");
+    const selectModalidad = document.getElementById("modalidad_carroceria");
+    const msjError = document.getElementById("msj-error-matricula");
+
+    const mensajesAyuda = {
+        Carretero: "Formato VIN: 17 caracteres alfanuméricos (sin I, O, Q).",
+        Ferroviario: "Deben ser 12 dígitos numéricos exactos.",
+        Marítimo: "Deben ser 7 dígitos (el último es verificador).",
+        Aéreo: "Prefijo de 1-2 letras seguido de 1-5 caracteres."
+    };
+
+    const validarAccion = () => {
+        const modalidad = selectModalidad.value;
+        const valor = inputMatricula.value.trim();
+
+        // 1. Si está vacío o no hay modalidad, resetear estado
+        if (!modalidad || valor === "") {
+            inputMatricula.classList.remove("input-valido", "input-invalido");
+            msjError.textContent = "";
+            return;
+        }
+
+        // 2. Ejecutar validador técnico
+        const validador = ValidadoresMatricula[modalidad];
+        const esValido = validador ? validador(valor) : true;
+
+        if (esValido) {
+            // ESTADO VÁLIDO: Usamos tus clases CSS
+            inputMatricula.classList.remove("input-invalido");
+            inputMatricula.classList.add("input-valido");
+            msjError.textContent = ""; // Limpiar mensaje
+            inputMatricula.title = "Formato correcto";
+        } else {
+            // ESTADO INVÁLIDO: Usamos tus clases CSS
+            inputMatricula.classList.remove("input-valido");
+            inputMatricula.classList.add("input-invalido");
+            
+            // Mostrar el mensaje de ayuda específico en el <small> que creaste
+            msjError.textContent = mensajesAyuda[modalidad] || "Formato no válido";
+            
+            // Tooltip nativo (al pasar el mouse)
+            inputMatricula.title = mensajesAyuda[modalidad];
+        }
+    };
+
+    // Escuchar cambios en ambos campos
+    inputMatricula.addEventListener("input", validarAccion);
+    selectModalidad.addEventListener("change", validarAccion);
+}
+
+/* =====================================================
+   1. GESTIÓN DE CONDICIONALES (RESTRICCIÓN FERROVIARIA)
+   ===================================================== */
 function gestionarCamposCondicionales() {
     const selectModalidad = document.getElementById("modalidad_carroceria");
     const selectTipo = document.getElementById("tipo_carroceria");
@@ -125,17 +187,21 @@ function gestionarCamposCondicionales() {
 
     const actualizarVisibilidad = () => {
         const mod = selectModalidad.value;
+        const tipo = selectTipo.value;
+
+        // REQUERIMIENTO: Ferroviario no permite "Mixta"
+        if (mod === "Ferroviario" && tipo === "Mixta") {
+            alerta("Validación", "La modalidad Ferroviaria no permite el tipo de carrocería Mixta.", "warning");
+            selectTipo.value = ""; // Reseteamos la selección
+            return;
+        }
+
         if (["Marítimo", "Aéreo"].includes(mod)) {
-            selectTipo.innerHTML = '<option value="Mixta">Mixta</option>';
             selectTipo.value = "Mixta";
             selectTipo.disabled = true;
             inputEjes.disabled = true;
             inputEjes.required = false;
-        } else if( mod === "Ferroviario") {
-            selectTipo.innerHTML = '<option value="">Seleccione tipo</option><option value="Unidad de carga">Unidad de carga</option><option value="Unidad de arrastre">Unidad de arrastre</option>';
-            selectTipo.disabled = false;
         } else {
-            selectTipo.innerHTML = '<option value="">Seleccione tipo</option><option value="Unidad de arrastre">Unidad de arrastre</option><option value="Unidad de carga">Unidad de carga</option><option value="Mixta">Mixta</option>';
             selectTipo.disabled = false;
             inputEjes.disabled = false;
             inputEjes.required = true;
@@ -149,6 +215,34 @@ function gestionarCamposCondicionales() {
     selectModalidad.addEventListener("change", actualizarVisibilidad);
     selectTipo.addEventListener("change", actualizarVisibilidad);
 }
+
+/* =====================================================
+   VALIDACIÓN DE ERRORES ESPECÍFICOS
+   ===================================================== */
+function validarFormularioCompleto() {
+    const matricula = document.getElementById("matricula").value.trim();
+    const modalidad = document.getElementById("modalidad_carroceria").value;
+    const tipo = document.getElementById("tipo_carroceria").value;
+    const peso = document.getElementById("peso_vehicular").value;
+    const responsable = document.getElementById("responsable_carroceria").value;
+    const localidad = document.getElementById("localidad_pertenece").value;
+
+    if (!matricula) return "La Matrícula es obligatoria.";
+    if (!modalidad) return "Debe seleccionar una Modalidad.";
+    if (!tipo) return "Debe seleccionar el Tipo de Carrocería.";
+    if (!peso || peso <= 0) return "El Peso Vehicular debe ser un número mayor a 0.";
+    if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
+    if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
+    
+    // Validación específica Ferroviario vs Mixto (Doble check)
+    if (modalidad === "Ferroviario" && tipo === "Mixta") {
+        return "Combinación inválida: Ferroviario no puede ser de tipo Mixta.";
+    }
+
+    return null; // Todo correcto
+}
+
+
 
 /* =====================================================
    1. REGISTRAR (CORREGIDO)
@@ -267,27 +361,30 @@ function generarFormularioDetalles() {
     }
 }
 
-// MODIFICA ESTA FUNCIÓN: Es la que envía los datos al servidor
+/* =====================================================
+   REGISTRO FINAL (CON MENSAJES DE ERROR CLAROS)
+   ===================================================== */
 function ejecutarRegistroFinal() {
-    // 1. Usamos tu función 'confirmar' que ya tienes en el proyecto
+    // REQUERIMIENTO: Mensajes de error claros y específicos
+    const errorMsg = validarFormularioCompleto();
+    if (errorMsg) {
+        alerta("Campo Faltante o Inválido", errorMsg, "error");
+        return;
+    }
+
     confirmar("¿Registrar Carrocería?", "¿Deseas continuar con el registro?")
         .then(r => {
-            // Si el usuario cancela, no hacemos nada
             if (!r.isConfirmed) return;
 
             const formulario = document.getElementById("formCarrocerias");
             
-            // Aseguramos que los campos bloqueados se envíen (tu estándar)
+            // Habilitar campos temporalmente para que FormData los capture
             const elementosBloqueados = formulario.querySelectorAll('[readonly], :disabled');
             elementosBloqueados.forEach(el => el.disabled = false);
 
-            // 2. Usamos tu función 'apiRequest' que ya definiste en carrocerias.js
-            // Pasamos el formulario completo como segundo parámetro
             apiRequest("registrar-carroceria", formulario)
                 .then(res => res.text())
                 .then(resp => {
-                    // 3. Usamos tu función 'manejarRespuestaCRUD' que ya tienes por defecto
-                    // Esta función ya muestra el mensaje de éxito y recarga la página
                     manejarRespuestaCRUD(resp, "Carrocería registrada correctamente.");
                 })
                 .catch(err => {
@@ -296,6 +393,8 @@ function ejecutarRegistroFinal() {
                 });
         });
 }
+
+
 // ASEGÚRATE DE QUE LOS SELECTS NO ESTÉN DISABLED
 // En la función donde pasas a la sección de detalles, usa esto:
 function bloquearCamposSeccion1() {

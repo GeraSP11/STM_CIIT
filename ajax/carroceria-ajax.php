@@ -13,13 +13,27 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 switch ($action) {
     case 'registrar-carroceria':
-        // Validación de seguridad: Si no hay matrícula, no procesar
+        // 1. REQUERIMIENTO: Mensajes de error claros y validaciones específicas
         if (empty($_POST['matricula'])) {
-            echo "Error: La matrícula es obligatoria.";
+            echo "Error: La matrícula es un campo obligatorio.";
             exit;
         }
 
-        // Asegurar valores por defecto para campos que podrían estar bloqueados
+        if (empty($_POST['responsable_carroceria'])) {
+            echo "Error: Debe asignar un responsable (Jefe de Almacén).";
+            exit;
+        }
+
+        // 2. REQUERIMIENTO: Modalidad ferroviaria no permite tipo mixto
+        $modalidad = $_POST['modalidad_carroceria'] ?? '';
+        $tipo = $_POST['tipo_carroceria'] ?? '';
+
+        if ($modalidad === 'Ferroviario' && $tipo === 'Mixta') {
+            echo "Error de Validación: No se permite seleccionar el tipo de carrocería 'Mixto' para la modalidad Ferroviaria.";
+            exit;
+        }
+
+        // Asegurar valores por defecto para campos numéricos
         $_POST['numero_ejes_vehiculares'] = !empty($_POST['numero_ejes_vehiculares']) ? $_POST['numero_ejes_vehiculares'] : 0;
         $_POST['numero_contenedores'] = !empty($_POST['numero_contenedores']) ? $_POST['numero_contenedores'] : 0;
         
@@ -115,20 +129,20 @@ switch ($action) {
         global $pdo;
         header('Content-Type: application/json');
         try {
-            // Eliminamos "WHERE estatus_personal = 'Activo'" ya que la columna no existe
+            // Filtramos por el cargo específico
             $sql = "SELECT id_personal, 
-                    (nombre_personal || ' ' || apellido_paterno || ' (' || cargo || ')') as nombre_completo 
+                    (nombre_personal || ' ' || apellido_paterno) as nombre_completo 
                     FROM personal 
+                    WHERE cargo = 'Jefe de Almacén' 
                     ORDER BY nombre_personal ASC";
             
             $stmt = $pdo->query($sql);
             $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode($resultados);
         } catch (Exception $e) {
-            // Es vital enviar el error para saber si algo más falla
             echo json_encode(["error" => $e->getMessage()]);
         }
-        exit;
+    exit;
 
     default:
         header('HTTP/1.1 400 Bad Request');
