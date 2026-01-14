@@ -814,10 +814,14 @@ document.addEventListener('DOMContentLoaded', function () {
         detalleCampos.fechaEntrega.textContent = pedido.fecha_entrega || "";
         detalleCampos.origen.textContent = pedido.origen || "";
         detalleCampos.destino.textContent = pedido.destino || "";
+        detalleCampos.unidad.textContent = pedido.unidad || "";
+        detalleCampos.cantidad.textContent = pedido.cantidad || "";
         detalleCampos.observaciones.textContent = pedido.observaciones || "Sin observaciones";
 
         // Procesar detalles de productos
         if (detalles && detalles.length > 0) {
+
+            // Vamos a hacer un select donde se va a rellenar con todos los productos.
             // Si hay múltiples productos, mostrar el primero o concatenar
            /* const primerProducto = detalles[0];
             detalleCampos.producto.textContent = primerProducto.producto || "";
@@ -825,7 +829,7 @@ document.addEventListener('DOMContentLoaded', function () {
             detalleCampos.unidad.textContent = "unidades"*/
             
             // Si quieres mostrar todos los productos:
-            const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
+            const productos = detalles.map(d => `${d.producto}`);
             detalleCampos.producto.textContent = productos;
         } else {
             detalleCampos.producto.textContent = "Sin productos";
