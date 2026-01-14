@@ -30,8 +30,11 @@ try {
             actualizarPedido($controller);
             break;
         case 'consultar-pedidos':
-            $controller = new PedidosController();
             $controller->consultarPedido($_POST);
+            break;
+        
+        case 'detalle-pedido':
+            $controller->obtenerDetallePedido($_POST);
             break;
 
 

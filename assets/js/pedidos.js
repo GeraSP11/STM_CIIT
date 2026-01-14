@@ -505,8 +505,6 @@ function mostrarLoading(mostrar) {
     document.getElementById('loading-overlay').style.display = mostrar ? 'flex' : 'none';
 }
 
-
-
 // =======================================================
 // FUNCIONALIDAD CONSULTAR PEDIDOS
 // =======================================================
@@ -539,13 +537,17 @@ document.addEventListener('DOMContentLoaded', function () {
         observaciones: document.getElementById("detalle-observaciones")
     };
 
-    // Listener del submit
+    // ============================================
+    // PASO 1: Listener del formulario de búsqueda
+    // ============================================
     formConsulta.addEventListener("submit", function(e) {
         e.preventDefault();
         consultarPedidos();
     });
 
-    // Función que consulta los pedidos
+    // ============================================
+    // PASO 2: Función que consulta los pedidos filtrados
+    // ============================================
     function consultarPedidos() {
 
         const filtros = {
@@ -560,48 +562,127 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Limpiamos resultados previos
+        // Mostrar estado de carga
         tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">Cargando...</td></tr>`;
+        divTablaResultados.style.display = 'block';
 
-      enviarPeticionPOST("consultar-pedidos", filtros)
-        .then(res => {
-            console.log("Status HTTP:", res.status, res.statusText);
-            return res.text();
-        })
-        .then(text => {
-            console.log("Texto recibido del backend:", text);
-            try {
-                const data = JSON.parse(text);
-                console.log("JSON parseado:", data);
-            } catch (e) {
-                console.error("No es JSON válido:", e);
-            }
-        })
-        .catch(err => {
-            console.error("Error en fetch:", err);
-        });
-
-
+        // Llamada al backend
+        enviarPeticionPOST("consultar-pedidos", filtros)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Error HTTP: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("Respuesta del servidor:", data);
+                
+                if (data.success && data.pedidos) {
+                    mostrarResultadosTabla(data.pedidos);
+                } else {
+                    throw new Error(data.error || "Error desconocido");
+                }
+            })
+            .catch(err => {
+                console.error("Error en la consulta:", err);
+                tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center text-danger">Error: ${err.message}</td></tr>`;
+                alerta("Error", "No se pudieron obtener los pedidos", "error");
+            });
     }
 
-    // Función que muestra los detalles del pedido en el modal
-    function mostrarModalPedido(pedido) {
-        detalleCampos.id.textContent = pedido.id || "";
-        detalleCampos.estatus.textContent = pedido.estatus || "";
-        detalleCampos.fechaSolicitud.textContent = pedido.fechaSolicitud || "";
-        detalleCampos.fechaEntrega.textContent = pedido.fechaEntrega || "";
-        detalleCampos.producto.textContent = pedido.producto || "";
+    // ============================================
+    // PASO 3: Mostrar resultados en la tabla
+    // ============================================
+    function mostrarResultadosTabla(pedidos) {
+        
+        // Si no hay resultados
+        if (pedidos.length === 0) {
+            tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">No se encontraron pedidos</td></tr>`;
+            return;
+        }
+
+        // Limpiar tabla
+        tablaPedidosTbody.innerHTML = '';
+
+        // Llenar tabla con cada pedido
+        pedidos.forEach(pedido => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td>${pedido.clave_pedido || pedido.id_pedido}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="verDetallePedido(${pedido.id_pedido})">
+                        <i class="bi bi-eye"></i> Ver detalle
+                    </button>
+                </td>
+            `;
+            tablaPedidosTbody.appendChild(fila);
+        });
+    }
+
+    // ============================================
+    // PASO 4: Función global para ver detalle (llamada desde botón)
+    // ============================================
+    window.verDetallePedido = function(idPedido) {
+        console.log("Solicitando detalle del pedido:", idPedido);
+
+        // Llamada al backend para obtener detalle completo
+        enviarPeticionPOST("detalle-pedido", { idPedido: idPedido })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Error HTTP: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log("Detalle recibido:", data);
+                
+                if (data.success && data.pedido) {
+                    mostrarModalPedido(data.pedido, data.detalles);
+                } else {
+                    throw new Error(data.error || "Error al obtener detalle");
+                }
+            })
+            .catch(err => {
+                console.error("Error al obtener detalle:", err);
+                alerta("Error", "No se pudo obtener el detalle del pedido", "error");
+            });
+    };
+
+    // ============================================
+    // PASO 5: Mostrar datos en el modal
+    // ============================================
+    function mostrarModalPedido(pedido, detalles) {
+        
+        // Llenar información general del pedido
+        detalleCampos.id.textContent = pedido.clave_pedido || pedido.id_pedido || "";
+        detalleCampos.estatus.textContent = pedido.estatus_pedido || "";
+        detalleCampos.fechaSolicitud.textContent = pedido.fecha_solicitud || "";
+        detalleCampos.fechaEntrega.textContent = pedido.fecha_entrega || "";
         detalleCampos.origen.textContent = pedido.origen || "";
         detalleCampos.destino.textContent = pedido.destino || "";
-        detalleCampos.cantidad.textContent = pedido.cantidad || "";
-        detalleCampos.unidad.textContent = pedido.unidad || "";
-        detalleCampos.observaciones.textContent = pedido.observaciones || "";
+        detalleCampos.observaciones.textContent = pedido.observaciones || "Sin observaciones";
 
+        // Procesar detalles de productos
+        if (detalles && detalles.length > 0) {
+            // Si hay múltiples productos, mostrar el primero o concatenar
+            const primerProducto = detalles[0];
+            detalleCampos.producto.textContent = primerProducto.producto || "";
+            detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
+            detalleCampos.unidad.textContent = "unidades"; // Ajustar según tu BD
+            
+            // Si quieres mostrar todos los productos:
+            // const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
+            // detalleCampos.producto.textContent = productos;
+        } else {
+            detalleCampos.producto.textContent = "Sin productos";
+            detalleCampos.cantidad.textContent = "0";
+            detalleCampos.unidad.textContent = "-";
+        }
+
+        // Mostrar el modal
         modalPedido.show();
     }
 
-    // Opcional: cargar la tabla al inicio
-    // consultarPedidos();
 });
 
 
@@ -625,7 +706,6 @@ function enviarPeticionPOST(accion, datos = null) {
     }
 
     formData.append("accion", accion);
-
 
     return fetch('/ajax/pedidos-ajax.php', {
         method: "POST",

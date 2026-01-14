@@ -139,7 +139,7 @@ $seccion = 'Consulta de Pedidos';
 
 
 <!-- Contenedor resultados -->
-<div id="tablaResultados" class="container mt-4" style="display:;">
+<div id="tablaResultados" class="container mt-4" style="display:none;">
     <div class="card shadow-sm">
         <div class="card-header text-white fw-bold" style="background:#4a1026;">
             Resultados obtenidos:

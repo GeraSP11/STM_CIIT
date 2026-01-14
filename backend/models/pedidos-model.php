@@ -240,7 +240,10 @@ class PedidosModel
 
 
     // FUNCIONALIDAD PARA CONSULTAR PEDIDOS
-    // Obtener pedidos con filtros opcionales
+    /**
+     * Obtener pedidos con filtros opcionales
+     * Retorna información general del pedido (sin productos)
+     */
     public function obtenerPedidos($idPedido = null, $origen = null, $destino = null) {
         global $pdo;
 
@@ -254,12 +257,12 @@ class PedidosModel
                     p.estatus_pedido, 
                     p.fecha_solicitud, 
                     p.fecha_entrega, 
-                    o.nombre AS origen, 
-                    d.nombre AS destino, 
+                    o.nombre_centro_trabajo AS origen, 
+                    d.nombre_centro_trabajo AS destino, 
                     p.observaciones
                 FROM pedidos p
-                JOIN localidades o ON p.localidad_origen = o.id_localidad
-                JOIN localidades d ON p.localidad_destino = d.id_localidad
+                LEFT JOIN localidades o ON p.localidad_origen = o.id_localidad
+                LEFT JOIN localidades d ON p.localidad_destino = d.id_localidad
                 WHERE 1=1";
 
         $params = [];
@@ -269,13 +272,15 @@ class PedidosModel
             $params[':idPedido'] = $idPedido;
         }
         if ($origen) {
-            $query .= " AND o.nombre ILIKE :origen";
+            $query .= " AND o.nombre_centro_trabajo ILIKE :origen";
             $params[':origen'] = "%$origen%";
         }
         if ($destino) {
-            $query .= " AND d.nombre ILIKE :destino";
+            $query .= " AND d.nombre_centro_trabajo ILIKE :destino";
             $params[':destino'] = "%$destino%";
         }
+
+        $query .= " ORDER BY p.fecha_solicitud DESC";
 
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
@@ -283,8 +288,12 @@ class PedidosModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Obtener detalles de un pedido
-    public function obtenerDetallesPedido($idPedido) {
+    /**
+     * Obtener TODOS los detalles de productos
+     * WORKAROUND: Como pedidos_detalles NO tiene id_pedido,
+     * retornamos todos los detalles y los filtramos en el controlador
+     */
+    public function obtenerTodosLosDetalles() {
         global $pdo;
 
         if (!$pdo) {
@@ -293,16 +302,18 @@ class PedidosModel
 
         $query = "SELECT 
                     pd.id_pedido_detalles, 
-                    pr.nombre AS producto, 
+                    pr.nombre_producto AS producto, 
                     pd.cantidad_producto AS cantidad, 
+                    pr.tipo_de_embalaje AS unidad,
                     pd.observaciones
                 FROM pedidos_detalles pd
-                JOIN productos pr ON pd.identificador_producto = pr.id_producto
-                WHERE pd.id_pedido = :idPedido";
+                LEFT JOIN productos pr ON pd.identificador_producto = pr.id_producto
+                ORDER BY pd.id_pedido_detalles ASC";
 
         $stmt = $pdo->prepare($query);
-        $stmt->execute([':idPedido' => $idPedido]);
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 }
