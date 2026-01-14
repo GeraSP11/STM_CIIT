@@ -25,6 +25,7 @@ class PedidosModel
                 p.id_producto,
                 p.nombre_producto,
                 p.peso,
+                p.unidades_existencia,
                 l.nombre_centro_trabajo AS localidad
             FROM productos p
             JOIN localidades l

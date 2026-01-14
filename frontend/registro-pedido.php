@@ -120,9 +120,29 @@ $seccion = 'Registrar pedidos';
             vertical-align: middle;
         }
 
-        .tabla-productos input[type="radio"] {
-            transform: scale(1.1);
+        /* Checkbox circular */
+        .tabla-productos input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #5b1d3b;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
         }
+
+        .tabla-productos input[type="checkbox"]:checked::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #5b1d3b;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+        }
+
 
         /* Scroll interno */
         .tabla-scroll {
@@ -153,6 +173,16 @@ $seccion = 'Registrar pedidos';
 
         .btn-gris:hover {
             background-color: #7f7f7f;
+        }
+
+        .btn-activo {
+            background-color: #6A0025 !important;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .btn-activo:hover {
+            background-color: #50001c !important;
         }
     </style>
 </head>
@@ -244,15 +274,35 @@ $seccion = 'Registrar pedidos';
                             </button>
                         </div>
 
+                        <!-- Tabla de productos agregados -->
+                        <div class="mt-4" id="contenedorTablaPedido" style="display:none;">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th style="width:120px;">Cantidad</th>
+                                        <th style="width:120px;">Unidad</th>
+                                        <th>Observaciones</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaPedido">
+                                </tbody>
+                            </table>
+                        </div>
+
+
                     </div>
                 </div>
                 <!-- Botones -->
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-custom me-2">Registrar</button>
-                    <button type="reset" class="btn btn-custom me-2">Cancelar</button>
-                    <button type="reset" class="btn btn-custom">Limpiar</button>
-                </div>
+                <div class="text-center mt-4" id="botonesRegistro" style="display:none;">
 
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-custom me-2">Registrar</button>
+                        <button type="reset" class="btn btn-custom me-2">Cancelar</button>
+                        <button type="reset" class="btn btn-custom">Limpiar</button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -316,7 +366,9 @@ $seccion = 'Registrar pedidos';
 
                     <button
                         type="button"
-                        class="btn-gris">
+                        class="btn-gris"
+                        id="btnAgregarProductos"
+                        disabled>
                         Agregar
                     </button>
                 </div>

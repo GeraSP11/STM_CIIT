@@ -1,6 +1,8 @@
 // Estado global
 let pedidoSeleccionado = null;
 let localidades = [];
+const productosPedido = {};
+
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
@@ -59,6 +61,12 @@ function mostrarVistaProductos() {
         vistaProductos.style.display = 'block';
         cargarProductos();
         scrollArriba();
+        document.getElementById('btnAgregarProductos').addEventListener('click', () => {
+            document.getElementById('vista-productos').style.display = 'none';
+            document.getElementById('vista-registro').style.display = 'block';
+
+            agregarProductosSeleccionados();
+        })
     }
 }
 // Mostrar u ocultar la seccion de registro
@@ -78,6 +86,98 @@ function scrollArriba() {
         behavior: 'smooth'
     });
 }
+// Agregar productos seleccionados a la vista de registro
+function agregarProductosSeleccionados() {
+
+    const checks = document.querySelectorAll('.chk-producto:checked');
+    const tbody = document.getElementById('tablaPedido');
+
+    checks.forEach(chk => {
+
+        const fila = chk.closest('tr');
+        const id = chk.value;
+
+        if (productosPedido[id]) return; // ya existe
+
+        const nombre = fila.children[1].innerText;
+        const peso = fila.children[2].innerText;
+        const existencia = chk.dataset.existencia;
+
+
+        productosPedido[id] = true;
+
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr data-id="${id}">
+                <td>${nombre}</td>
+                <td>
+                    <input type="number"
+                        class="form-control input-cantidad"
+                        min="1"
+                        max="${existencia}"
+                        value="1"
+                        data-max="${existencia}"
+                        oninput="validarCantidad(this)">
+
+
+                </td>
+                <td>${peso}</td>
+                <td>
+                    <input type="text" class="form-control">
+                </td>
+                <td class="text-center">
+                    <i class="fas fa-trash text-danger"
+                       style="cursor:pointer"
+                       onclick="eliminarProducto(${id})"></i>
+                </td>
+            </tr>
+        `);
+    });
+
+    if (Object.keys(productosPedido).length > 0) {
+        document.getElementById('contenedorTablaPedido').style.display = 'block';
+        mostrarBotonesRegistro();
+    }
+}
+// Eliminar productos del pedido
+function eliminarProducto(id) {
+    delete productosPedido[id];
+    document.querySelector(`tr[data-id="${id}"]`).remove();
+
+    if (Object.keys(productosPedido).length === 0) {
+        document.getElementById('contenedorTablaPedido').style.display = 'none';
+        ocultarBotonesRegistro();
+    }
+}
+// Mostrar botones de registro
+function mostrarBotonesRegistro() {
+    document.getElementById('botonesRegistro').style.display = 'block';
+}
+function ocultarBotonesRegistro() {
+    document.getElementById('botonesRegistro').style.display = 'none';
+}
+// Validar cantidades maximas en los spinners
+function validarCantidad(input) {
+    const min = 1;
+    const max = parseInt(input.dataset.max);
+    let valor = parseInt(input.value);
+
+    if (isNaN(valor) || valor < min) {
+        input.value = min;
+    } else if (valor > max) {
+        input.value = max;
+    }
+}
+document.addEventListener('keydown', function (e) {
+    if (
+        e.target.classList.contains('input-cantidad') &&
+        ['e', 'E', '+', '-', '.'].includes(e.key)
+    ) {
+        e.preventDefault();
+    }
+});
+
+
+
 
 // Cargar Productos para la vista de seleccion en el registro
 function cargarProductos(filtro = '') {
@@ -102,7 +202,7 @@ function cargarProductos(filtro = '') {
 }
 // Renderizar la tabla de productos
 function renderizarTablaProductos(productos) {
-    const tablaProductosBody = document.getElementById('tablaProductos'); 
+    const tablaProductosBody = document.getElementById('tablaProductos');
     tablaProductosBody.innerHTML = '';
 
     if (productos.length === 0) {
@@ -116,12 +216,13 @@ function renderizarTablaProductos(productos) {
     }
 
     productos.forEach(p => {
-
         tablaProductosBody.insertAdjacentHTML('beforeend', `
             <tr>
                 <td class="text-center">
-                    <input type="radio" name="productoSeleccionado"
-                           value="${p.id_producto}">
+                    <input type="checkbox"
+                        class="chk-producto"
+                        value="${p.id_producto}"
+                        data-existencia="${p.unidades_existencia}">
                 </td>
                 <td>${p.nombre_producto}</td>
                 <td>${p.peso}</td>
@@ -129,7 +230,40 @@ function renderizarTablaProductos(productos) {
             </tr>
         `);
     });
+
+    inicializarEventosCheckbox();
 }
+function inicializarEventosCheckbox() {
+    const checkboxes = document.querySelectorAll('.chk-producto');
+
+    checkboxes.forEach(chk => {
+        chk.addEventListener('change', actualizarEstadoBotonAgregar);
+    });
+}
+function actualizarEstadoBotonAgregar() {
+    const seleccionados = document.querySelectorAll('.chk-producto:checked');
+    const btn = document.getElementById('btnAgregarProductos');
+
+    if (seleccionados.length > 0) {
+        btn.disabled = false;
+        btn.classList.remove('btn-gris');
+        btn.classList.add('btn-activo');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('btn-gris');
+        btn.classList.remove('btn-activo');
+    }
+}
+
+function obtenerProductosSeleccionados() {
+    const seleccionados = [];
+
+    document.querySelectorAll('.chk-producto:checked')
+        .forEach(chk => seleccionados.push(chk.value));
+
+    return seleccionados;
+}
+
 // Buscador de productos
 function filtrarProductos(e) {
     cargarProductos(e.target.value.trim());
