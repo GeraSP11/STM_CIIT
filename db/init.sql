@@ -195,7 +195,7 @@ CREATE TABLE rutas (
 
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
-    clave_pedido VARCHAR(30) NOT NULL,
+    clave_pedido VARCHAR(50) NOT NULL,
     localidad_origen INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
     localidad_destino INT REFERENCES localidades(id_localidad)

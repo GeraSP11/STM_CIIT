@@ -23,8 +23,43 @@ class PedidosModel
 
         try {
             $conn->beginTransaction();
-            // Generar clave del pedido
-            $clave = 'PED-' . date('Ymd') . '-' . $data['localidad_origen'] . '-' . $data['localidad_destino'];
+
+            /* ===========================
+           1. Obtener claves de centros
+        ============================ */
+
+            $sqlCentro = "
+            SELECT clave_centro_trabajo
+            FROM localidades
+            WHERE id_localidad = :id
+        ";
+
+            $stmtCentro = $conn->prepare($sqlCentro);
+
+            // Origen
+            $stmtCentro->execute([':id' => $data['localidad_origen']]);
+            $claveOrigen = $stmtCentro->fetchColumn();
+
+            // Destino
+            $stmtCentro->execute([':id' => $data['localidad_destino']]);
+            $claveDestino = $stmtCentro->fetchColumn();
+
+            if (!$claveOrigen || !$claveDestino) {
+                throw new Exception('Claves de centro no encontradas');
+            }
+
+            /* ===========================
+           2. Generar clave del pedido
+        ============================ */
+
+            $fecha = date('Ymd');
+            $hash  = self::generarHashPedido();
+
+            $clavePedido = "PED-$fecha-$claveOrigen-$claveDestino-$hash";
+
+            /* ===========================
+           3. Insertar pedido
+        ============================ */
 
             $sqlPedido = "
             INSERT INTO pedidos (
@@ -41,18 +76,23 @@ class PedidosModel
                 'En captura',
                 CURRENT_DATE,
                 :entrega
-            ) RETURNING id_pedido
+            )
+            RETURNING id_pedido
         ";
 
-            $stmt = $conn->prepare($sqlPedido);
-            $stmt->execute([
-                ':clave' => $clave,
-                ':origen' => $data['localidad_origen'],
+            $stmtPedido = $conn->prepare($sqlPedido);
+            $stmtPedido->execute([
+                ':clave'   => $clavePedido,
+                ':origen'  => $data['localidad_origen'],
                 ':destino' => $data['localidad_destino'],
                 ':entrega' => $data['fecha_entrega']
             ]);
 
-            $idPedido = $stmt->fetchColumn();
+            $idPedido = $stmtPedido->fetchColumn();
+
+            /* ===========================
+           4. Insertar detalles
+        ============================ */
 
             $sqlDetalle = "
             INSERT INTO pedidos_detalles (
@@ -70,13 +110,16 @@ class PedidosModel
 
             foreach ($productos as $p) {
                 $stmtDetalle->execute([
-                    ':producto' => $p['id_producto'],
-                    ':cantidad' => $p['cantidad'],
+                    ':producto'      => $p['id_producto'],
+                    ':cantidad'      => $p['cantidad'],
                     ':observaciones' => $p['observaciones']
                 ]);
             }
 
-            // Cambiar estatus a En preparación
+            /* ===========================
+           5. Cambiar estatus
+        ============================ */
+
             $conn->prepare("
             UPDATE pedidos
             SET estatus_pedido = 'En preparación'
@@ -86,15 +129,25 @@ class PedidosModel
             $conn->commit();
 
             return [
-                'success' => true,
-                'id_pedido' => $idPedido,
-                'clave_pedido' => $clave
+                'success'       => true,
+                'id_pedido'     => $idPedido,
+                'clave_pedido'  => $clavePedido
             ];
-
         } catch (Exception $e) {
             $conn->rollBack();
-            throw $e;
+
+            return [
+                'success' => false,
+                'message' => 'Error al registrar el pedido',
+                // útil en desarrollo:
+                // 'error' => $e->getMessage()
+            ];
         }
+    }
+
+    private static function generarHashPedido(): string
+    {
+        return strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
     }
 
 
@@ -331,7 +384,8 @@ class PedidosModel
      * Retorna información general del pedido (sin productos)
      */
 
-    public function obtenerPedidos($clavePedido = null, $origen = null, $destino = null) {
+    public function obtenerPedidos($clavePedido = null, $origen = null, $destino = null)
+    {
         global $pdo;
 
         if (!$pdo) {
@@ -380,8 +434,9 @@ class PedidosModel
      * WORKAROUND: Como pedidos_detalles NO tiene id_pedido,
      * retornamos todos los detalles y los filtramos en el controlador
      */
-    
-    public function obtenerDetallesPorPedido($idPedido) {
+
+    public function obtenerDetallesPorPedido($idPedido)
+    {
 
         global $pdo;
 
@@ -405,5 +460,4 @@ class PedidosModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }
