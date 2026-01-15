@@ -50,6 +50,7 @@ $seccion = 'Registrar pedidos';
             color: white;
             padding: 12px 35px;
             border: none;
+            margin-bottom: 1rem;
             border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
@@ -177,12 +178,20 @@ $seccion = 'Registrar pedidos';
 
         .btn-activo {
             background-color: #6A0025 !important;
-            color: #fff;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 4px;
+            border: none;
             cursor: pointer;
         }
 
         .btn-activo:hover {
             background-color: #50001c !important;
+        }
+
+        .alert {
+            margin: 20px auto;
+            max-width: 800px;
         }
     </style>
 </head>
@@ -205,7 +214,8 @@ $seccion = 'Registrar pedidos';
     </nav>
 
 
-
+    <!-- Mensajes de alerta -->
+    <div id="mensaje-alerta"></div>
     <!-- VISTA 1: REGISTRAR PEDIDO -->
     <div id="vista-registro">
         <!-- Título de sección -->
@@ -231,7 +241,7 @@ $seccion = 'Registrar pedidos';
                                     id="fechaSolicitud"
                                     name="fechaSolicitud"
                                     class="form-control"
-                                    required>
+                                    readonly>
                             </div>
 
                             <div class="col-md-6">
@@ -241,7 +251,7 @@ $seccion = 'Registrar pedidos';
                                     id="fechaEntrega"
                                     name="fechaEntrega"
                                     class="form-control"
-                                    required>
+                                    require>
                             </div>
                         </div>
 
@@ -250,14 +260,14 @@ $seccion = 'Registrar pedidos';
                             <div class="col-md-6">
                                 <label for="origen" class="form-label">Localidad origen:</label>
                                 <select class="form-control" id="localidad-origen">
-                                    <option value="">Localidad Origen</option>
+                                    <option value="">Seleccione una Localidad</option>
                                 </select>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="destino" class="form-label">Localidad destino:</label>
                                 <select class="form-control" id="localidad-destino">
-                                    <option value="">Localidad Destino</option>
+                                    <option value="">Seleccione una Localidad</option>
                                 </select>
                             </div>
                         </div>
@@ -298,9 +308,7 @@ $seccion = 'Registrar pedidos';
                 <div class="text-center mt-4" id="botonesRegistro" style="display:none;">
 
                     <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-custom me-2">Registrar</button>
-                        <button type="reset" class="btn btn-custom me-2">Cancelar</button>
-                        <button type="reset" class="btn btn-custom">Limpiar</button>
+                        <button type="submit" class="btn btn-custom">Registrar</button>
                     </div>
                 </div>
             </form>

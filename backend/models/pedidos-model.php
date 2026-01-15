@@ -16,31 +16,116 @@ class PedidosModel
         return $pdo;
     }
 
-    // Obtener los productos
-    public static function obtenerProductos($busqueda)
+    // Registrar pedido
+    public static function registrarPedido($data, $productos)
     {
+        $conn = self::getConnection();
 
-        $sql = "
-            SELECT
-                p.id_producto,
-                p.nombre_producto,
-                p.peso,
-                p.unidades_existencia,
-                l.nombre_centro_trabajo AS localidad
-            FROM productos p
-            JOIN localidades l
-                ON l.id_localidad = p.ubicacion_producto
-            WHERE p.nombre_producto ILIKE :busqueda
-            ORDER BY p.nombre_producto
-            LIMIT 50
+        try {
+            $conn->beginTransaction();
+            // Generar clave del pedido
+            $clave = 'PED-' . date('Ymd-His');
+
+            $sqlPedido = "
+            INSERT INTO pedidos (
+                clave_pedido,
+                localidad_origen,
+                localidad_destino,
+                estatus_pedido,
+                fecha_solicitud,
+                fecha_entrega
+            ) VALUES (
+                :clave,
+                :origen,
+                :destino,
+                'En captura',
+                CURRENT_DATE,
+                :entrega
+            ) RETURNING id_pedido
         ";
+
+            $stmt = $conn->prepare($sqlPedido);
+            $stmt->execute([
+                ':clave' => $clave,
+                ':origen' => $data['localidad_origen'],
+                ':destino' => $data['localidad_destino'],
+                ':entrega' => $data['fecha_entrega']
+            ]);
+
+            $idPedido = $stmt->fetchColumn();
+
+            $sqlDetalle = "
+            INSERT INTO pedidos_detalles (
+                identificador_producto,
+                cantidad_producto,
+                observaciones
+            ) VALUES (
+                :producto,
+                :cantidad,
+                :observaciones
+            )
+        ";
+
+            $stmtDetalle = $conn->prepare($sqlDetalle);
+
+            foreach ($productos as $p) {
+                $stmtDetalle->execute([
+                    ':producto' => $p['id_producto'],
+                    ':cantidad' => $p['cantidad'],
+                    ':observaciones' => $p['observaciones']
+                ]);
+            }
+
+            // Cambiar estatus a En preparación
+            $conn->prepare("
+            UPDATE pedidos
+            SET estatus_pedido = 'En preparación'
+            WHERE id_pedido = :id
+        ")->execute([':id' => $idPedido]);
+
+            $conn->commit();
+
+            return [
+                'success' => true,
+                'id_pedido' => $idPedido,
+                'clave_pedido' => $clave
+            ];
+
+        } catch (Exception $e) {
+            $conn->rollBack();
+            throw $e;
+        }
+    }
+
+
+    // Obtener los productos
+    public static function obtenerProductos($busqueda, $destino)
+    {
+        $sql = "
+        SELECT
+            p.id_producto,
+            p.nombre_producto,
+            p.peso,
+            p.unidades_existencia,
+            l.nombre_centro_trabajo AS localidad
+        FROM productos p
+        JOIN localidades l
+            ON l.id_localidad = p.ubicacion_producto
+        WHERE p.nombre_producto ILIKE :busqueda
+          AND p.ubicacion_producto = :destino
+        ORDER BY p.nombre_producto
+        LIMIT 50
+    ";
+
         $conn = self::getConnection();
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':busqueda', '%' . $busqueda . '%');
+        $stmt->bindValue(':destino', $destino, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     /**
      * Obtener todas las localidades
@@ -245,6 +330,7 @@ class PedidosModel
      * Obtener pedidos con filtros opcionales
      * Retorna información general del pedido (sin productos)
      */
+
     public function obtenerPedidos($clavePedido = null, $origen = null, $destino = null) {
         global $pdo;
 
@@ -296,6 +382,7 @@ class PedidosModel
      */
     
     public function obtenerDetallesPorPedido($idPedido) {
+
         global $pdo;
 
         if (!$pdo) {
@@ -318,6 +405,5 @@ class PedidosModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 
 }

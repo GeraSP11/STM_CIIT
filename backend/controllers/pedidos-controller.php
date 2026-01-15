@@ -3,26 +3,33 @@ require_once __DIR__ . '/../models/pedidos-model.php';
 
 class PedidosController
 {
-
-    // Obtener productos
-    public static function listarProductos($busqueda)
+    //Registrar pedido
+    public static function registrarPedido($data, $productos)
     {
-
         try {
-            $productos = PedidosModel::obtenerProductos($busqueda);
-
-            return [
-                'success' => true,
-                'data' => $productos
-            ];
+            return PedidosModel::registrarPedido($data, $productos);
         } catch (Exception $e) {
-
             return [
                 'success' => false,
-                'message' => 'Error al obtener productos'
+                'message' => 'Error interno al registrar el pedido'
             ];
         }
     }
+
+    // Obtener productos
+    public static function listarProductos($busqueda, $destino)
+    {
+        try {
+            if (!$destino) {
+                return [];
+            }
+
+            return PedidosModel::obtenerProductos($busqueda, $destino);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
 
     /**
      * Obtener todas las localidades
@@ -131,7 +138,8 @@ class PedidosController
      * Consultar pedidos con filtros
      * Acción: consultar-pedidos
      */
-    public function consultarPedido($data) {
+    public function consultarPedido($data)
+    {
         try {
             $clavePedido = isset($data['clavePedido']) ? trim($data['clavePedido']) : null;
             $origen   = isset($data['origen']) ? trim($data['origen']) : null;
@@ -148,6 +156,7 @@ class PedidosController
             }
 
             $model = new PedidosModel();
+            
             $pedidos = $model->obtenerPedidos($clavePedido, $origen, $destino);
             
             header('Content-Type: application/json');
@@ -155,7 +164,6 @@ class PedidosController
                 'success' => true,
                 'pedidos' => $pedidos
             ]);
-            
         } catch (Exception $e) {
             header('Content-Type: application/json');
             echo json_encode([
@@ -172,7 +180,8 @@ class PedidosController
      * WORKAROUND: Como pedidos_detalles no tiene id_pedido,
      * retornamos todos los detalles disponibles
      */
-    public function obtenerDetallePedido($data) {
+    public function obtenerDetallePedido($data)
+    {
         try {
             
            $idPedido = isset($data['idPedido']) ? intval($data['idPedido']) : 0;
@@ -192,7 +201,6 @@ class PedidosController
             $pedidoArray = $model->obtenerPedidos($idPedido); // información general
             $pedido = $pedidoArray[0] ?? null;
 
-
             if (!$pedido) {
                 header('Content-Type: application/json');
                 echo json_encode([
@@ -202,9 +210,9 @@ class PedidosController
                 return;
             }
 
+
             // Obtener solo los detalles de este pedido
             $detalles = $model->obtenerDetallesPorPedido($idPedido);
-
 
             header('Content-Type: application/json');
             echo json_encode([
@@ -221,6 +229,4 @@ class PedidosController
             ]);
         }
     }
-
-
 }

@@ -22,16 +22,6 @@ $seccion = 'Eliminar Pedidos';
         font-family: Arial, sans-serif;
     }
 
-    .header-seccion {
-        background-color: #6b2d42;
-        color: white;
-        padding: 20px;
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 30px;
-    }
-
     .contenedor-principal {
         background-color: white;
         border-radius: 8px;
@@ -251,11 +241,6 @@ Eliminar pedidos
 </li>
 </ol>
 </nav>
-
-<div class="header-seccion">
-    Gestión de Pedidos
-</div>
-
 <!-- Mensajes de alerta -->
 <div id="mensaje-alerta"></div>
 
