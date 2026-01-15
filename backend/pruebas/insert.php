@@ -168,7 +168,7 @@ try {
     }
 
 
-        /* ============================================================
+    /* ============================================================
         5️⃣ INSERTAR PEDIDOS
     ============================================================ */
     $sql_pedidos = "INSERT INTO pedidos
@@ -308,6 +308,40 @@ try {
     }
 
     echo "\n✅ Se insertaron " . count($ids_pedidos) . " pedidos correctamente.\n";
+
+    // ============================================
+    // 6️⃣ INSERTAR DETALLES DE LOS PEDIDOS
+    // ============================================
+
+    $sql_detalles = "INSERT INTO pedidos_detalles
+        (pedido, identificador_producto, cantidad_producto, observaciones)
+        VALUES (:pedido, :identificador_producto, :cantidad_producto, :observaciones)";
+    $stmt_detalles = $pdo->prepare($sql_detalles);
+
+    // Define qué productos y cantidades van a cada pedido
+    $detalles_a_insertar = [
+        ['pedido' => $ids_pedidos[0], 'producto' => 1, 'cantidad' => 10, 'obs' => 'Queso Oaxaca 1kg'],
+        ['pedido' => $ids_pedidos[0], 'producto' => 2, 'cantidad' => 5,  'obs' => 'Queso Panela 500g'],
+
+        ['pedido' => $ids_pedidos[1], 'producto' => 3, 'cantidad' => 20, 'obs' => 'Yogurt Natural 1L'],
+        ['pedido' => $ids_pedidos[1], 'producto' => 4, 'cantidad' => 15, 'obs' => 'Yogurt Frutas 500ml'],
+
+        ['pedido' => $ids_pedidos[5], 'producto' => 3, 'cantidad' => 50, 'obs' => 'Yogurt Natural 1L'],
+        ['pedido' => $ids_pedidos[5], 'producto' => 4, 'cantidad' => 30, 'obs' => 'Yogurt Frutas 500ml'],
+    ];
+
+    // Ejecutar inserciones
+    foreach ($detalles_a_insertar as $d) {
+        $stmt_detalles->execute([
+            ':pedido' => $d['pedido'],
+            ':identificador_producto' => $d['producto'],
+            ':cantidad_producto' => $d['cantidad'],
+            ':observaciones' => $d['obs']
+        ]);
+    }
+
+echo "✅ Se insertaron los detalles de los pedidos.\n";
+
 
     $pdo->commit();
     echo "✅ Datos insertados correctamente.";

@@ -3,6 +3,22 @@
 //  Basado en la estructura de Localidades CIIT-TMS
 // =====================================================
 
+// Función para prevenir números negativos en inputs numéricos
+function prevenirNumerosNegativos(inputs) {
+    inputs.forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+            }
+        });
+        input.addEventListener('input', function() {
+            if (parseFloat(this.value) < 0) {
+                this.value = Math.abs(parseFloat(this.value));
+            }
+        });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // ---- 0. Carga de Catálogos (NUEVO) ----
     if (document.getElementById('localidad_pertenece')) cargarLocalidades();
@@ -12,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     configurarRegistroCarroceria();
     gestionarCamposCondicionales(); 
     configurarValidacionMatriculaRealTime();
+    configurarValidacionEjesYContenedores();
 
     // ---- 2. Consultar ----
     configurarVistaConsultarCarrocerias();
@@ -27,15 +44,25 @@ document.addEventListener("DOMContentLoaded", function () {
     /* configurarVistaEliminarCarrocerias();
     */eliminarCarrocerias();  
 
+    // Prevenir números negativos en inputs específicos
+    const inputsParaValidar = ['peso_vehicular', 'numero_ejes_vehiculares', 'numero_contenedores']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+    prevenirNumerosNegativos(inputsParaValidar);
+
     const form = document.getElementById("formCarrocerias");
     form.addEventListener("submit", function(e) {
         e.preventDefault(); // <--- ESTO evita que la página se salga/recargue
         ejecutarRegistroFinal();
     });
+
+    
 });
 
+
+
 /* =====================================================
-   0. CARGA DE CATÁLOGOS (LOCALIDADES Y PERSONAL)
+    0. CARGA DE CATÁLOGOS (LOCALIDADES Y PERSONAL)
    ===================================================== */
 function cargarLocalidades() {
     apiRequest("obtener-localidades")
@@ -58,7 +85,7 @@ function cargarLocalidades() {
 }
 
 /* =====================================================
-   0. CARGA DE CATÁLOGOS (PERSONAL FILTRADO)
+    0. CARGA DE CATÁLOGOS (PERSONAL FILTRADO)
    ===================================================== */
 function cargarPersonal() {
     apiRequest("obtener-personal")
@@ -123,6 +150,45 @@ const ValidadoresMatricula = {
         return /^[A-Z]{1,2}[A-Z0-9]{1,5}$/.test(v);
     }
 };
+
+function configurarValidacionEjesYContenedores() {
+    const inputEjes = document.getElementById("numero_ejes_vehiculares");
+    const inputContenedores = document.getElementById("numero_contenedores");
+    const msjErrorEjes = document.getElementById("msj-error-ejes");
+    const msjErrorContenedores = document.getElementById("msj-error-contenedores");
+
+    const mensajesAyudaLimites = {
+        ejes: "El número máximo de ejes permitidos es 20.",
+        contenedores: "El número máximo de contenedores permitidos es 20."
+    };
+
+    const validarCampo = (input, msjError, tipo) => {
+        const valor = parseInt(input.value) || 0;
+
+        if (valor > 20) {
+            input.classList.add("input-invalido");
+            input.classList.remove("input-valido");
+            msjError.textContent = mensajesAyudaLimites[tipo];
+            input.title = mensajesAyudaLimites[tipo];
+        } else if (valor >= 0) {
+            input.classList.remove("input-invalido");
+            input.classList.add("input-valido");
+            msjError.textContent = "";
+            input.title = "Valor correcto";
+        } else {
+            input.classList.remove("input-valido", "input-invalido");
+            msjError.textContent = "";
+        }
+    };
+
+    if (inputEjes && msjErrorEjes) {
+        inputEjes.addEventListener("input", () => validarCampo(inputEjes, msjErrorEjes, "ejes"));
+    }
+
+    if (inputContenedores && msjErrorContenedores) {
+        inputContenedores.addEventListener("input", () => validarCampo(inputContenedores, msjErrorContenedores, "contenedores"));
+    }
+}
 
 function configurarValidacionMatriculaRealTime() {
     const inputMatricula = document.getElementById("matricula");
@@ -231,6 +297,8 @@ function validarFormularioCompleto() {
     const peso = document.getElementById("peso_vehicular").value;
     const responsable = document.getElementById("responsable_carroceria").value;
     const localidad = document.getElementById("localidad_pertenece").value;
+    const ejes = parseInt(document.getElementById("numero_ejes_vehiculares").value) || 0;
+    const contenedores = parseInt(document.getElementById("numero_contenedores").value) || 0;
 
     if (!matricula) return "La Matrícula es obligatoria.";
     if (!modalidad) return "Debe seleccionar una Modalidad.";
@@ -238,6 +306,8 @@ function validarFormularioCompleto() {
     if (!peso || peso <= 0) return "El Peso Vehicular debe ser un número mayor a 0.";
     if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
     if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
+    if (ejes > 20) return "El número de ejes no puede ser mayor a 20.";
+    if (contenedores > 20) return "El número de contenedores no puede ser mayor a 20.";
     
     // Validación específica Ferroviario vs Mixto (Doble check)
     if (modalidad === "Ferroviario" && tipo === "Mixta") {
@@ -351,19 +421,22 @@ function generarFormularioDetalles() {
                 <div class="row">
                     <div class="col-md-4">
                         <label>Longitud (m)</label>
-                        <input type="number" name="longitud[]" class="form-control" step="0.01" required>
+                        <input type="number" name="longitud[]" class="form-control" step="1.00" min="0" required>
                     </div>
                     <div class="col-md-4">
                         <label>Anchura (m)</label>
-                        <input type="number" name="anchura[]" class="form-control" step="0.01" required>
+                        <input type="number" name="anchura[]" class="form-control" step="1.00" min="0" required>
                     </div>
                     <div class="col-md-4">
                         <label>Altura (m)</label>
-                        <input type="number" name="altura[]" class="form-control" step="0.01" required>
+                        <input type="number" name="altura[]" class="form-control" step="1.0" min="0" required>
                     </div>
                 </div>
             </div>`;
     }
+    // Prevenir números negativos en los inputs generados
+    const inputsNumericos = contenedor.querySelectorAll('input[type="number"]');
+    prevenirNumerosNegativos(inputsNumericos);
 }
 
 /* =====================================================
