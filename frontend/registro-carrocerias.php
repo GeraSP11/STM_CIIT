@@ -120,7 +120,7 @@ $seccion = 'Registro de Carrocerías';
     <h2><?php echo $seccion; ?></h2>
 
     <div class="form-container">
- <form id="formCarrocerias">
+<form id="formCarrocerias">
     <div id="seccionPrincipal">
         <div class="row mb-3">
             <div class="col-md-4">
@@ -134,8 +134,8 @@ $seccion = 'Registro de Carrocerías';
                 </select>
             </div>
             <div class="col-md-4">
-                <label for="matricula" class="form-label">Matrícula / NIV *</label>
-                <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej. ABC-1234" required maxlength="100">
+                <label for="matricula" class="form-label">Matrícula / VIN *</label>
+                <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej." required maxlength="100">
                 <small id="msj-error-matricula" class="error-texto"></small>
             </div>
             <div class="col-md-4">
@@ -153,6 +153,7 @@ $seccion = 'Registro de Carrocerías';
             <div class="col-md-4">
                 <label for="peso_vehicular" class="form-label">Peso Vehicular (kg) *</label>
                 <input type="number" step="0.01" id="peso_vehicular" name="peso_vehicular" class="form-input" placeholder="Ej. 1500.50" required min="1">
+                <small id="msj-error-peso" class="error-texto"></small>
             </div>
             <div class="col-md-4">
                 <label for="numero_ejes_vehiculares" class="form-label">Número de Ejes</label>
