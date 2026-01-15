@@ -24,7 +24,7 @@ class PedidosModel
         try {
             $conn->beginTransaction();
             // Generar clave del pedido
-            $clave = 'PED-' . date('Ymd-His');
+            $clave = 'PED-' . date('Ymd') . '-' . $data['localidad_origen'] . '-' . $data['localidad_destino'];
 
             $sqlPedido = "
             INSERT INTO pedidos (

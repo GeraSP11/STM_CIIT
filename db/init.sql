@@ -14,6 +14,16 @@ CREATE TABLE localidades (
         ('Centro Productivo', 'Centro de Distribucion', 'PODEBI', 'Almacen'))
 );
 
+CREATE TABLE tipo_recepcion(
+    id_recepcion SERIAL PRIMARY KEY,
+    localidad INT REFERENCES localidades(id_localidad) 
+        ON DELETE CASCADE ON UPDATE CASCADE, 
+    modalidad_vehiculo VARCHAR(50) CHECK (modalidad_vehiculo IN 
+        ('Carretero', 'Ferroviario', 'Marítimo', 'Aéreo')),
+    capacidad_simultanea INT
+);
+
+
 CREATE TABLE personal (
     id_personal SERIAL PRIMARY KEY,
     nombre_personal VARCHAR(100),
@@ -150,14 +160,14 @@ CREATE TABLE carrocerias_detalle (
 
 CREATE TABLE maniobras (
     id_maniobra SERIAL PRIMARY KEY,
-    id_carroceria INT REFERENCES carrocerias(id_carroceria)
-        ON DELETE CASCADE ON UPDATE CASCADE,
     localidad INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    tipo_vehiculo VARCHAR(10),
+    vehiculo INT REFERENCES vehiculos(id_vehiculo)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     tiempo_carga INT,
     tiempo_descarga INT,
     tiempo_almacenaje INT
+
 );
 
 CREATE TABLE mantenimientos_vehiculos (
@@ -175,15 +185,13 @@ CREATE TABLE rutas (
         ON DELETE CASCADE ON UPDATE CASCADE,
     localidad_destino INT REFERENCES localidades(id_localidad)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    tipo_vehiculo INT REFERENCES vehiculos(id_vehiculo)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    tipo_ruta INT REFERENCES carrocerias(id_carroceria)
-        ON DELETE CASCADE ON UPDATE CASCADE,
+    modalidad_ruta VARCHAR(50) CHECK (modalidad_ruta IN 
+        ('Carretera', 'Ferroviaria', 'Marítima', 'Aérea')),
+    tipo_ruta varchar(3),
     distancia FLOAT,
     peso_soportado FLOAT,
     descripcion VARCHAR(200)
 );
-
 
 CREATE TABLE pedidos (
     id_pedido SERIAL PRIMARY KEY,
