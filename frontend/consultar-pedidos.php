@@ -205,7 +205,7 @@ $seccion = 'Consulta de Pedidos';
 
                      <div class="col-md-3">
                         <div class="detalle-box">
-                            <small>ID</small>
+                            <small>Clave</small>
                             <span id="detalle-id"></span>
                         </div>
                     </div>
@@ -231,12 +231,16 @@ $seccion = 'Consulta de Pedidos';
                         </div>
                     </div>
 
+
                     <div class="col-md-4">
                         <div class="detalle-box">
                             <small>Producto</small>
-                            <span id="detalle-producto"></span>
+                            <select id="detalle-producto" class="form-control form-control-sm">
+                                <!-- Se llenará dinámicamente -->
+                            </select>
                         </div>
                     </div>
+
 
                     <div class="col-md-4">
                         <div class="detalle-box">

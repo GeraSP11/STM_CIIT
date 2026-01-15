@@ -330,8 +330,8 @@ class PedidosModel
      * Obtener pedidos con filtros opcionales
      * Retorna información general del pedido (sin productos)
      */
-    public function obtenerPedidos($idPedido = null, $origen = null, $destino = null)
-    {
+
+    public function obtenerPedidos($clavePedido = null, $origen = null, $destino = null) {
         global $pdo;
 
         if (!$pdo) {
@@ -354,9 +354,9 @@ class PedidosModel
 
         $params = [];
 
-        if ($idPedido) {
-            $query .= " AND p.clave_pedido = :idPedido";
-            $params[':idPedido'] = $idPedido;
+        if ($clavePedido) {
+            $query .= " AND p.clave_pedido ILIKE :clavePedido";
+            $params[':clavePedido'] = "%$clavePedido%";
         }
         if ($origen) {
             $query .= " AND o.nombre_centro_trabajo ILIKE :origen";
@@ -380,8 +380,9 @@ class PedidosModel
      * WORKAROUND: Como pedidos_detalles NO tiene id_pedido,
      * retornamos todos los detalles y los filtramos en el controlador
      */
-    public function obtenerTodosLosDetalles()
-    {
+    
+    public function obtenerDetallesPorPedido($idPedido) {
+
         global $pdo;
 
         if (!$pdo) {
@@ -392,15 +393,17 @@ class PedidosModel
                     pd.id_pedido_detalles, 
                     pr.nombre_producto AS producto, 
                     pd.cantidad_producto AS cantidad, 
-                    pr.tipo_de_embalaje AS unidad,
+                    pr.unidades_existencia AS unidad,
                     pd.observaciones
                 FROM pedidos_detalles pd
                 LEFT JOIN productos pr ON pd.identificador_producto = pr.id_producto
+                WHERE pd.pedido = :idPedido
                 ORDER BY pd.id_pedido_detalles ASC";
 
         $stmt = $pdo->prepare($query);
-        $stmt->execute();
+        $stmt->execute([':idPedido' => $idPedido]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 }

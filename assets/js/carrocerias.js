@@ -3,6 +3,22 @@
 //  Basado en la estructura de Localidades CIIT-TMS
 // =====================================================
 
+// Función para prevenir números negativos en inputs numéricos
+function prevenirNumerosNegativos(inputs) {
+    inputs.forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+            }
+        });
+        input.addEventListener('input', function() {
+            if (parseFloat(this.value) < 0) {
+                this.value = Math.abs(parseFloat(this.value));
+            }
+        });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // ---- 0. Carga de Catálogos (NUEVO) ----
     if (document.getElementById('localidad_pertenece')) cargarLocalidades();
@@ -12,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     configurarRegistroCarroceria();
     gestionarCamposCondicionales(); 
     configurarValidacionMatriculaRealTime();
+    configurarValidacionEjesYContenedores();
 
     // ---- 2. Consultar ----
     configurarVistaConsultarCarrocerias();
@@ -27,15 +44,25 @@ document.addEventListener("DOMContentLoaded", function () {
     /* configurarVistaEliminarCarrocerias();
     */eliminarCarrocerias();  
 
+    // Prevenir números negativos en inputs específicos
+    const inputsParaValidar = ['peso_vehicular', 'numero_ejes_vehiculares', 'numero_contenedores']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+    prevenirNumerosNegativos(inputsParaValidar);
+
     const form = document.getElementById("formCarrocerias");
     form.addEventListener("submit", function(e) {
         e.preventDefault(); // <--- ESTO evita que la página se salga/recargue
         ejecutarRegistroFinal();
     });
+
+    
 });
 
+
+
 /* =====================================================
-   0. CARGA DE CATÁLOGOS (LOCALIDADES Y PERSONAL)
+    0. CARGA DE CATÁLOGOS (LOCALIDADES Y PERSONAL)
    ===================================================== */
 function cargarLocalidades() {
     apiRequest("obtener-localidades")
@@ -58,7 +85,7 @@ function cargarLocalidades() {
 }
 
 /* =====================================================
-   0. CARGA DE CATÁLOGOS (PERSONAL FILTRADO)
+    0. CARGA DE CATÁLOGOS (PERSONAL FILTRADO)
    ===================================================== */
 function cargarPersonal() {
     apiRequest("obtener-personal")
@@ -88,13 +115,14 @@ function cargarPersonal() {
 }
 
 /* =====================================================
-   1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
+    1. REGISTRAR (CREATE) CON VALIDACIONES TÉCNICAS
    ===================================================== */
 
 const ValidadoresMatricula = {
     Carretero: (v) => {
-        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X][A-Z][A-HJ-NPR-Z0-9]{7}$/;
+        const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X]{1}[A-HJ-NPR]{1}[A-HJ-NPR-Z0-9]{7}$/;
         return regex.test(v);
+        
     },
     Ferroviario: (v) => {
         if (!/^\d{12}$/.test(v)) return false;
@@ -123,10 +151,53 @@ const ValidadoresMatricula = {
     }
 };
 
+function configurarValidacionEjesYContenedores() {
+    const inputEjes = document.getElementById("numero_ejes_vehiculares");
+    const inputContenedores = document.getElementById("numero_contenedores");
+    const msjErrorEjes = document.getElementById("msj-error-ejes");
+    const msjErrorContenedores = document.getElementById("msj-error-contenedores");
+
+    const mensajesAyudaLimites = {
+        ejes: "El número máximo de ejes permitidos es 20.",
+        contenedores: "El número máximo de contenedores permitidos es 20."
+    };
+
+    const validarCampo = (input, msjError, tipo) => {
+        const valor = parseInt(input.value) || 0;
+
+        if (valor > 20) {
+            input.classList.add("input-invalido");
+            input.classList.remove("input-valido");
+            msjError.textContent = mensajesAyudaLimites[tipo];
+            input.title = mensajesAyudaLimites[tipo];
+        } else if (valor >= 0) {
+            input.classList.remove("input-invalido");
+            input.classList.add("input-valido");
+            msjError.textContent = "";
+            input.title = "Valor correcto";
+        } else {
+            input.classList.remove("input-valido", "input-invalido");
+            msjError.textContent = "";
+        }
+    };
+
+    if (inputEjes && msjErrorEjes) {
+        inputEjes.addEventListener("input", () => validarCampo(inputEjes, msjErrorEjes, "ejes"));
+    }
+
+    if (inputContenedores && msjErrorContenedores) {
+        inputContenedores.addEventListener("input", () => validarCampo(inputContenedores, msjErrorContenedores, "contenedores"));
+    }
+}
+
 function configurarValidacionMatriculaRealTime() {
     const inputMatricula = document.getElementById("matricula");
     const selectModalidad = document.getElementById("modalidad_carroceria");
     const msjError = document.getElementById("msj-error-matricula");
+
+        // SOLUCIÓN: Si no existen estos elementos (como en la vista de consulta), salimos sin error
+    if (!inputMatricula || !selectModalidad) return; 
+
 
     const mensajesAyuda = {
         Carretero: "Formato VIN: 17 caracteres alfanuméricos (sin I, O, Q).",
@@ -226,6 +297,8 @@ function validarFormularioCompleto() {
     const peso = document.getElementById("peso_vehicular").value;
     const responsable = document.getElementById("responsable_carroceria").value;
     const localidad = document.getElementById("localidad_pertenece").value;
+    const ejes = parseInt(document.getElementById("numero_ejes_vehiculares").value) || 0;
+    const contenedores = parseInt(document.getElementById("numero_contenedores").value) || 0;
 
     if (!matricula) return "La Matrícula es obligatoria.";
     if (!modalidad) return "Debe seleccionar una Modalidad.";
@@ -233,6 +306,8 @@ function validarFormularioCompleto() {
     if (!peso || peso <= 0) return "El Peso Vehicular debe ser un número mayor a 0.";
     if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
     if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
+    if (ejes > 20) return "El número de ejes no puede ser mayor a 20.";
+    if (contenedores > 20) return "El número de contenedores no puede ser mayor a 20.";
     
     // Validación específica Ferroviario vs Mixto (Doble check)
     if (modalidad === "Ferroviario" && tipo === "Mixta") {
@@ -346,19 +421,22 @@ function generarFormularioDetalles() {
                 <div class="row">
                     <div class="col-md-4">
                         <label>Longitud (m)</label>
-                        <input type="number" name="longitud[]" class="form-control" step="0.01" required>
+                        <input type="number" name="longitud[]" class="form-control" step="1.00" min="0" required>
                     </div>
                     <div class="col-md-4">
                         <label>Anchura (m)</label>
-                        <input type="number" name="anchura[]" class="form-control" step="0.01" required>
+                        <input type="number" name="anchura[]" class="form-control" step="1.00" min="0" required>
                     </div>
                     <div class="col-md-4">
                         <label>Altura (m)</label>
-                        <input type="number" name="altura[]" class="form-control" step="0.01" required>
+                        <input type="number" name="altura[]" class="form-control" step="1.0" min="0" required>
                     </div>
                 </div>
             </div>`;
     }
+    // Prevenir números negativos en los inputs generados
+    const inputsNumericos = contenedor.querySelectorAll('input[type="number"]');
+    prevenirNumerosNegativos(inputsNumericos);
 }
 
 /* =====================================================
@@ -505,27 +583,36 @@ function consultarCarrocerias() {
     form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        // Recolectar filtros dinámicos (Inputs y Selects)
+        // 1. Integridad conservada: Recolección dinámica de filtros
         const filtros = {};
         const elementos = contenedorFiltros.querySelectorAll('input:not([readonly]), select');
         
+        // Verificación básica antes de enviar
+        if (elementos.length === 0) {
+            alerta("Filtros", "Por favor agrega al menos un filtro para la búsqueda.", "warning");
+            return;
+        }
+
         elementos.forEach(el => {
             if (el.value.trim() !== "") {
                 filtros[el.name] = el.value.trim();
             }
         });
 
+        // 2. Llamada a la API
         apiRequest("consultar-carrocerias", filtros)
             .then(res => res.json())
             .then(data => {
                 const tbody = document.querySelector("#tablaCarrocerias tbody");
                 tbody.innerHTML = "";
 
+                // 3. Alerta de "Sin resultados" manteniendo tu flujo
                 if (!data || data.length === 0) {
-                    alerta("Sin resultados", "No se encontraron carrocerías", "info");
+                    alerta("Sin resultados", "No se encontraron carrocerías con los criterios seleccionados.", "info");
                     return;
                 }
 
+                // 4. Integridad conservada: Construcción de filas con operadores OR para compatibilidad de nombres
                 data.forEach(carro => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
@@ -543,12 +630,14 @@ function consultarCarrocerias() {
                     tbody.appendChild(tr);
                 });
 
+                // Cambio de vista
                 document.getElementById("formContainer").style.display = "none";
                 document.getElementById("tablaResultados").style.display = "block";
             })
             .catch(err => {
+                // 5. Alerta de error técnica
                 console.error("Error:", err);
-                alerta("Error", "Error al procesar la respuesta del servidor", "error");
+                alerta("Error de conexión", "No se pudo obtener respuesta del servidor. Intente más tarde.", "error");
             });
     });
 }
@@ -707,15 +796,18 @@ function apiRequest(accion, datos = null) {
 }
 
 function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
-    if (respuesta.trim() === "OK") {
-        // Usa tu función 'alerta' de alertas.js para el ÉXITO
-        alerta("Éxito", mensajeExito, "success").then(() => {
+    // Limpiamos la respuesta de espacios en blanco
+    const res = respuesta.trim();
+
+    if (res === "OK") {
+        alerta("¡Éxito!", mensajeExito, "success").then(() => {
             if (redireccion) window.location.href = redireccion;
             else location.reload();
         });
     } else {
-        // Usa tu función 'alerta' de alertas.js para el ERROR
-        // Esto pondrá automáticamente el botón rojo y el texto "Aceptar"
-        alerta("Error", respuesta, "error");
+        // Si el controlador PHP mandó algo que no es "OK", es un error o advertencia
+        // Ejemplo: "Error: La matrícula ya existe"
+        const tipo = res.includes("Error") ? "error" : "warning";
+        alerta("Atención", res, tipo);
     }
 }

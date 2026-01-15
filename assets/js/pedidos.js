@@ -1147,26 +1147,50 @@ document.addEventListener('DOMContentLoaded', function () {
         detalleCampos.destino.textContent = pedido.destino || "";
         detalleCampos.observaciones.textContent = pedido.observaciones || "Sin observaciones";
 
-        // Procesar detalles de productos
-        if (detalles && detalles.length > 0) {
-            // Si hay múltiples productos, mostrar el primero o concatenar
-            /* const primerProducto = detalles[0];
-             detalleCampos.producto.textContent = primerProducto.producto || "";
-             detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
-             detalleCampos.unidad.textContent = "unidades"*/
+        const selectProducto = detalleCampos.producto;
+        selectProducto.innerHTML = ''; // Limpiar opciones anteriores
 
-            // Si quieres mostrar todos los productos:
-            const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
-            detalleCampos.producto.textContent = productos;
+        if (detalles && detalles.length > 0) {
+
+            detalles.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.id_producto;
+                option.textContent = d.producto;
+                option.dataset.cantidad = d.cantidad;
+                option.dataset.unidad = d.unidad;
+                selectProducto.appendChild(option);
+            });
+
+            // Mostrar los datos del primer producto por defecto
+            const primer = selectProducto.options[0];
+            detalleCampos.cantidad.textContent = primer.dataset.cantidad;
+            detalleCampos.unidad.textContent = primer.dataset.unidad;
+
         } else {
-            detalleCampos.producto.textContent = "Sin productos";
+            const option = document.createElement('option');
+            option.textContent = "Sin productos";
+            option.value = "";
+            selectProducto.appendChild(option);
             detalleCampos.cantidad.textContent = "0";
             detalleCampos.unidad.textContent = "-";
         }
 
+        // Listener: al cambiar de producto, actualizar cantidad y unidad
+        selectProducto.addEventListener('change', function() {
+            const seleccionado = selectProducto.selectedOptions[0];
+            if (seleccionado && seleccionado.value !== "") {
+                detalleCampos.cantidad.textContent = seleccionado.dataset.cantidad;
+                detalleCampos.unidad.textContent = seleccionado.dataset.unidad;
+            } else {
+                detalleCampos.cantidad.textContent = "0";
+                detalleCampos.unidad.textContent = "-";
+            }
+        });
+
         // Mostrar el modal
         modalPedido.show();
     }
+
 
     // ============================================
     // Cargar localidades para los selects

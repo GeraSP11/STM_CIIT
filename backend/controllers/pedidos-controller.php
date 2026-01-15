@@ -141,7 +141,7 @@ class PedidosController
     public function consultarPedido($data)
     {
         try {
-            $idPedido = isset($data['idPedido']) ? trim($data['idPedido']) : null;
+            $clavePedido = isset($data['clavePedido']) ? trim($data['clavePedido']) : null;
             $origen   = isset($data['origen']) ? trim($data['origen']) : null;
             $destino  = isset($data['destino']) ? trim($data['destino']) : null;
 
@@ -156,8 +156,9 @@ class PedidosController
             }
 
             $model = new PedidosModel();
-            $pedidos = $model->obtenerPedidos($idPedido, $origen, $destino);
-
+            
+            $pedidos = $model->obtenerPedidos($clavePedido, $origen, $destino);
+            
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
@@ -182,30 +183,23 @@ class PedidosController
     public function obtenerDetallePedido($data)
     {
         try {
-            $idPedido = isset($data['idPedido']) ? intval($data['idPedido']) : 0;
+            
+           $idPedido = isset($data['idPedido']) ? intval($data['idPedido']) : 0;
 
             if (!$idPedido) {
                 header('Content-Type: application/json');
                 echo json_encode([
                     'success' => false,
-                    'error' => 'ID de pedido inválido'
+                    'error' => 'Clave de pedido inválido'
                 ]);
                 return;
             }
 
             $model = new PedidosModel();
 
-            // Obtener información general del pedido
-            $pedidos = $model->obtenerPedidos(null, null, null);
-
-            // Buscar el pedido específico por id_pedido
-            $pedido = null;
-            foreach ($pedidos as $p) {
-                if ($p['id_pedido'] == $idPedido) {
-                    $pedido = $p;
-                    break;
-                }
-            }
+            // Obtener información general del pedido( ya no va, porque al hacer clien en ver detalle se manda el  id no?)
+            $pedidoArray = $model->obtenerPedidos($idPedido); // información general
+            $pedido = $pedidoArray[0] ?? null;
 
             if (!$pedido) {
                 header('Content-Type: application/json');
@@ -216,17 +210,17 @@ class PedidosController
                 return;
             }
 
-            // WORKAROUND: Como no hay relación, obtenemos todos los detalles
-            // En producción esto mostrará productos que pueden no ser del pedido
-            $detalles = $model->obtenerTodosLosDetalles();
+
+            // Obtener solo los detalles de este pedido
+            $detalles = $model->obtenerDetallesPorPedido($idPedido);
 
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
                 'pedido' => $pedido,
-                'detalles' => $detalles,
-                'advertencia' => 'Los productos mostrados pueden no corresponder específicamente a este pedido debido a limitaciones en la estructura de la BD'
+                'detalles' => $detalles
             ]);
+
         } catch (Exception $e) {
             header('Content-Type: application/json');
             echo json_encode([

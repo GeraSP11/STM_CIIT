@@ -77,8 +77,10 @@ $seccion = 'Consultar Carrocerías';
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
     <script src="/assets/libs/swal/sweetalert2.min.js"></script>
     <script src="/assets/js/alertas.js"></script>
     <script src="/assets/js/carrocerias.js"></script>
+
 </body>
 </html>
