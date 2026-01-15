@@ -103,7 +103,7 @@ function cargarLocalidades() {
                 select.innerHTML = '<option value="">Sin localidades registradas</option>';
                 select.disabled = true; // Opcional: deshabilitar si no hay datos
             } else {
-                select.disabled = false;
+                //select.disabled = false;
                 select.innerHTML = '<option value="">Seleccione localidad</option>';
                 data.forEach(loc => {
                     select.add(new Option(loc.nombre_display, loc.id_localidad));
@@ -129,7 +129,7 @@ function cargarPersonal() {
                 select.innerHTML = '<option value="">Sin Jefes de Almacén registrados</option>';
                 select.disabled = true;
             } else {
-                select.disabled = false;
+                //select.disabled = false;
                 // Simplemente recorremos los datos que envía el PHP 
                 // (el PHP ya hizo el trabajo de filtrar por 'Jefe de Almacén')
                 data.forEach(p => {
@@ -178,7 +178,7 @@ const ValidadoresMatricula = {
         return /^[A-Z]{1,2}[A-Z0-9]{1,5}$/.test(v);
     }
 };
-
+// Validación de ejes, contenedores y peso vehicular
 function configurarValidacionEjesYContenedores() {
     const inputEjes = document.getElementById("numero_ejes_vehiculares");
     const inputContenedores = document.getElementById("numero_contenedores");
@@ -227,13 +227,19 @@ function configurarValidacionEjesYContenedores() {
 
     const validarCampo = (input, msjError, tipo, max) => {
         const valor = parseInt(input.value) || 0;
+        const esRequerido = input.required;
 
-        if (valor > max) {
+        if (esRequerido && valor === 0) {
+            input.classList.add("input-invalido");
+            input.classList.remove("input-valido");
+            msjError.textContent = `El ${tipo === 'ejes' ? 'número de ejes' : 'número de contenedores'} debe ser mayor a 0.`;
+            input.title = `El ${tipo === 'ejes' ? 'número de ejes' : 'número de contenedores'} debe ser mayor a 0.`;
+        } else if (valor > max) {
             input.classList.add("input-invalido");
             input.classList.remove("input-valido");
             msjError.textContent = mensajesAyudaLimites[tipo];
             input.title = mensajesAyudaLimites[tipo];
-        } else if (valor >= 0) {
+        } else if (valor > 0 || (valor === 0 && !esRequerido)) {
             input.classList.remove("input-invalido");
             input.classList.add("input-valido");
             msjError.textContent = "";
@@ -367,13 +373,18 @@ function configurarValidacionMatriculaRealTime() {
 }
 
 /* =====================================================
-   1. GESTIÓN DE CONDICIONALES (RESTRICCIÓN FERROVIARIA)
+    1. GESTIÓN DE CONDICIONALES (RESTRICCIÓN FERROVIARIA)
    ===================================================== */
 function gestionarCamposCondicionales() {
     const selectModalidad = document.getElementById("modalidad_carroceria");
     const selectTipo = document.getElementById("tipo_carroceria");
     const inputEjes = document.getElementById("numero_ejes_vehiculares");
     const inputContenedores = document.getElementById("numero_contenedores");
+    const inputMatricula = document.getElementById("matricula");
+
+    const inputPeso = document.getElementById("peso_vehicular");
+    const inputLocalidad = document.getElementById("localidad_pertenece");
+    const inputResponsable = document.getElementById("responsable_carroceria");
 
     if (!selectModalidad || !selectTipo) return;
 
@@ -385,6 +396,7 @@ function gestionarCamposCondicionales() {
         if (mod === "Ferroviario" && tipo === "Mixta") {
             alerta("Validación", "La modalidad Ferroviaria no permite el tipo de carrocería Mixta.", "warning");
             selectTipo.value = ""; // Reseteamos la selección
+            selectTipo.disabled = false;
             return;
         }
 
@@ -398,6 +410,11 @@ function gestionarCamposCondicionales() {
             inputEjes.disabled = false;
             inputEjes.required = true;
         }
+        // Habilitar siempre estos campos al cambiar modalidad
+        inputMatricula.disabled = false;
+        inputPeso.disabled = false;
+        inputLocalidad.disabled = false;
+        inputResponsable.disabled = false;        
 
         const requiereContenedores = ["Unidad de carga", "Mixta"].includes(selectTipo.value);
         inputContenedores.disabled = !requiereContenedores;
@@ -409,7 +426,7 @@ function gestionarCamposCondicionales() {
 }
 
 /* =====================================================
-   VALIDACIÓN DE ERRORES ESPECÍFICOS
+    VALIDACIÓN DE ERRORES ESPECÍFICOS
    ===================================================== */
 function validarFormularioCompleto() {
     const matricula = document.getElementById("matricula").value.trim();
@@ -442,8 +459,13 @@ function validarFormularioCompleto() {
     if (!peso || peso <= 0) return "El Peso Vehicular debe ser un número mayor a 0.";
     if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
     if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
+    if (ejes === 0) return "El número de ejes debe ser mayor a 0.";
     if (ejes > 20) return "El número de ejes no puede ser mayor a 20.";
-    if (contenedores > 10) return "El número de contenedores no puede ser mayor a 10.";
+    
+    // Validar contenedores solo si es Unidad de carga o Mixta
+    const requiereContenedores = ["Unidad de carga", "Mixta"].includes(tipo);
+    if (requiereContenedores && contenedores === 0) return "El número de contenedores debe ser mayor a 0.";
+    if (requiereContenedores && contenedores > 10) return "El número de contenedores no puede ser mayor a 10.";
     
     // Validación de peso según modalidad (mínimo y máximo)
     const minPeso = limitesPesoMin[modalidad] || 15000;
@@ -468,7 +490,7 @@ function validarFormularioCompleto() {
 
 
 /* =====================================================
-   1. REGISTRAR (CORREGIDO)
+    1. REGISTRAR (CORREGIDO)
    ===================================================== */
 
 function configurarRegistroCarroceria() {
@@ -529,13 +551,12 @@ function configurarRegistroCarroceria() {
             }
         });
         
-        // Para los SELECTS (que no tienen readOnly), bloqueamos la interacción visual
+        // Para los SELECTS, establecemos disabled=true para que se vean realmente deshabilitados
         const selects = ["modalidad_carroceria", "localidad_pertenece", "responsable_carroceria", "tipo_carroceria"];
         selects.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                el.style.pointerEvents = "none";
-                el.style.backgroundColor = "#e9ecef"; // Color grisáceo de Bootstrap
+                el.disabled = true;
             }
         });
 
@@ -568,8 +589,7 @@ function configurarRegistroCarroceria() {
         selects.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                el.style.pointerEvents = "auto";
-                el.style.backgroundColor = "";
+                el.disabled = false;
             }
         });
     });
@@ -607,7 +627,7 @@ function generarFormularioDetalles() {
 }
 
 /* =====================================================
-   REGISTRO FINAL (CON MENSAJES DE ERROR CLAROS)
+    REGISTRO FINAL (CON MENSAJES DE ERROR CLAROS)
    ===================================================== */
 function ejecutarRegistroFinal() {
     // REQUERIMIENTO: Mensajes de error claros y específicos
