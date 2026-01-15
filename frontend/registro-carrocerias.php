@@ -157,10 +157,12 @@ $seccion = 'Registro de Carrocerías';
             <div class="col-md-4">
                 <label for="numero_ejes_vehiculares" class="form-label">Número de Ejes</label>
                 <input type="number" id="numero_ejes_vehiculares" name="numero_ejes_vehiculares" class="form-input" placeholder="Ej. 2" min="1" max="20">
+                <small id="msj-error-ejes" class="error-texto"></small>
             </div>
             <div class="col-md-4">
                 <label for="numero_contenedores" class="form-label">Número de Contenedores</label>
                 <input type="number" id="numero_contenedores" name="numero_contenedores" class="form-input" placeholder="Ej. 1" min="0" max="10">
+                <small id="msj-error-contenedores" class="error-texto"></small>
             </div>
         </div>
 
