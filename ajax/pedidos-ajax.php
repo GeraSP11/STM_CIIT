@@ -9,30 +9,78 @@ try {
     $controller = new PedidosController();
     
     switch ($accion) {
+        case 'registrarPedido':
+
+            $productos = json_decode($_POST['productos'] ?? '[]', true);
+
+            if (
+                empty($_POST['fecha_entrega']) ||
+                empty($_POST['localidad_origen']) ||
+                empty($_POST['localidad_destino']) ||
+                empty($productos)
+            ) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Datos incompletos para registrar el pedido'
+                ]);
+                exit;
+            }
+
+            $resultado = $controller->registrarPedido(
+                $_POST,
+                $productos
+            );
+            if (ob_get_length()) ob_clean();
+            echo json_encode($resultado);
+            exit;
+
         case 'listarProductos':
             $busqueda = $_POST['busqueda'] ?? '';
-            echo json_encode($controller::listarProductos($busqueda));
+            $destino  = $_POST['destino'] ?? null;
+
+            if (!$destino) {
+                echo json_encode([
+                    'success' => true,
+                    'data' => []
+                ]);
+                exit;
+            }
+
+            $productos = $controller->listarProductos($busqueda, $destino);
+
+            if ($productos === false) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error al obtener productos'
+                ]);
+                exit;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'data' => $productos
+            ]);
             break;
 
         case 'obtener_localidades':
             obtenerLocalidades($controller);
             break;
-            
+
         case 'buscar':
             buscarPedidos($controller);
             break;
-            
+
         case 'obtener':
             obtenerPedido($controller);
             break;
-            
+
         case 'actualizar':
             actualizarPedido($controller);
             break;
         case 'consultar-pedidos':
             $controller->consultarPedido($_POST);
             break;
-        
+
         case 'detalle-pedido':
             $controller->obtenerDetallePedido($_POST);
             break;
@@ -58,10 +106,11 @@ exit;
 /**
  * Obtener todas las localidades
  */
-function obtenerLocalidades($controller) {
+function obtenerLocalidades($controller)
+{
     try {
         $localidades = $controller->obtenerLocalidades();
-        
+
         echo json_encode([
             'success' => true,
             'localidades' => $localidades
@@ -77,12 +126,13 @@ function obtenerLocalidades($controller) {
 /**
  * Buscar pedidos por criterios
  */
-function buscarPedidos($controller) {
+function buscarPedidos($controller)
+{
     try {
         $clavePedido = isset($_POST['clave_pedido']) ? trim($_POST['clave_pedido']) : null;
         $localidadOrigen = isset($_POST['localidad_origen']) ? intval($_POST['localidad_origen']) : null;
         $localidadDestino = isset($_POST['localidad_destino']) ? intval($_POST['localidad_destino']) : null;
-        
+
         // Validar que al menos un criterio esté presente
         if (empty($clavePedido) && empty($localidadOrigen) && empty($localidadDestino)) {
             echo json_encode([
@@ -91,9 +141,9 @@ function buscarPedidos($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         $pedidos = $controller->buscarPedidos($clavePedido, $localidadOrigen, $localidadDestino);
-        
+
         echo json_encode([
             'success' => true,
             'pedidos' => $pedidos
@@ -109,10 +159,11 @@ function buscarPedidos($controller) {
 /**
  * Obtener un pedido por ID
  */
-function obtenerPedido($controller) {
+function obtenerPedido($controller)
+{
     try {
         $idPedido = isset($_GET['id']) ? intval($_GET['id']) : 0;
-        
+
         if ($idPedido <= 0) {
             echo json_encode([
                 'success' => false,
@@ -120,9 +171,9 @@ function obtenerPedido($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         $pedido = $controller->obtenerPedidoPorId($idPedido);
-        
+
         if ($pedido) {
             echo json_encode([
                 'success' => true,
@@ -145,14 +196,15 @@ function obtenerPedido($controller) {
 /**
  * Actualizar un pedido
  */
-function actualizarPedido($controller) {
+function actualizarPedido($controller)
+{
     try {
         $idPedido = isset($_POST['id_pedido']) ? intval($_POST['id_pedido']) : 0;
         $estatusPedido = isset($_POST['estatus_pedido']) ? trim($_POST['estatus_pedido']) : '';
         $fechaSolicitud = isset($_POST['fecha_solicitud']) ? trim($_POST['fecha_solicitud']) : '';
         $fechaEntrega = isset($_POST['fecha_entrega']) ? trim($_POST['fecha_entrega']) : null;
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : null;
-        
+
         // Validaciones
         if ($idPedido <= 0) {
             echo json_encode([
@@ -161,7 +213,7 @@ function actualizarPedido($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         if (empty($estatusPedido)) {
             echo json_encode([
                 'success' => false,
@@ -169,7 +221,7 @@ function actualizarPedido($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         if (empty($fechaSolicitud)) {
             echo json_encode([
                 'success' => false,
@@ -177,7 +229,7 @@ function actualizarPedido($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         // Validar estatus
         $estatusValidos = ['En captura', 'En preparación', 'En recolección', 'Enviado', 'En tránsito', 'En reparto', 'Entregado'];
         if (!in_array($estatusPedido, $estatusValidos)) {
@@ -187,9 +239,9 @@ function actualizarPedido($controller) {
             ], JSON_UNESCAPED_UNICODE);
             return;
         }
-        
+
         $resultado = $controller->actualizarPedido($idPedido, $estatusPedido, $fechaSolicitud, $fechaEntrega, $observaciones);
-        
+
         if ($resultado) {
             echo json_encode([
                 'success' => true,

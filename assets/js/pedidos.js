@@ -15,7 +15,16 @@ function inicializarEventos() {
 
     // Formulario de registro
     if (document.getElementById('formRegistroProductos')) {
+        establecerFechaActual();
+        cargarLocalidadesRegistro();
         configurarVistaProductos();
+        document.getElementById('formRegistroProductos').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!validarFormularioPedido()) return;
+
+            registrarPedido();
+        });
     }
 
     // Formulario de búsqueda
@@ -36,6 +45,10 @@ function configurarVistaProductos() {
     const btnAgregarProducto = document.getElementById('btnAgregarProducto');
     const btnRegresar = document.getElementById('btnRegresar');
     const inputBuscarProducto = document.getElementById('buscarProducto');
+    const fechaEntrega = document.getElementById('fechaEntrega');
+    const fechaSolicitud = document.getElementById('fechaSolicitud');
+    const selectOrigen = document.getElementById('localidad-origen');
+    const selectDestino = document.getElementById('localidad-destino');
 
     if (btnAgregarProducto) {
         btnAgregarProducto.addEventListener('click', mostrarVistaProductos);
@@ -50,7 +63,42 @@ function configurarVistaProductos() {
             cargarProductos(this.value.trim());
         });
     }
+
+    if (fechaEntrega) {
+        fechaEntrega.addEventListener('change', validarFechaEntrega);
+    }
+
+    if (fechaSolicitud) {
+        fechaSolicitud.addEventListener('change', function () {
+            configurarRestriccionFechaEntrega();
+            validarFechaEntrega();
+        });
+    }
+
+    if (selectOrigen) {
+        selectOrigen.addEventListener('change', sincronizarSelectsLocalidades);
+    }
+
+    if (selectDestino) {
+        selectDestino.addEventListener('change', sincronizarSelectsLocalidades);
+    }
 }
+
+function actualizarEstadoBotonAgregarProducto() {
+    const selectOrigen = document.getElementById('localidad-origen');
+    const selectDestino = document.getElementById('localidad-destino');
+    const btnAgregarProducto = document.getElementById('btnAgregarProducto');
+
+    if (!selectOrigen || !selectDestino || !btnAgregarProducto) return;
+
+    if (selectOrigen.value && selectDestino.value) {
+        btnAgregarProducto.style.display = 'inline-block';
+    } else {
+        btnAgregarProducto.style.display = 'none';
+    }
+}
+
+
 // Mostrar u ocultar la seccion de productos
 function mostrarVistaProductos() {
     const vistaRegistro = document.getElementById('vista-registro');
@@ -100,9 +148,7 @@ function agregarProductosSeleccionados() {
         if (productosPedido[id]) return; // ya existe
 
         const nombre = fila.children[1].innerText;
-        const peso = fila.children[2].innerText;
         const existencia = chk.dataset.existencia;
-
 
         productosPedido[id] = true;
 
@@ -120,7 +166,7 @@ function agregarProductosSeleccionados() {
 
 
                 </td>
-                <td>${peso}</td>
+                <td>${existencia}</td>
                 <td>
                     <input type="text" class="form-control">
                 </td>
@@ -175,16 +221,58 @@ document.addEventListener('keydown', function (e) {
         e.preventDefault();
     }
 });
+// Establecer fecha actual
+function establecerFechaActual() {
+    const inputFecha = document.getElementById('fechaSolicitud');
+    if (!inputFecha) return;
 
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
 
+    const fechaHoy = `${year}-${month}-${day}`;
+    inputFecha.value = fechaHoy;
 
+    inputFecha.min = fechaHoy;
+}
+function validarFechaEntrega() {
+
+    const fechaSolicitud = document.getElementById('fechaSolicitud');
+    const fechaEntrega = document.getElementById('fechaEntrega');
+
+    if (!fechaSolicitud || !fechaEntrega) return;
+
+    if (!fechaEntrega.value) return;
+
+    if (fechaEntrega.value < fechaSolicitud.value) {
+        mostrarAlerta(
+            'warning',
+            'La fecha estimada de entrega no puede ser anterior a la fecha de solicitud'
+        );
+
+        fechaEntrega.value = fechaSolicitud.value;
+    }
+}
+function configurarRestriccionFechaEntrega() {
+    const fechaSolicitud = document.getElementById('fechaSolicitud');
+    const fechaEntrega = document.getElementById('fechaEntrega');
+
+    if (!fechaSolicitud || !fechaEntrega) return;
+
+    fechaEntrega.min = fechaSolicitud.value;
+}
 
 // Cargar Productos para la vista de seleccion en el registro
 function cargarProductos(filtro = '') {
 
+    const destino = document.getElementById('localidad-destino').value;
+    if (!destino) return;
+
     const formData = new FormData();
     formData.append('accion', 'listarProductos');
     formData.append('busqueda', filtro);
+    formData.append('destino', destino);
 
     fetch('/ajax/pedidos-ajax.php', {
         method: 'POST',
@@ -192,14 +280,12 @@ function cargarProductos(filtro = '') {
     })
         .then(res => res.json())
         .then(data => {
-            if (!data.success) {
-                console.error(data.message);
-                return;
-            }
+            if (!data.success) return;
             renderizarTablaProductos(data.data);
         })
-        .catch(error => console.error(error));
+        .catch(console.error);
 }
+
 // Renderizar la tabla de productos
 function renderizarTablaProductos(productos) {
     const tablaProductosBody = document.getElementById('tablaProductos');
@@ -268,6 +354,251 @@ function obtenerProductosSeleccionados() {
 function filtrarProductos(e) {
     cargarProductos(e.target.value.trim());
 }
+// Localidades y logica para registro
+function llenarSelectLocalidadesRegistro(select, excluirId = null, valorSeleccionado = '') {
+
+    // Limpiar select
+    select.innerHTML = '<option value="">Seleccione una Localidad</option>';
+
+    localidades.forEach(loc => {
+        if (loc.id_localidad == excluirId) return;
+
+        const option = document.createElement('option');
+        option.value = loc.id_localidad;
+        option.textContent = loc.nombre_completo;
+
+        if (loc.id_localidad == valorSeleccionado) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+    });
+}
+function manejarCambioDestino() {
+
+    const tbody = document.getElementById('tablaPedido');
+    const contenedor = document.getElementById('contenedorTablaPedido');
+
+    // Vaciar estado interno
+    for (const key in productosPedido) {
+        delete productosPedido[key];
+    }
+
+    // Limpiar tabla
+    if (tbody) tbody.innerHTML = '';
+
+    // Ocultar tabla y botones
+    if (contenedor) contenedor.style.display = 'none';
+    ocultarBotonesRegistro();
+}
+
+function sincronizarSelectsLocalidades() {
+
+    const selectOrigen = document.getElementById('localidad-origen');
+    const selectDestino = document.getElementById('localidad-destino');
+
+    const origenSeleccionado = selectOrigen.value;
+    const destinoSeleccionado = selectDestino.value;
+
+    // Llenar cada select excluyendo la selección del otro
+    llenarSelectLocalidadesRegistro(selectOrigen, destinoSeleccionado, origenSeleccionado);
+    llenarSelectLocalidadesRegistro(selectDestino, origenSeleccionado, destinoSeleccionado);
+    actualizarEstadoBotonAgregarProducto();
+    manejarCambioDestino();
+}
+function cargarLocalidadesRegistro() {
+
+    const formData = new FormData();
+    formData.append('accion', 'obtener_localidades');
+
+    fetch('/ajax/pedidos-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.text())
+        .then(text => {
+            const data = JSON.parse(text);
+
+            if (data.success) {
+                localidades = data.localidades;
+                sincronizarSelectsLocalidades(); // clave
+            }
+        })
+        .catch(() => {
+            mostrarAlerta('error', 'Error al cargar localidades');
+        });
+}
+
+// Inicio de operaciones para registro de pedido
+function validarFormularioPedido() {
+
+    const fechaEntrega = document.getElementById('fechaEntrega').value;
+    const origen = document.getElementById('localidad-origen').value;
+    const destino = document.getElementById('localidad-destino').value;
+
+    if (!fechaEntrega || !origen || !destino) {
+        mostrarAlerta('warning', 'Todos los campos del pedido son obligatorios');
+        return false;
+    }
+
+    const filas = document.querySelectorAll('#tablaPedido tr');
+
+    if (filas.length === 0) {
+        mostrarAlerta('warning', 'Debe agregar al menos un producto al pedido');
+        return false;
+    }
+
+    let valido = true;
+
+    filas.forEach(fila => {
+        const cantidad = fila.querySelector('.input-cantidad').value;
+        if (!cantidad || cantidad <= 0) {
+            valido = false;
+        }
+    });
+
+    if (!valido) {
+        mostrarAlerta('warning', 'Todas las cantidades deben ser mayores a 0');
+        return false;
+    }
+
+    return true;
+}
+// Registrar pedido
+function registrarPedido() {
+
+    const form = document.getElementById('formRegistroProductos');
+    const formData = new FormData(form);
+    formData.append('accion', 'registrarPedido');
+    formData.append('fecha_entrega', document.getElementById('fechaEntrega').value);
+    formData.append('localidad_origen', document.getElementById('localidad-origen').value);
+    formData.append('localidad_destino', document.getElementById('localidad-destino').value);
+
+    const productos = [];
+
+    document.querySelectorAll('#tablaPedido tr').forEach(tr => {
+        productos.push({
+            id_producto: tr.dataset.id,
+            cantidad: tr.querySelector('.input-cantidad')?.value,
+            observaciones: tr.querySelector('input[type="text"]')?.value
+        });
+    });
+
+    if (productos.length === 0) {
+        mostrarAlerta('warning', 'Debe agregar al menos un producto');
+        return;
+    }
+
+    formData.append('productos', JSON.stringify(productos));
+
+    fetch('/ajax/pedidos-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => {
+            if (!res.ok) throw new Error('HTTP error');
+            return res.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                mostrarAlerta('error', data.message);
+                return;
+            }
+
+            mostrarAlerta(
+                'success',
+                `Pedido ${data.clave_pedido} registrado correctamente`
+            );
+
+            actualizarEstatusVista('En preparación');
+            limpiarTodoRegistro();
+        })
+        .catch(err => {
+            console.error('ERROR FETCH:', err);
+            mostrarAlerta('error', 'Error de comunicación con el servidor');
+        });
+}
+
+function actualizarEstatusVista(estatus) {
+    const header = document.querySelector('.captura-header');
+    if (header) header.textContent = estatus;
+}
+function limpiarTodoRegistro() {
+
+    /* ==========================
+       FORMULARIO
+    ========================== */
+    const form = document.getElementById('formRegistroProductos');
+    if (form) form.reset();
+
+    /* ==========================
+       FECHAS
+    ========================== */
+    establecerFechaActual();
+    document.getElementById('fechaEntrega').value = '';
+
+    /* ==========================
+       LOCALIDADES
+    ========================== */
+    const selectOrigen = document.getElementById('localidad-origen');
+    const selectDestino = document.getElementById('localidad-destino');
+
+    if (selectOrigen) selectOrigen.value = '';
+    if (selectDestino) selectDestino.value = '';
+
+    sincronizarSelectsLocalidades();
+
+    /* ==========================
+       PRODUCTOS DEL PEDIDO
+    ========================== */
+    // Limpiar estructura de control
+    for (let key in productosPedido) {
+        delete productosPedido[key];
+    }
+
+    // Limpiar tabla visual
+    const tbody = document.getElementById('tablaPedido');
+    if (tbody) tbody.innerHTML = '';
+
+    // Ocultar tabla
+    const contenedorTabla = document.getElementById('contenedorTablaPedido');
+    if (contenedorTabla) contenedorTabla.style.display = 'none';
+
+    /* ==========================
+       BOTONES
+    ========================== */
+    ocultarBotonesRegistro();
+
+    /* ==========================
+       VISTAS
+    ========================== */
+    document.getElementById('vista-productos').style.display = 'none';
+    document.getElementById('vista-registro').style.display = 'block';
+
+    /* ==========================
+       BOTÓN AGREGAR PRODUCTOS
+    ========================== */
+    const btnAgregarProductos = document.getElementById('btnAgregarProductos');
+    if (btnAgregarProductos) {
+        btnAgregarProductos.disabled = true;
+        btnAgregarProductos.classList.add('btn-gris');
+        btnAgregarProductos?.classList?.remove('btn-activo');
+    }
+
+    /* ==========================
+       BOTÓN "+"
+    ========================== */
+    document.getElementById('btnAgregarProducto').style.display = 'none';
+
+    /* ==========================
+       ESTATUS VISUAL
+    ========================== */
+    const header = document.querySelector('.captura-header');
+    if (header) header.textContent = 'En captura';
+
+    scrollArriba();
+}
+
 
 
 
@@ -688,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============================================
     // PASO 1: Listener del formulario de búsqueda
     // ============================================
-    formConsulta.addEventListener("submit", function(e) {
+    formConsulta.addEventListener("submit", function (e) {
         e.preventDefault();
         consultarPedidos();
     });
@@ -724,14 +1055,14 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(data => {
                 console.log("Respuesta del servidor:", data);
-                
+
                 if (data.success && data.pedidos) {
                     // Ocultar formulario de filtros
                     const formContainer = document.querySelector('.form-container');
                     if (formContainer) {
                         formContainer.style.display = 'none';
                     }
-                    
+
                     mostrarResultadosTabla(data.pedidos);
                 } else {
                     throw new Error(data.error || "Error desconocido");
@@ -748,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // PASO 3: Mostrar resultados en la tabla
     // ============================================
     function mostrarResultadosTabla(pedidos) {
-        
+
         // Si no hay resultados
         if (pedidos.length === 0) {
             tablaPedidosTbody.innerHTML = `<tr><td colspan="2" class="text-center">No se encontraron pedidos</td></tr>`;
@@ -776,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============================================
     // PASO 4: Función global para ver detalle (llamada desde botón)
     // ============================================
-    window.verDetallePedido = function(idPedido) {
+    window.verDetallePedido = function (idPedido) {
         console.log("Solicitando detalle del pedido:", idPedido);
 
         // Llamada al backend para obtener detalle completo
@@ -789,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(data => {
                 console.log("Detalle recibido:", data);
-                
+
                 if (data.success && data.pedido) {
                     mostrarModalPedido(data.pedido, data.detalles);
                 } else {
@@ -806,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // PASO 5: Mostrar datos en el modal
     // ============================================
     function mostrarModalPedido(pedido, detalles) {
-        
+
         // Llenar información general del pedido
         detalleCampos.id.textContent = pedido.clave_pedido || pedido.id_pedido || "";
         detalleCampos.estatus.textContent = pedido.estatus_pedido || "";
@@ -819,11 +1150,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Procesar detalles de productos
         if (detalles && detalles.length > 0) {
             // Si hay múltiples productos, mostrar el primero o concatenar
-           /* const primerProducto = detalles[0];
-            detalleCampos.producto.textContent = primerProducto.producto || "";
-            detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
-            detalleCampos.unidad.textContent = "unidades"*/
-            
+            /* const primerProducto = detalles[0];
+             detalleCampos.producto.textContent = primerProducto.producto || "";
+             detalleCampos.cantidad.textContent = primerProducto.cantidad || "";
+             detalleCampos.unidad.textContent = "unidades"*/
+
             // Si quieres mostrar todos los productos:
             const productos = detalles.map(d => `${d.producto} (${d.cantidad})`).join(', ');
             detalleCampos.producto.textContent = productos;
@@ -885,13 +1216,13 @@ function nuevaBusqueda() {
     if (formContainer) {
         formContainer.style.display = 'block';
     }
-    
+
     // Ocultar tabla
     const divTablaResultados = document.getElementById("tablaResultados");
     if (divTablaResultados) {
         divTablaResultados.style.display = 'none';
     }
-    
+
     // Limpiar formulario
     document.getElementById("formConsulta").reset();
 }
