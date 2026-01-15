@@ -75,6 +75,7 @@ switch ($action) {
         echo json_encode($carrocerias);
         break;
 
+
     case 'buscar-carrocerias':
         $texto = $_POST['busqueda'] ?? '';
         $controller = new CarroceriaController();

@@ -95,6 +95,7 @@ const ValidadoresMatricula = {
     Carretero: (v) => {
         const regex = /^[A-HJ-NPR-Z0-9]{8}[0-9X]{1}[A-HJ-NPR]{1}[A-HJ-NPR-Z0-9]{7}$/;
         return regex.test(v);
+        
     },
     Ferroviario: (v) => {
         if (!/^\d{12}$/.test(v)) return false;
@@ -127,6 +128,10 @@ function configurarValidacionMatriculaRealTime() {
     const inputMatricula = document.getElementById("matricula");
     const selectModalidad = document.getElementById("modalidad_carroceria");
     const msjError = document.getElementById("msj-error-matricula");
+
+        // SOLUCIÓN: Si no existen estos elementos (como en la vista de consulta), salimos sin error
+    if (!inputMatricula || !selectModalidad) return; 
+
 
     const mensajesAyuda = {
         Carretero: "Formato VIN: 17 caracteres alfanuméricos (sin I, O, Q).",
@@ -505,27 +510,36 @@ function consultarCarrocerias() {
     form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        // Recolectar filtros dinámicos (Inputs y Selects)
+        // 1. Integridad conservada: Recolección dinámica de filtros
         const filtros = {};
         const elementos = contenedorFiltros.querySelectorAll('input:not([readonly]), select');
         
+        // Verificación básica antes de enviar
+        if (elementos.length === 0) {
+            alerta("Filtros", "Por favor agrega al menos un filtro para la búsqueda.", "warning");
+            return;
+        }
+
         elementos.forEach(el => {
             if (el.value.trim() !== "") {
                 filtros[el.name] = el.value.trim();
             }
         });
 
+        // 2. Llamada a la API
         apiRequest("consultar-carrocerias", filtros)
             .then(res => res.json())
             .then(data => {
                 const tbody = document.querySelector("#tablaCarrocerias tbody");
                 tbody.innerHTML = "";
 
+                // 3. Alerta de "Sin resultados" manteniendo tu flujo
                 if (!data || data.length === 0) {
-                    alerta("Sin resultados", "No se encontraron carrocerías", "info");
+                    alerta("Sin resultados", "No se encontraron carrocerías con los criterios seleccionados.", "info");
                     return;
                 }
 
+                // 4. Integridad conservada: Construcción de filas con operadores OR para compatibilidad de nombres
                 data.forEach(carro => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
@@ -543,12 +557,14 @@ function consultarCarrocerias() {
                     tbody.appendChild(tr);
                 });
 
+                // Cambio de vista
                 document.getElementById("formContainer").style.display = "none";
                 document.getElementById("tablaResultados").style.display = "block";
             })
             .catch(err => {
+                // 5. Alerta de error técnica
                 console.error("Error:", err);
-                alerta("Error", "Error al procesar la respuesta del servidor", "error");
+                alerta("Error de conexión", "No se pudo obtener respuesta del servidor. Intente más tarde.", "error");
             });
     });
 }
@@ -707,15 +723,18 @@ function apiRequest(accion, datos = null) {
 }
 
 function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
-    if (respuesta.trim() === "OK") {
-        // Usa tu función 'alerta' de alertas.js para el ÉXITO
-        alerta("Éxito", mensajeExito, "success").then(() => {
+    // Limpiamos la respuesta de espacios en blanco
+    const res = respuesta.trim();
+
+    if (res === "OK") {
+        alerta("¡Éxito!", mensajeExito, "success").then(() => {
             if (redireccion) window.location.href = redireccion;
             else location.reload();
         });
     } else {
-        // Usa tu función 'alerta' de alertas.js para el ERROR
-        // Esto pondrá automáticamente el botón rojo y el texto "Aceptar"
-        alerta("Error", respuesta, "error");
+        // Si el controlador PHP mandó algo que no es "OK", es un error o advertencia
+        // Ejemplo: "Error: La matrícula ya existe"
+        const tipo = res.includes("Error") ? "error" : "warning";
+        alerta("Atención", res, tipo);
     }
 }
