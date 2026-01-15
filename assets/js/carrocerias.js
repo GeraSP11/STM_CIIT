@@ -19,6 +19,33 @@ function prevenirNumerosNegativos(inputs) {
     });
 }
 
+// Función para cambiar el placeholder de matrícula según la modalidad
+function cambiarPlaceholderMatricula() {
+    const inputMatricula = document.getElementById("matricula");
+    const selectModalidad = document.getElementById("modalidad_carroceria");
+
+    if (!inputMatricula || !selectModalidad) return;
+
+    const placeholders = {
+        Carretero: "Ej. 8M2R1P5B321K7Z9X0",
+        Ferroviario: "Ej. 123456789012",
+        Marítimo: "Ej. 1234567",
+        Aéreo: "Ej. AB12345"
+    };
+
+    const actualizarPlaceholder = () => {
+        const modalidad = selectModalidad.value;
+        if (modalidad && placeholders[modalidad]) {
+            inputMatricula.placeholder = placeholders[modalidad];
+        } else {
+            inputMatricula.placeholder = "Ej.";
+        }
+    };
+
+    // Cambiar placeholder cuando se selecciona una modalidad
+    selectModalidad.addEventListener("change", actualizarPlaceholder);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // ---- 0. Carga de Catálogos (NUEVO) ----
     if (document.getElementById('localidad_pertenece')) cargarLocalidades();
@@ -29,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gestionarCamposCondicionales(); 
     configurarValidacionMatriculaRealTime();
     configurarValidacionEjesYContenedores();
+    cambiarPlaceholderMatricula();
 
     // ---- 2. Consultar ----
     configurarVistaConsultarCarrocerias();
@@ -154,18 +182,53 @@ const ValidadoresMatricula = {
 function configurarValidacionEjesYContenedores() {
     const inputEjes = document.getElementById("numero_ejes_vehiculares");
     const inputContenedores = document.getElementById("numero_contenedores");
+    const inputPeso = document.getElementById("peso_vehicular");
+    const selectModalidad = document.getElementById("modalidad_carroceria");
     const msjErrorEjes = document.getElementById("msj-error-ejes");
     const msjErrorContenedores = document.getElementById("msj-error-contenedores");
+    const msjErrorPeso = document.getElementById("msj-error-peso");
 
     const mensajesAyudaLimites = {
         ejes: "El número máximo de ejes permitidos es 20.",
-        contenedores: "El número máximo de contenedores permitidos es 20."
+        contenedores: "El número máximo de contenedores permitidos es 10."
     };
 
-    const validarCampo = (input, msjError, tipo) => {
+    // Límites máximos de peso por modalidad (en kg)
+    const limitesPesoMax = {
+        Carretero: 75500,
+        Ferroviario: 130000,
+        Marítimo: 200000000,
+        Aéreo: 400000
+    };
+
+    // Límites mínimos de peso por modalidad (en kg)
+    const limitesPesoMin = {
+        Carretero: 15000,
+        Ferroviario: 20000,
+        Marítimo: 30000000,
+        Aéreo: 180000
+    };
+
+    // Mensajes personalizados por modalidad (máximo)
+    const mensajesPesoMax = {
+        Carretero: "El peso máximo permitido para modalidad Carretero es 75,500 kg.",
+        Ferroviario: "El peso máximo permitido para modalidad Ferroviario es 130,000 kg.",
+        Marítimo: "El peso máximo permitido para modalidad Marítimo es 200,000,000 kg.",
+        Aéreo: "El peso máximo permitido para modalidad Aéreo es 400,000 kg."
+    };
+
+    // Mensajes personalizados por modalidad (mínimo)
+    const mensajesPesoMin = {
+        Carretero: "El peso mínimo permitido para modalidad Carretero es 15,000 kg.",
+        Ferroviario: "El peso mínimo permitido para modalidad Ferroviario es 20,000 kg.",
+        Marítimo: "El peso mínimo permitido para modalidad Marítimo es 30,000,000 kg.",
+        Aéreo: "El peso mínimo permitido para modalidad Aéreo es 180,000 kg."
+    };
+
+    const validarCampo = (input, msjError, tipo, max) => {
         const valor = parseInt(input.value) || 0;
 
-        if (valor > 20) {
+        if (valor > max) {
             input.classList.add("input-invalido");
             input.classList.remove("input-valido");
             msjError.textContent = mensajesAyudaLimites[tipo];
@@ -181,12 +244,70 @@ function configurarValidacionEjesYContenedores() {
         }
     };
 
+    const validarPeso = () => {
+        if (!inputPeso || !msjErrorPeso) return;
+        
+        const modalidad = selectModalidad.value;
+        const valor = parseFloat(inputPeso.value) || 0;
+        const maxPeso = limitesPesoMax[modalidad] || 75500;
+        const minPeso = limitesPesoMin[modalidad] || 15000;
+
+        if (!modalidad || valor === 0) {
+            inputPeso.classList.remove("input-valido", "input-invalido");
+            msjErrorPeso.textContent = "";
+            return;
+        }
+
+        if (valor < minPeso) {
+            inputPeso.classList.add("input-invalido");
+            inputPeso.classList.remove("input-valido");
+            msjErrorPeso.textContent = mensajesPesoMin[modalidad] || "Peso inferior al mínimo.";
+            inputPeso.title = mensajesPesoMin[modalidad];
+        } else if (valor > maxPeso) {
+            inputPeso.classList.add("input-invalido");
+            inputPeso.classList.remove("input-valido");
+            msjErrorPeso.textContent = mensajesPesoMax[modalidad] || "Peso excedido.";
+            inputPeso.title = mensajesPesoMax[modalidad];
+        } else if (valor > 0) {
+            inputPeso.classList.remove("input-invalido");
+            inputPeso.classList.add("input-valido");
+            msjErrorPeso.textContent = "";
+            inputPeso.title = "Peso correcto";
+        }
+    };
+
+    const actualizarMinMaxPeso = () => {
+        if (!inputPeso || !selectModalidad) return;
+        
+        const modalidad = selectModalidad.value;
+        const maxPeso = limitesPesoMax[modalidad] || 75500;
+        const minPeso = limitesPesoMin[modalidad] || 15000;
+        
+        // Actualizar los atributos min y max del input
+        inputPeso.setAttribute("max", maxPeso);
+        inputPeso.setAttribute("min", minPeso);
+        
+        // Re-validar el peso actual después de cambiar modalidad
+        validarPeso();
+    };
+
+    // Validación de ejes
     if (inputEjes && msjErrorEjes) {
-        inputEjes.addEventListener("input", () => validarCampo(inputEjes, msjErrorEjes, "ejes"));
+        inputEjes.addEventListener("input", () => validarCampo(inputEjes, msjErrorEjes, "ejes", 20));
     }
 
+    // Validación de contenedores
     if (inputContenedores && msjErrorContenedores) {
-        inputContenedores.addEventListener("input", () => validarCampo(inputContenedores, msjErrorContenedores, "contenedores"));
+        inputContenedores.addEventListener("input", () => validarCampo(inputContenedores, msjErrorContenedores, "contenedores", 10));
+    }
+
+    // Validación de peso (se ejecuta cuando cambia modalidad o peso)
+    if (inputPeso && selectModalidad && msjErrorPeso) {
+        inputPeso.addEventListener("input", validarPeso);
+        selectModalidad.addEventListener("change", actualizarMinMaxPeso);
+        
+        // Establecer el min y max inicial
+        actualizarMinMaxPeso();
     }
 }
 
@@ -200,8 +321,8 @@ function configurarValidacionMatriculaRealTime() {
 
 
     const mensajesAyuda = {
-        Carretero: "Formato VIN: 17 caracteres alfanuméricos (sin I, O, Q).",
-        Ferroviario: "Deben ser 12 dígitos numéricos exactos.",
+        Carretero: "“Ingresa un código de 17 caracteres usando solo letras mayúsculas y números. No se permiten las letras I, O, Q ni Ñ. Verifica que todo esté bien escrito antes de continuar.",
+        Ferroviario: "Deben ser 12 dígitos numéricos exactos (el último es verificador).",
         Marítimo: "Deben ser 7 dígitos (el último es verificador).",
         Aéreo: "Prefijo de 1-2 letras seguido de 1-5 caracteres."
     };
@@ -294,11 +415,26 @@ function validarFormularioCompleto() {
     const matricula = document.getElementById("matricula").value.trim();
     const modalidad = document.getElementById("modalidad_carroceria").value;
     const tipo = document.getElementById("tipo_carroceria").value;
-    const peso = document.getElementById("peso_vehicular").value;
+    const peso = parseFloat(document.getElementById("peso_vehicular").value) || 0;
     const responsable = document.getElementById("responsable_carroceria").value;
     const localidad = document.getElementById("localidad_pertenece").value;
     const ejes = parseInt(document.getElementById("numero_ejes_vehiculares").value) || 0;
     const contenedores = parseInt(document.getElementById("numero_contenedores").value) || 0;
+
+    // Límites de peso por modalidad
+    const limitesPesoMax = {
+        Carretero: 75500,
+        Ferroviario: 130000,
+        Marítimo: 200000000,
+        Aéreo: 400000
+    };
+
+    const limitesPesoMin = {
+        Carretero: 15000,
+        Ferroviario: 20000,
+        Marítimo: 30000000,
+        Aéreo: 180000
+    };
 
     if (!matricula) return "La Matrícula es obligatoria.";
     if (!modalidad) return "Debe seleccionar una Modalidad.";
@@ -307,7 +443,19 @@ function validarFormularioCompleto() {
     if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
     if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
     if (ejes > 20) return "El número de ejes no puede ser mayor a 20.";
-    if (contenedores > 20) return "El número de contenedores no puede ser mayor a 20.";
+    if (contenedores > 10) return "El número de contenedores no puede ser mayor a 10.";
+    
+    // Validación de peso según modalidad (mínimo y máximo)
+    const minPeso = limitesPesoMin[modalidad] || 15000;
+    const maxPeso = limitesPesoMax[modalidad] || 75500;
+    
+    if (peso < minPeso) {
+        return `El peso mínimo permitido para ${modalidad} es ${minPeso.toLocaleString()} kg.`;
+    }
+    
+    if (peso > maxPeso) {
+        return `El peso máximo permitido para ${modalidad} es ${maxPeso.toLocaleString()} kg.`;
+    }
     
     // Validación específica Ferroviario vs Mixto (Doble check)
     if (modalidad === "Ferroviario" && tipo === "Mixta") {
@@ -335,15 +483,34 @@ function configurarRegistroCarroceria() {
         const mod = document.getElementById("modalidad_carroceria").value;
         const mat = document.getElementById("matricula").value;
         const peso = parseFloat(document.getElementById("peso_vehicular").value);
+        const inputPeso = document.getElementById("peso_vehicular");
+        
+        // Límites de peso por modalidad
+        const limitesPesoMax = {
+            Carretero: 75500,
+            Ferroviario: 130000,
+            Marítimo: 200000000,
+            Aéreo: 400000
+        };
+
+        const limitesPesoMin = {
+            Carretero: 15000,
+            Ferroviario: 20000,
+            Marítimo: 30000000,
+            Aéreo: 180000
+        };
         
         // Simplificamos la validación de matrícula para que no sea tan estricta 
         // y permita avanzar si hay texto (puedes volver a usar ValidadoresMatricula[mod] si lo prefieres)
         const matValida = mat.trim().length >= 3; 
         
         const pesoValido = !isNaN(peso) && peso > 0;
+        const minPeso = limitesPesoMin[mod] || 15000;
+        const maxPeso = limitesPesoMax[mod] || 75500;
+        const pesoEnRango = !mod || (peso >= minPeso && peso <= maxPeso);
         const formValido = formPrincipal.checkValidity();
 
-        btnSiguiente.disabled = !(matValida && pesoValido && formValido);
+        btnSiguiente.disabled = !(matValida && pesoValido && pesoEnRango && formValido);
     });
 
     // Acción del botón Siguiente
