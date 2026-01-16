@@ -103,7 +103,7 @@ function cargarLocalidades() {
                 select.innerHTML = '<option value="">Sin localidades registradas</option>';
                 select.disabled = true; // Opcional: deshabilitar si no hay datos
             } else {
-                //select.disabled = false;
+                select.disabled = false;
                 select.innerHTML = '<option value="">Seleccione localidad</option>';
                 data.forEach(loc => {
                     select.add(new Option(loc.nombre_display, loc.id_localidad));
@@ -129,7 +129,7 @@ function cargarPersonal() {
                 select.innerHTML = '<option value="">Sin Jefes de Almacén registrados</option>';
                 select.disabled = true;
             } else {
-                //select.disabled = false;
+                select.disabled = false;
                 // Simplemente recorremos los datos que envía el PHP 
                 // (el PHP ya hizo el trabajo de filtrar por 'Jefe de Almacén')
                 data.forEach(p => {
@@ -396,17 +396,20 @@ function gestionarCamposCondicionales() {
         if (mod === "Ferroviario" && tipo === "Mixta") {
             alerta("Validación", "La modalidad Ferroviaria no permite el tipo de carrocería Mixta.", "warning");
             selectTipo.value = ""; // Reseteamos la selección
-            selectTipo.disabled = false;
+            selectTipo.style.pointerEvents = "auto";
+            selectTipo.style.backgroundColor = "";
             return;
         }
 
         if (["Marítimo", "Aéreo"].includes(mod)) {
             selectTipo.value = "Mixta";
-            selectTipo.disabled = true;
+            selectTipo.style.pointerEvents = "none";
+            selectTipo.style.backgroundColor = "#e9ecef";
             inputEjes.disabled = true;
             inputEjes.required = false;
         } else {
-            selectTipo.disabled = false;
+            selectTipo.style.pointerEvents = "auto";
+            selectTipo.style.backgroundColor = "";
             inputEjes.disabled = false;
             inputEjes.required = true;
         }
@@ -459,13 +462,15 @@ function validarFormularioCompleto() {
     if (!peso || peso <= 0) return "El Peso Vehicular debe ser un número mayor a 0.";
     if (!responsable) return "Debe asignar un Responsable (Jefe de Almacén).";
     if (!localidad) return "Debe seleccionar la Localidad a la que pertenece.";
-    if (ejes === 0) return "El número de ejes debe ser mayor a 0.";
-    if (ejes > 20) return "El número de ejes no puede ser mayor a 20.";
     
     // Validar contenedores solo si es Unidad de carga o Mixta
     const requiereContenedores = ["Unidad de carga", "Mixta"].includes(tipo);
     if (requiereContenedores && contenedores === 0) return "El número de contenedores debe ser mayor a 0.";
     if (requiereContenedores && contenedores > 10) return "El número de contenedores no puede ser mayor a 10.";
+
+    const requireejes = ["Carretero", "Ferroviario"].includes(modalidad);
+    if (requireejes && ejes === 0) return "El número de ejes es obligatorio para la modalidad seleccionada.";
+    if (requireejes && ejes > 20) return "El número de ejes no puede ser mayor a 0.";
     
     // Validación de peso según modalidad (mínimo y máximo)
     const minPeso = limitesPesoMin[modalidad] || 15000;
@@ -538,6 +543,8 @@ function configurarRegistroCarroceria() {
     // Acción del botón Siguiente
     btnSiguiente?.addEventListener("click", () => {
         const tipo = document.getElementById("tipo_carroceria").value;
+        console.log("Formulario principal válido, avanzando...");
+        console.log("Tipo de carrocería seleccionado:", tipo);
         
         // ASEGURAMOS QUE LOS CAMPOS SEAN ENVIABLES
         // Usar readOnly garantiza que el valor sea visible y se incluya en el FormData
@@ -547,7 +554,7 @@ function configurarRegistroCarroceria() {
             const el = document.getElementById(id);
             if (el) {
                 el.readOnly = true;
-                el.classList.add("bg-light"); // Feedback visual de que está bloqueado
+                el.style.backgroundColor = "#e9ecef"; // Color grisáceo de Bootstrap
             }
         });
         
@@ -556,7 +563,8 @@ function configurarRegistroCarroceria() {
         selects.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                el.disabled = true;
+                el.style.pointerEvents = "none";
+                el.style.backgroundColor = "#e9ecef"; // Color grisáceo de Bootstrap
             }
         });
 
@@ -589,7 +597,8 @@ function configurarRegistroCarroceria() {
         selects.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                el.disabled = false;
+                el.style.pointerEvents = "auto";
+                el.style.backgroundColor = "";
             }
         });
     });
@@ -644,8 +653,13 @@ function ejecutarRegistroFinal() {
             const formulario = document.getElementById("formCarrocerias");
             
             // Habilitar campos temporalmente para que FormData los capture
-            const elementosBloqueados = formulario.querySelectorAll('[readonly], :disabled');
-            elementosBloqueados.forEach(el => el.disabled = false);
+            //const elementosBloqueados = formulario.querySelectorAll('[readonly], :disabled');
+            //elementosBloqueados.forEach(el => el.disabled = false);
+            const fd = new FormData(formulario);
+            for (let [k, v] of fd.entries()) {
+                console.log(k, v);
+            }
+            // Rehabilitar los campos bloqueados
 
             apiRequest("registrar-carroceria", formulario)
                 .then(res => res.text())

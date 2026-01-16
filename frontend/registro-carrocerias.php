@@ -136,12 +136,12 @@ $seccion = 'Registro de Carrocerías';
             </div>
             <div class="col-md-4">
                 <label for="matricula" class="form-label">Matrícula / VIN *</label>
-                <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej." required maxlength="100" disabled>
+                <input type="text" id="matricula" name="matricula" class="form-input" placeholder="Ej." required maxlength="100">
                 <small id="msj-error-matricula" class="error-texto"></small>
             </div>
             <div class="col-md-4">
                 <label for="tipo_carroceria" class="form-label">Tipo de carrocería *</label>
-                <select id="tipo_carroceria" name="tipo_carroceria" class="form-select" required disabled>
+                <select id="tipo_carroceria" name="tipo_carroceria" class="form-select" required >
                     <option value="">Seleccione tipo</option>
                     <option value="Unidad de arrastre">Unidad de arrastre</option>
                     <option value="Unidad de carga">Unidad de carga</option>
@@ -153,17 +153,17 @@ $seccion = 'Registro de Carrocerías';
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="peso_vehicular" class="form-label">Peso Vehicular (kg) *</label>
-                <input type="number" step="0.01" id="peso_vehicular" name="peso_vehicular" class="form-input" placeholder="Ej. 1500.50" required min="1" disabled>
+                <input type="number" step="0.01" id="peso_vehicular" name="peso_vehicular" class="form-input" placeholder="Ej. 1500.50" required min="1" >
                 <small id="msj-error-peso" class="error-texto"></small>
             </div>
             <div class="col-md-4">
                 <label for="numero_ejes_vehiculares" class="form-label">Número de Ejes</label>
-                <input type="number" id="numero_ejes_vehiculares" name="numero_ejes_vehiculares" class="form-input" placeholder="Ej. 2" min="1" max="20" disabled>
+                <input type="number" id="numero_ejes_vehiculares" name="numero_ejes_vehiculares" class="form-input" placeholder="Ej. 2" min="1" max="20">
                 <small id="msj-error-ejes" class="error-texto"></small>
             </div>
             <div class="col-md-4">
                 <label for="numero_contenedores" class="form-label">Número de Contenedores</label>
-                <input type="number" id="numero_contenedores" name="numero_contenedores" class="form-input" placeholder="Ej. 1" min="1" max="10" disabled>
+                <input type="number" id="numero_contenedores" name="numero_contenedores" class="form-input" placeholder="Ej. 1" min="1" max="10">
                 <small id="msj-error-contenedores" class="error-texto"></small>
             </div>
         </div>
@@ -171,13 +171,13 @@ $seccion = 'Registro de Carrocerías';
         <div class="row mb-4">
             <div class="col-md-6">
                 <label for="localidad_pertenece" class="form-label">Localidad de Pertenencia *</label>
-                <select id="localidad_pertenece" name="localidad_pertenece" class="form-select" required disabled>
+                <select id="localidad_pertenece" name="localidad_pertenece" class="form-select" required>
                     <option value="">Seleccione localidad</option>
                 </select>
             </div>
             <div class="col-md-6">
                 <label for="responsable_carroceria" class="form-label">Responsable Asignado *</label>
-                <select id="responsable_carroceria" name="responsable_carroceria" class="form-select" required disabled>
+                <select id="responsable_carroceria" name="responsable_carroceria" class="form-select" required >
                     <option value="">Seleccione responsable</option>
                 </select>
             </div>

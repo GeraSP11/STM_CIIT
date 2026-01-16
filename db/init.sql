@@ -133,7 +133,7 @@ CREATE TABLE carrocerias (
     peso_vehicular FLOAT,
     numero_ejes_vehiculares INT,
     tipo_carroceria varchar (30) CHECK (tipo_carroceria IN 
-        ('Unidad de arrastre', 'Unidad de carga', 'Unidad mixta')),
+        ('Unidad de arrastre', 'Unidad de carga', 'Mixta')),
     estatus_carroceria varchar(15) CHECK (estatus_carroceria IN 
         ('Disponible', 'Ensamblada', 'En mantenimiento', 'En reparación')),
     modalidad_carroceria VARCHAR (30) CHECK (modalidad_carroceria IN
