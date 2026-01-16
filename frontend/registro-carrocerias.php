@@ -197,7 +197,7 @@ $seccion = 'Registro de Carrocerías';
             <button class="btn btn-outline-secondary me-3" type="button" id="btnAnterior">
                 <i class="fas fa-arrow-left"></i> Anterior
             </button>
-            <button class="btn btn-custom" type="submit" disabled id="btnGuardar">
+            <button class="btn btn-custom" type="submit">
                 <i class="fas fa-save"></i> Guardar Carrocería
             </button>
         </div>

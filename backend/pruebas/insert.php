@@ -52,6 +52,7 @@ try {
         ['Juan', 'López', 'Martínez', 1002, $ids_localidades[1], 'Administrador del TMS', 'LOMJ850210HOCRRN03'],
         ['Ana', 'Ramírez', 'Castillo', 1003, $ids_localidades[2], 'Operador Logístico', 'RACA900415MOCSTS04'],
         ['Carlos', 'Hernández', 'Ortiz', 1004, $ids_localidades[3], 'Jefe de Almacén', 'HEOC820701HOCNRS05'],
+        ['Marcos', 'Santos', 'Vega', 1006, $ids_localidades[0], 'Jefe de Almacén', 'SAVM880923HOCNRS07'],
         ['Fernanda', 'Vargas', 'Luna', 1005, $ids_localidades[1], 'Cliente', 'VALF950812MOCNRN06']
     ];
 
