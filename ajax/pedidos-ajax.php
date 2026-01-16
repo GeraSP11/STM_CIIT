@@ -84,8 +84,9 @@ try {
         case 'detalle-pedido':
             $controller->obtenerDetallePedido($_POST);
             break;
-
-
+        case 'eliminar-pedidos':
+            $controller->eliminarPedido($_POST);
+            break;
         default:
             echo json_encode([
                 'success' => false,

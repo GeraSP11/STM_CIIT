@@ -1252,6 +1252,186 @@ function nuevaBusqueda() {
 }
 
 
+
+// =======================================================
+// FUNCIONALIDAD ELIMINAR PEDIDOS
+// =======================================================
+
+// =======================================================
+// FUNCIONALIDAD ELIMINAR PEDIDOS (COMPLETA)
+// =======================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const formEliminar = document.getElementById('form-busqueda-eliminar');
+    if (!formEliminar) return; // Si no estamos en esta vista, salir
+
+    // Referencias al DOM
+    const inputClavePedido = document.getElementById('clave-pedido');
+    const vistaBusqueda = document.getElementById('vista-busqueda-eliminar');
+    const vistaResultados = document.getElementById('vista-resultados-eliminar');
+
+    const campoClave = document.getElementById('resultado-clave');
+    const campoEstatus = document.getElementById('resultado-estatus');
+    const campoFechaSolicitud = document.getElementById('resultado-fecha-solicitud');
+    const campoFechaEntrega = document.getElementById('resultado-fecha-entrega');
+    const campoProducto = document.getElementById('resultado-producto');
+    const selectProducto = document.getElementById('resultado-producto-select');
+    const campoOrigen = document.getElementById('resultado-localidad-origen');
+    const campoDestino = document.getElementById('resultado-localidad-destino');
+    const campoCantidad = document.getElementById('resultado-cantidad');
+    const campoUnidad = document.getElementById('resultado-unidad');
+    const campoObservaciones = document.getElementById('resultado-observaciones');
+
+    const btnEliminar = document.getElementById('btn-confirmar-eliminar');
+    const btnCancelar = document.getElementById('btn-cancelar-eliminar');
+
+    // =======================================================
+    // PASO 1: Buscar pedido por clave
+    // =======================================================
+    formEliminar.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const clavePedido = inputClavePedido.value.trim();
+        
+        if (!clavePedido) {
+            alerta("Aviso", "Ingresa una clave para buscar.", "info");
+            return;
+        }
+
+        // Llamada al backend para obtener detalle completo
+        enviarPeticionPOST("detalle-pedido", { clavePedido })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (!data.success || !data.pedido) {
+                    alerta("Aviso", "No se encontró el pedido.", "info");
+                    return;
+                }
+
+                // Ocultar búsqueda y mostrar resultados
+                vistaBusqueda.style.display = 'none';
+                vistaResultados.style.display = 'block';
+
+                // Llenar los campos del pedido
+                llenarDetallePedido(data.pedido, data.detalles || []);
+            })
+            .catch(err => {
+                console.error(err);
+                alerta("Error", "Error al consultar el pedido.", "error");
+            });
+    });
+
+    // =======================================================
+    // PASO 2: Llenar detalle del pedido en la vista eliminar
+    // =======================================================
+    function llenarDetallePedido(pedido, detalles) {
+        campoClave.textContent = pedido.clave_pedido || pedido.id_pedido || "";
+        campoEstatus.textContent = pedido.estatus || "";
+        campoFechaSolicitud.textContent = pedido.fecha_solicitud || "";
+        campoFechaEntrega.textContent = pedido.fecha_entrega || "";
+        campoOrigen.textContent = pedido.localidad_origen || "";
+        campoDestino.textContent = pedido.localidad_destino || "";
+        campoObservaciones.textContent = pedido.observaciones || "N/A";
+
+        // Si hay detalles de productos
+        selectProducto.innerHTML = ""; // Limpiar select
+
+        if (detalles.length > 0) {
+            detalles.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.id_producto;
+                option.textContent = d.producto;
+                option.dataset.cantidad = d.cantidad;
+                option.dataset.unidad = d.unidad;
+                selectProducto.appendChild(option);
+            });
+
+            // Mostrar el primer producto por defecto
+            const primer = selectProducto.options[0];
+            campoProducto.textContent = primer.textContent;
+            campoCantidad.textContent = primer.dataset.cantidad;
+            campoUnidad.textContent = primer.dataset.unidad;
+
+        } else {
+            // Sin productos
+            const option = document.createElement('option');
+            option.textContent = "Sin productos";
+            option.value = "";
+            selectProducto.appendChild(option);
+            campoProducto.textContent = "N/A";
+            campoCantidad.textContent = "0";
+            campoUnidad.textContent = "-";
+        }
+
+        // ===================================================
+        // Listener: actualizar cantidad y unidad al cambiar de producto
+        // ===================================================
+        selectProducto.addEventListener('change', function () {
+            const seleccionado = selectProducto.selectedOptions[0];
+            if (seleccionado && seleccionado.value !== "") {
+                campoProducto.textContent = seleccionado.textContent;
+                campoCantidad.textContent = seleccionado.dataset.cantidad;
+                campoUnidad.textContent = seleccionado.dataset.unidad;
+            } else {
+                campoProducto.textContent = "N/A";
+                campoCantidad.textContent = "0";
+                campoUnidad.textContent = "-";
+            }
+        });
+    }
+
+    // =======================================================
+    // PASO 3: Botón Confirmar Eliminar
+    // =======================================================
+    btnEliminar.addEventListener('click', function () {
+        const clavePedido = inputClavePedido.value.trim();
+        if (!clavePedido) return;
+
+        if (!confirmar("Gestion pedidos","¿Estás seguro de eliminar este pedido? Esta acción es irreversible.")) return;
+
+        enviarPeticionPOST("confirmar-eliminar-pedido", { clavePedido })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.text();
+            })
+            .then(respuesta => {
+                manejarRespuestaCRUD(respuesta, "El pedido fue eliminado exitosamente.", "/dashboard.php");
+            })
+            .catch(err => {
+                console.error(err);
+                alerta("Error", "No se pudo eliminar el pedido.", "error");
+            });
+    });
+
+    // =======================================================
+    // PASO 4: Botón Cancelar
+    // =======================================================
+    btnCancelar.addEventListener('click', function () {
+        vistaResultados.style.display = 'none';
+        vistaBusqueda.style.display = 'block';
+        formEliminar.reset();
+    });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =======================================================
 // FUNCIONES AUXILIARES
 // =======================================================

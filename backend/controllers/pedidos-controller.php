@@ -229,4 +229,22 @@ class PedidosController
             ]);
         }
     }
+
+
+    /*
+        Funcionalida elimar pedidos
+    */
+        public function eliminarPedido($data){
+            $clavePedido = $data['clave-pedido'] ?? null;
+            if (!$clavePedido) {
+                return "Clave de pedido inválido";
+            }
+
+                
+            $model = new PedidosModel();
+            $resultado = $model->eliminarPedidos($clavePedido);
+
+            return $resultado ? "OK" : "Error al eliminar localidad";
+
+        }
 }
