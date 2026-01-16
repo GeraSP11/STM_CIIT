@@ -4,11 +4,8 @@ require_once "../backend/middleware/no-cache.php";
 requireRole(["Autoridad", "Administrador del TMS"]);
 
 $page_title = 'MARINA Corredor Interoceánico';
-$titulo_seccion = 'Gestión de Vehículos';
-$seccion = 'Armar Vehículo';
-
-// Simulación de variables para la estructura que pediste
-$active_tab = 'tab_ensamble'; 
+$titulo_seccion = 'Gestión de Vehículos'; // Consistente con localidades
+$seccion = 'Registro de Vehículos';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -23,89 +20,64 @@ $active_tab = 'tab_ensamble';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root {
-            --primary-color: #4a1026;
-            --secondary-color: #6c757d;
-            --error-color: #dc3545;
-        }
-
+        /* Estructura idéntica a Localidades */
         .form-container {
             background-color: #f8f9fa;
-            padding: 30px;
+            padding: 40px;
             border-radius: 8px;
-            width: 95%;
-            max-width: 1300px;
-            margin: 20px auto;
+            width: 90%; /* Un poco más ancho para las dos columnas */
+            min-width: 400px;
+            margin: 40px auto;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        /* Estructura de Grid solicitada */
-        .ensamble-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        .form-column, .table-column {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        label {
+        .form-label {
             display: block;
+            margin-bottom: 6px;
             font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 5px;
         }
 
-        input[type="text"], select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #bbb;
-            border-radius: 4px;
-        }
-
-        .btn-submit-ensamble {
-            background-color: var(--primary-color);
+        .btn-custom {
+            background-color: #4a1026;
             color: white;
-            padding: 15px;
+            padding: 12px 35px;
             border: none;
             border-radius: 4px;
-            width: 100%;
             font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            margin-top: 25px;
-            transition: background 0.3s;
         }
 
-        .btn-submit-ensamble:hover {
+        .btn-custom:hover {
             background-color: #3b0d20;
+            color: white;
         }
 
-        /* Tabla de carrocerías */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
+        h2 {
+            text-align: center;
+            color: #4a1026;
+            margin-top: 10px;
+            margin-bottom: 30px;
         }
 
-        .data-table th {
-            background-color: #f4f4f4;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
+        .section-title {
+            color: #4a1026;
+            font-weight: bold;
+            border-bottom: 2px solid #4a1026;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        .data-table td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+        .table-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
         }
 
-        .hidden { display: none; }
-        h2 { text-align: center; color: var(--primary-color); }
+        .scroll-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
@@ -113,167 +85,118 @@ $active_tab = 'tab_ensamble';
 
     <?php include('includes/header-dinamico.php'); ?>
 
+    <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <?php echo $seccion; ?>
+            </li>
+        </ol>
+    </nav>
+
+    <h2><?php echo $seccion; ?></h2>
+
     <div class="form-container">
-        <div id="tab_ensamble" class="tab-content <?php echo ($active_tab !== 'tab_ensamble') ? 'hidden' : ''; ?>">
-            <h2><?php echo $seccion; ?></h2>
-            
-            <form id="formVehiculos">
-                <div class="ensamble-grid">
+        <form id="formVehiculos">
+            <div class="row">
+                <div class="col-lg-7">
+                    <h5 class="section-title"><i class="fas fa-truck"></i> Información del Vehículo</h5>
                     
-                    <div class="form-column">
-                        <h4 style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px;">
-                            <i class=""></i> Datos del Vehículo Principal
-                        </h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="modalidad_vehiculo" class="form-label">Modalidad</label>
+                            <select id="modalidad_vehiculo" name="modalidad_vehiculo" class="form-select" required>
+                                <option value="">Seleccione modalidad</option>
+                                <option value="Carretero">Carretero</option>
+                                <option value="Ferroviario">Ferroviario</option>
+                                <option value="Marítimo">Marítimo</option>
+                                <option value="Aéreo">Aéreo</option>
+                            </select>
+                        </div>
 
-                        <label for="modalidad_vehiculo">Modalidad:</label>
-                        <select id="modalidad_vehiculo" name="modalidad_vehiculo" required>
-                            <option value="">-- Seleccionar Modalidad --</option>
-                            <option value="Carretero">Carretero (Mín. 2)</option>
-                            <option value="Ferroviario">Ferroviario (Mín. 2)</option>
-                            <option value="Marítimo">Marítimo (Exacto 1)</option>
-                            <option value="Aéreo">Aéreo (Exacto 1)</option>
-                        </select>
+                        <div class="col-md-6">
+                            <label for="clave_vehiculo" class="form-label">Clave vehícular</label>
+                            <input type="text" id="clave_vehiculo" name="clave_vehiculo" class="form-control" placeholder="Ej: T3-S2-123" required>
+                        </div>
 
-                        <label for="descripcion_vehiculo">Descripción / Modelo:</label>
-                        <input type="text" id="descripcion_vehiculo" name="descripcion_vehiculo" required 
-                               placeholder="Ej: Tractocamión Kenworth, Buque de Carga">
+                        <div class="col-md-12">
+                            <label for="descripcion_vehiculo" class="form-label">Descripción</label>
+                            <textarea id="descripcion_vehiculo" name="descripcion_vehiculo" class="form-control" rows="2" placeholder="Marca, modelo, color..."></textarea>
+                        </div>
 
-                        <label for="chofer_asignado">Chofer Asignado (Operador Logístico):</label>
-                        <select id="chofer_asignado" name="chofer_asignado" required>
-                            <option value="">-- Seleccionar Chofer --</option>
-                        </select>
+                        <div class="col-md-6">
+                            <label for="chofer_asignado" class="form-label">Chofer Asignado</label>
+                            <select id="chofer_asignado" name="chofer_asignado" class="form-select" required>
+                                <option value="">Cargando personal...</option>
+                            </select>
+                        </div>
 
-                        <button type="submit" class="btn-submit-ensamble">
-                            <i class=""></i> Registrar Vehículo y Ensamblar Carrocerías
-                        </button>
+                        <div class="col-md-6">
+                            <label for="nomenclatura" class="form-label">Nomenclatura</label>
+                            <input type="text" id="nomenclatura" name="nomenclatura" class="form-control" placeholder="Ej: T3-S2">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="clase" class="form-label">Clase</label>
+                            <input type="text" id="clase" name="clase" class="form-control" maxlength="2" placeholder="Ej: T">
+                        </div>
+
+                        <div class="col-md-4" id="div_ejes" style="display:none;">
+                            <label for="numero_de_ejes" class="form-label">No. Ejes</label>
+                            <input type="number" id="numero_de_ejes" name="numero_de_ejes" class="form-control" value="0">
+                        </div>
+
+                        <div class="col-md-4" id="div_llantas" style="display:none;">
+                            <label for="numero_de_llantas" class="form-label">No. Llantas</label>
+                            <input type="number" id="numero_de_llantas" name="numero_de_llantas" class="form-control" value="0">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="peso_bruto_vehicular" class="form-label">Peso Bruto (Ton)</label>
+                            <input type="number" step="0.1" id="peso_bruto_vehicular" name="peso_bruto_vehicular" class="form-control" required>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="table-column">
-                        <h4 style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 5px;">
-                            <i class=""></i> Selección de Carrocerías Disponibles
-                        </h4>
-                        
-                        <p style="color: var(--secondary-color); font-size: 0.9em; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> Marca las carrocerías a acoplar al nuevo vehículo.
-                        </p>
-
-                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 6px; background: #fafafa;">
-                            <table class="data-table">
-                                <thead>
+                <div class="col-lg-5">
+                    <h5 class="section-title"><i class="fas fa-boxes"></i> Carrocerias</h5>
+                    <div class="table-container">
+                        <p class="text-muted small">Seleccione las carrocerías compatibles con la modalidad elegida.</p>
+                        <div class="scroll-table">
+                            <table class="table table-hover align-middle" id="tablaCarrocerias">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Sel.</th>
-                                        <th>ID</th>
+                                        <th width="40px">Sel.</th>
                                         <th>Tipo</th>
-                                        <th>N° Serie</th>
+                                        <th>Serie</th>
                                     </tr>
                                 </thead>
                                 <tbody id="lista_carrocerias">
-                                    <tr><td colspan="4" class="text-center">Cargando activos...</td></tr>
+                                    <tr>
+                                        <td colspan="3" class="text-center">Seleccione una modalidad primero</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <div id="mensaje_validacion_carroceria" class="mt-2 small text-danger"></div>
                     </div>
-
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button class="btn btn-custom me-3" type="submit">Guardar Vehículo</button>
+                <button class="btn btn-outline-secondary" type="reset">Cancelar</button>
+            </div>
+        </form>
     </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
     <script src="/assets/libs/swal/sweetalert2.min.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            cargarChoferes();
-            cargarCarrocerias();
-
-            // Lógica de Envío y Validación RF-GV-02
-            document.getElementById('formVehiculos').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const modalidad = document.getElementById('modalidad_vehiculo').value;
-                const seleccionadas = document.querySelectorAll('input[name="ids_carrocerias[]"]:checked');
-                const cantidad = seleccionadas.length;
-
-                // Reglas de negocio del PDF
-                if ((modalidad === 'Marítimo' || modalidad === 'Aéreo') && cantidad !== 1) {
-                    Swal.fire('Error de Validación', 'La modalidad ' + modalidad + ' requiere exactamente 1 carrocería.', 'error');
-                    return;
-                }
-
-                if ((modalidad === 'Carretero' || modalidad === 'Ferroviario') && cantidad < 2) {
-                    Swal.fire('Error de Validación', 'La modalidad ' + modalidad + ' requiere mínimo 2 carrocerías.', 'error');
-                    return;
-                }
-
-                if (cantidad === 0) {
-                    Swal.fire('Atención', 'Debe seleccionar al menos una carrocería.', 'warning');
-                    return;
-                }
-
-                const formData = new FormData(this);
-                formData.append('action', 'armar-vehiculo');
-
-                fetch('/ajax/vehiculos-ajax.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.exito) {
-                        Swal.fire('¡Éxito!', 'Vehículo registrado y ensamblado correctamente.', 'success')
-                            .then(() => location.reload());
-                    } else {
-                        Swal.fire('Error', data.mensaje || 'Error en el proceso.', 'error');
-                    }
-                });
-            });
-        });
-
-        function cargarChoferes() {
-            fetch('/ajax/personal-ajax.php', {
-                method: 'POST',
-                body: new URLSearchParams({'action': 'consultar-operadores'})
-            })
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById('chofer_asignado');
-                select.innerHTML = '<option value="">-- Seleccionar Chofer --</option>';
-                data.forEach(p => {
-                    let opt = document.createElement('option');
-                    opt.value = p.id_personal;
-                    opt.textContent = `${p.id_personal} - ${p.nombre_personal} ${p.apellido_paterno}`;
-                    select.appendChild(opt);
-                });
-            });
-        }
-
-        function cargarCarrocerias() {
-            const tbody = document.getElementById('lista_carrocerias');
-            fetch('/ajax/carroceria-ajax.php', {
-                method: 'POST',
-                body: new URLSearchParams({'action': 'consultar-carrocerias'})
-            })
-            .then(res => res.json())
-            .then(data => {
-                tbody.innerHTML = '';
-                if(data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay carrocerías disponibles.</td></tr>';
-                    return;
-                }
-                data.forEach(c => {
-                    let tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><input type="checkbox" name="ids_carrocerias[]" value="${c.id_carroceria}"></td>
-                        <td>${c.id_carroceria}</td>
-                        <td>${c.tipo_carroceria}</td>
-                        <td>${c.numero_serie}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            });
-        }
-    </script>
+    <script src="/assets/js/alertas.js"></script>
+    <script src="/assets/js/vehiculos.js"></script>
 </body>
+
 </html>
