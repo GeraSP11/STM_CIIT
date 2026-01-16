@@ -460,4 +460,72 @@ class PedidosModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /* Función eliminar pedidos */
+    public function eliminarPedidos($clavePedido)
+    {
+        global $pdo;
+
+        try {
+            $pdo->beginTransaction();
+
+            // Obtener ID del pedido
+            $stmt = $pdo->prepare("
+                SELECT id_pedido 
+                FROM pedidos 
+                WHERE clave_pedido = ?
+            ");
+            $stmt->execute([$clavePedido]);
+            $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pedido) {
+                $pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'El pedido no existe'
+                ];
+            }
+
+            $idPedido = $pedido['id_pedido'];
+
+            // Eliminar dependencias (orden inverso)
+            $pdo->prepare("DELETE FROM envios WHERE identificador_pedido = ?")
+                ->execute([$idPedido]);
+
+            $pdo->prepare("DELETE FROM fleteros_detalle 
+                        WHERE identificador_flete IN (
+                            SELECT id_fletero FROM fleteros
+                        )")->execute();
+
+            $pdo->prepare("DELETE FROM fleteros 
+                        WHERE id_fletero IN (
+                            SELECT identificador_flete 
+                            FROM envios 
+                            WHERE identificador_pedido = ?
+                        )")->execute([$idPedido]);
+
+            $pdo->prepare("DELETE FROM pedidos_detalles WHERE pedido = ?")
+                ->execute([$idPedido]);
+
+            // Eliminar pedido
+            $pdo->prepare("DELETE FROM pedidos WHERE id_pedido = ?")
+                ->execute([$idPedido]);
+
+            $pdo->commit();
+
+            return [
+                'success' => true,
+                'message' => 'Pedido y registros relacionados eliminados correctamente'
+            ];
+
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return [
+                'success' => false,
+                'error' => 'ERROR_BD',
+                'message' => 'Error al eliminar pedido: ' . $e->getMessage()
+            ];
+        }
+    }
+
 }
