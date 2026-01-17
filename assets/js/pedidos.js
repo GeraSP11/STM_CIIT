@@ -995,7 +995,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Si no existe el formulario en esta vista, salimos
     if (!formConsulta) return;
     cargarLocalidades();
-    const inputIdPedido = document.getElementById("clavePedido");
+    const inputClavePedido = document.getElementById("clavePedido");
     const inputOrigen = document.getElementById("origen");
     const inputDestino = document.getElementById("destino");
     const divTablaResultados = document.getElementById("tablaResultados");
@@ -1030,13 +1030,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function consultarPedidos() {
 
         const filtros = {
-            idPedido: inputIdPedido.value.trim(),
+            clavePedido: inputClavePedido.value.trim(),
             origen: inputOrigen.value.trim(),
             destino: inputDestino.value.trim()
         };
 
         // Validación: al menos un filtro debe estar lleno
-        if (!filtros.idPedido && !filtros.origen && !filtros.destino) {
+        if (!filtros.clavePedido && !filtros.origen && !filtros.destino) {
             alerta("Aviso", "Ingresa al menos un filtro para buscar.", "info");
             return;
         }
@@ -1257,10 +1257,6 @@ function nuevaBusqueda() {
 // FUNCIONALIDAD ELIMINAR PEDIDOS
 // =======================================================
 
-// =======================================================
-// FUNCIONALIDAD ELIMINAR PEDIDOS (COMPLETA)
-// =======================================================
-
 document.addEventListener('DOMContentLoaded', function () {
 
     const formEliminar = document.getElementById('form-busqueda-eliminar');
@@ -1275,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const campoEstatus = document.getElementById('resultado-estatus');
     const campoFechaSolicitud = document.getElementById('resultado-fecha-solicitud');
     const campoFechaEntrega = document.getElementById('resultado-fecha-entrega');
-    const campoProducto = document.getElementById('resultado-producto');
+    //const campoProducto = document.getElementById('resultado-producto');
     const selectProducto = document.getElementById('resultado-producto-select');
     const campoOrigen = document.getElementById('resultado-localidad-origen');
     const campoDestino = document.getElementById('resultado-localidad-destino');
@@ -1327,12 +1323,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // PASO 2: Llenar detalle del pedido en la vista eliminar
     // =======================================================
     function llenarDetallePedido(pedido, detalles) {
-        campoClave.textContent = pedido.clave_pedido || pedido.id_pedido || "";
-        campoEstatus.textContent = pedido.estatus || "";
+
+        campoClave.textContent = pedido.clave_pedido || "";
+        campoEstatus.textContent = pedido.estatus_pedido || "";
         campoFechaSolicitud.textContent = pedido.fecha_solicitud || "";
         campoFechaEntrega.textContent = pedido.fecha_entrega || "";
-        campoOrigen.textContent = pedido.localidad_origen || "";
-        campoDestino.textContent = pedido.localidad_destino || "";
+        campoOrigen.textContent = pedido.origen || "";
+        campoDestino.textContent = pedido.destino || "";
         campoObservaciones.textContent = pedido.observaciones || "N/A";
 
         // Si hay detalles de productos
@@ -1350,7 +1347,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Mostrar el primer producto por defecto
             const primer = selectProducto.options[0];
-            campoProducto.textContent = primer.textContent;
+            //campoProducto.textContent = primer.textContent;
             campoCantidad.textContent = primer.dataset.cantidad;
             campoUnidad.textContent = primer.dataset.unidad;
 
@@ -1360,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', function () {
             option.textContent = "Sin productos";
             option.value = "";
             selectProducto.appendChild(option);
-            campoProducto.textContent = "N/A";
+            //campoProducto.textContent = "N/A";
             campoCantidad.textContent = "0";
             campoUnidad.textContent = "-";
         }
@@ -1371,11 +1368,11 @@ document.addEventListener('DOMContentLoaded', function () {
         selectProducto.addEventListener('change', function () {
             const seleccionado = selectProducto.selectedOptions[0];
             if (seleccionado && seleccionado.value !== "") {
-                campoProducto.textContent = seleccionado.textContent;
+                //campoProducto.textContent = seleccionado.textContent;
                 campoCantidad.textContent = seleccionado.dataset.cantidad;
                 campoUnidad.textContent = seleccionado.dataset.unidad;
             } else {
-                campoProducto.textContent = "N/A";
+                //campoProducto.textContent = "N/A";
                 campoCantidad.textContent = "0";
                 campoUnidad.textContent = "-";
             }
@@ -1386,24 +1383,44 @@ document.addEventListener('DOMContentLoaded', function () {
     // PASO 3: Botón Confirmar Eliminar
     // =======================================================
     btnEliminar.addEventListener('click', function () {
-        const clavePedido = inputClavePedido.value.trim();
-        if (!clavePedido) return;
 
-        if (!confirmar("Gestion pedidos","¿Estás seguro de eliminar este pedido? Esta acción es irreversible.")) return;
+        // Usamos la clave que ya se buscó
+        const clavePedido = campoClave.textContent.trim();
 
-        enviarPeticionPOST("confirmar-eliminar-pedido", { clavePedido })
+        if (!clavePedido) {
+            alerta("Error", "No hay un pedido válido para eliminar.", "error");
+            return;
+        }
+
+        if (!confirmar(
+            "Gestión de pedidos",
+            "¿Estás seguro de eliminar este pedido?\nEsta acción es irreversible."
+        )) return;
+
+        enviarPeticionPOST("eliminar-pedidos", { clavePedido })
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.text();
+                return res.json(); // ⬅ ahora backend responde JSON
             })
-            .then(respuesta => {
-                manejarRespuestaCRUD(respuesta, "El pedido fue eliminado exitosamente.", "/dashboard.php");
+            .then(data => {
+                if (!data.success) {
+                    alerta("Error", data.message || "No se pudo eliminar.", "error");
+                    return;
+                }
+
+                alerta("Éxito", data.message, "success");
+
+                // Redirigir o resetear vista
+                setTimeout(() => {
+                    window.location.href = "/dashboard.php";
+                }, 1500);
             })
             .catch(err => {
                 console.error(err);
                 alerta("Error", "No se pudo eliminar el pedido.", "error");
             });
     });
+
 
     // =======================================================
     // PASO 4: Botón Cancelar
@@ -1412,7 +1429,14 @@ document.addEventListener('DOMContentLoaded', function () {
         vistaResultados.style.display = 'none';
         vistaBusqueda.style.display = 'block';
         formEliminar.reset();
+
+        // Limpieza visual opcional
+        campoClave.textContent = "";
+        campoEstatus.textContent = "";
+        campoOrigen.textContent = "";
+        campoDestino.textContent = "";
     });
+
 
 });
 

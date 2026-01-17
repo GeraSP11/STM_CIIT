@@ -146,7 +146,7 @@ class PedidosController
             $destino  = isset($data['destino']) ? trim($data['destino']) : null;
 
             // Validar que al menos haya un filtro
-            if (empty($idPedido) && empty($origen) && empty($destino)) {
+            if (empty($clavePedido) && empty($origen) && empty($destino)) {
                 header('Content-Type: application/json');
                 echo json_encode([
                     'success' => false,
@@ -180,29 +180,29 @@ class PedidosController
      * WORKAROUND: Como pedidos_detalles no tiene id_pedido,
      * retornamos todos los detalles disponibles
      */
-    public function obtenerDetallePedido($data)
-    {
+    public function obtenerDetallePedido($data){
         try {
-            
-           $idPedido = isset($data['idPedido']) ? intval($data['idPedido']) : 0;
-
-            if (!$idPedido) {
-                header('Content-Type: application/json');
-                echo json_encode([
-                    'success' => false,
-                    'error' => 'Clave de pedido inválido'
-                ]);
-                return;
-            }
-
             $model = new PedidosModel();
 
-            // Obtener información general del pedido( ya no va, porque al hacer clien en ver detalle se manda el  id no?)
-            $pedidoArray = $model->obtenerPedidos($idPedido); // información general
-            $pedido = $pedidoArray[0] ?? null;
+            $idPedido = $data['idPedido'] ?? null;
+            $clavePedido = $data['clavePedido'] ?? null;
 
-            if (!$pedido) {
-                header('Content-Type: application/json');
+            // 1. Resolver pedido
+            if ($idPedido) {
+                $pedidoArray = $model->obtenerPedidos(null, null, null);
+                foreach ($pedidoArray as $p) {
+                    if ($p['id_pedido'] == $idPedido) {
+                        $pedido = $p;
+                        break;
+                    }
+                }
+            } 
+            elseif ($clavePedido) {
+                $pedidoArray = $model->obtenerPedidos($clavePedido);
+                $pedido = $pedidoArray[0] ?? null;
+            }
+
+            if (empty($pedido)) {
                 echo json_encode([
                     'success' => false,
                     'error' => 'Pedido no encontrado'
@@ -210,11 +210,9 @@ class PedidosController
                 return;
             }
 
+            // 2. Obtener detalles SIEMPRE por ID
+            $detalles = $model->obtenerDetallesPorPedido($pedido['id_pedido']);
 
-            // Obtener solo los detalles de este pedido
-            $detalles = $model->obtenerDetallesPorPedido($idPedido);
-
-            header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
                 'pedido' => $pedido,
@@ -222,29 +220,36 @@ class PedidosController
             ]);
 
         } catch (Exception $e) {
-            header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
-                'error' => 'Error al obtener detalle: ' . $e->getMessage()
+                'error' => $e->getMessage()
             ]);
         }
     }
 
 
+
     /*
         Funcionalida elimar pedidos
     */
-        public function eliminarPedido($data){
-            $clavePedido = $data['clave-pedido'] ?? null;
-            if (!$clavePedido) {
-                return "Clave de pedido inválido";
-            }
+    public function eliminarPedido($data)
+    {
+        header('Content-Type: application/json');
 
-                
-            $model = new PedidosModel();
-            $resultado = $model->eliminarPedidos($clavePedido);
+        $clavePedido = $data['clavePedido'] ?? null;
 
-            return $resultado ? "OK" : "Error al eliminar localidad";
-
+        if (!$clavePedido) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Clave de pedido inválida'
+            ]);
+            return;
         }
+
+        $model = new PedidosModel();
+        $resultado = $model->eliminarPedidos($clavePedido);
+
+        echo json_encode($resultado);
+    }
+
 }

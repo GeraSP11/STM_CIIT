@@ -381,7 +381,6 @@ class PedidosModel
     // FUNCIONALIDAD PARA CONSULTAR PEDIDOS
     /**
      * Obtener pedidos con filtros opcionales
-     * Retorna información general del pedido (sin productos)
      */
 
     public function obtenerPedidos($clavePedido = null, $origen = null, $destino = null)
@@ -428,12 +427,6 @@ class PedidosModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    /**
-     * Obtener TODOS los detalles de productos
-     * WORKAROUND: Como pedidos_detalles NO tiene id_pedido,
-     * retornamos todos los detalles y los filtramos en el controlador
-     */
 
     public function obtenerDetallesPorPedido($idPedido)
     {

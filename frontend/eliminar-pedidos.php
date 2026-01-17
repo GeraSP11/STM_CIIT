@@ -258,7 +258,7 @@ $seccion = 'Eliminar Pedidos';
     </div>
 
     <!-- Vista 2: Resultados de Búsqueda -->
-    <div id="vista-resultados-eliminar" class="container my-4 p-4 bg-white rounded shadow" style="display: n; max-width: 1200px;">
+    <div id="vista-resultados-eliminar" class="container my-4 p-4 bg-white rounded shadow" style="display: none; max-width: 1200px;">
         <div class="mb-3 p-3 rounded" style="background-color: #4d2132; color: #fff;">
             <h5 class="mb-0">Resultados obtenidos:</h5>
         </div>
