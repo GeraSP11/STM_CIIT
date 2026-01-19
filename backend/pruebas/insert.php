@@ -182,116 +182,117 @@ try {
     $stmt_pedidos = $pdo->prepare($sql_pedidos);
 
     $pedidos = [
-        // Pedido 1: Centro Productivo Oaxaca → Centro de Distribución Istmo (Entregado)
+        // Pedido 1: Oaxaca → Istmo (Entregado)
         [
-            'PED-2024-001', 
-            $ids_localidades[0], // Oaxaca
-            $ids_localidades[1], // Istmo
+            'PED-20240115-CPOAX01-CDIST01-A1B2C3',
+            $ids_localidades[0],
+            $ids_localidades[1],
             'Entregado',
             '2024-01-15',
             '2024-01-20',
             'Envío de quesos frescos - Entrega exitosa'
         ],
-        
-        // Pedido 2: Centro de Distribución Istmo → PODEBI Huatulco (En tránsito)
+
+        // Pedido 2: Istmo → Huatulco (En tránsito)
         [
-            'PED-2024-002',
-            $ids_localidades[1], // Istmo
-            $ids_localidades[2], // Huatulco
+            'PED-20240122-CDIST01-POHUA01-B2C3D4',
+            $ids_localidades[1],
+            $ids_localidades[2],
             'En tránsito',
             '2024-01-22',
             '2024-01-25',
             'Yogurt y productos lácteos - En camino'
         ],
-        
-        // Pedido 3: Almacén Central Puebla → Centro Productivo Oaxaca (En preparación)
+
+        // Pedido 3: Puebla → Oaxaca (En preparación)
         [
-            'PED-2024-003',
-            $ids_localidades[3], // Puebla
-            $ids_localidades[0], // Oaxaca
+            'PED-20240123-ALPUE01-CPOAX01-C3D4E5',
+            $ids_localidades[3],
+            $ids_localidades[0],
             'En preparación',
             '2024-01-23',
             '2024-01-28',
             'Material de embalaje y pallets'
         ],
-        
-        // Pedido 4: Centro Productivo Oaxaca → Almacén Central Puebla (Enviado)
+
+        // Pedido 4: Oaxaca → Puebla (Enviado)
         [
-            'PED-2024-004',
-            $ids_localidades[0], // Oaxaca
-            $ids_localidades[3], // Puebla
+            'PED-20240120-CPOAX01-ALPUE01-D4E5F6',
+            $ids_localidades[0],
+            $ids_localidades[3],
             'Enviado',
             '2024-01-20',
             '2024-01-26',
             'Productos terminados para redistribución'
         ],
-        
-        // Pedido 5: PODEBI Huatulco → Centro de Distribución Istmo (En captura)
+
+        // Pedido 5: Huatulco → Istmo (En captura)
         [
-            'PED-2024-005',
-            $ids_localidades[2], // Huatulco
-            $ids_localidades[1], // Istmo
+            'PED-20240124-POHUA01-CDIST01-E5F6A1',
+            $ids_localidades[2],
+            $ids_localidades[1],
             'En captura',
             '2024-01-24',
-            null, // Sin fecha de entrega aún
+            null,
             'Pedido en proceso de captura'
         ],
-        
-        // Pedido 6: Centro de Distribución Istmo → Almacén Central Puebla (En recolección)
+
+        // Pedido 6: Istmo → Puebla (En recolección)
         [
-            'PED-2024-006',
-            $ids_localidades[1], // Istmo
-            $ids_localidades[3], // Puebla
+            'PED-20240123-CDIST01-ALPUE01-F6A1B2',
+            $ids_localidades[1],
+            $ids_localidades[3],
             'En recolección',
             '2024-01-23',
             '2024-01-30',
             'Productos perecederos - Urgente'
         ],
-        
-        // Pedido 7: Almacén Central Puebla → PODEBI Huatulco (En reparto)
+
+        // Pedido 7: Puebla → Huatulco (En reparto)
         [
-            'PED-2024-007',
-            $ids_localidades[3], // Puebla
-            $ids_localidades[2], // Huatulco
+            'PED-20240121-ALPUE01-POHUA01-A1C2D3',
+            $ids_localidades[3],
+            $ids_localidades[2],
             'En reparto',
             '2024-01-21',
             '2024-01-24',
             'Último tramo de entrega'
         ],
-        
-        // Pedido 8: Centro Productivo Oaxaca → Centro de Distribución Istmo (Entregado)
+
+        // Pedido 8: Oaxaca → Istmo (Entregado)
         [
-            'PED-2024-008',
-            $ids_localidades[0], // Oaxaca
-            $ids_localidades[1], // Istmo
+            'PED-20240110-CPOAX01-CDIST01-B2D3E4',
+            $ids_localidades[0],
+            $ids_localidades[1],
             'Entregado',
             '2024-01-10',
             '2024-01-15',
             'Pedido anterior completado'
         ],
-        
-        // Pedido 9: PODEBI Huatulco → Almacén Central Puebla (En tránsito)
+
+        // Pedido 9: Huatulco → Puebla (En tránsito)
         [
-            'PED-2024-009',
-            $ids_localidades[2], // Huatulco
-            $ids_localidades[3], // Puebla
+            'PED-20240122-POHUA01-ALPUE01-C3E4F5',
+            $ids_localidades[2],
+            $ids_localidades[3],
             'En tránsito',
             '2024-01-22',
             '2024-01-27',
             'Traslado de materiales'
         ],
-        
-        // Pedido 10: Centro de Distribución Istmo → Centro Productivo Oaxaca (Enviado)
+
+        // Pedido 10: Istmo → Oaxaca (Enviado)
         [
-            'PED-2024-010',
-            $ids_localidades[1], // Istmo
-            $ids_localidades[0], // Oaxaca
+            'PED-20240123-CDIST01-CPOAX01-D4F5A6',
+            $ids_localidades[1],
+            $ids_localidades[0],
             'Enviado',
             '2024-01-23',
             '2024-01-26',
             'Devolución de envases vacíos'
         ]
     ];
+
 
     $ids_pedidos = [];
 

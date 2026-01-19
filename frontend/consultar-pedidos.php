@@ -135,10 +135,12 @@ $seccion = 'Consulta de Pedidos';
         <input 
             id="clavePedido" 
             class="form-control-custom" 
-            placeholder="Clave del pedido (ej: PED-2024-010)"
-            pattern="PED-\d{4}-\d{3}"
+            pattern="^PED-\d{8}-[A-Z0-9]{3,12}-[A-Z0-9]{3,12}-[A-F0-9]{6}$"
+            placeholder="PED-20260118-CPOAX01-CDIST01-A9F3C2"
             title="Formato: PED-YYYY-XXX (ej: PED-2024-010)"
         >
+
+
         <div class="d-flex align-items-center my-3">
             <div class="flex-grow-1 border-top"></div>
             <span class="mx-2 fw-bold">o</span>
