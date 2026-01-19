@@ -1397,9 +1397,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // =======================================================
     // PASO 3: Botón Confirmar Eliminar
     // =======================================================
-    btnEliminar.addEventListener('click', function () {
+    btnEliminar.addEventListener('click', async function () {
 
-        // Usamos la clave que ya se buscó
         const clavePedido = campoClave.textContent.trim();
 
         if (!clavePedido) {
@@ -1407,34 +1406,37 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (!confirmar(
+        const result = await confirmar(
             "Gestión de pedidos",
             "¿Estás seguro de eliminar este pedido?\nEsta acción es irreversible."
-        )) return;
+        );
 
-        enviarPeticionPOST("eliminar-pedidos", { clavePedido })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json(); // ⬅ ahora backend responde JSON
-            })
-            .then(data => {
-                if (!data.success) {
-                    alerta("Error", data.message || "No se pudo eliminar.", "error");
-                    return;
-                }
+        if (!result.isConfirmed) return;
 
-                alerta("Éxito", data.message, "success");
+        try {
+            const res = await enviarPeticionPOST("eliminar-pedidos", { clavePedido });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                // Redirigir o resetear vista
-                setTimeout(() => {
-                    window.location.href = "/dashboard.php";
-                }, 1500);
-            })
-            .catch(err => {
-                console.error(err);
-                alerta("Error", "No se pudo eliminar el pedido.", "error");
-            });
+            const data = await res.json();
+
+            if (!data.success) {
+                alerta("Error", data.message || "No se pudo eliminar.", "error");
+                return;
+            }
+
+            alerta("Éxito", data.message, "success");
+            //setTimeout(() => window.location.href = "/eliminar-pedidos.php", 1500);
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+
+        } catch (err) {
+            console.error(err);
+            alerta("Error", "No se pudo eliminar el pedido.", "error");
+        }
     });
+
 
 
     // =======================================================
