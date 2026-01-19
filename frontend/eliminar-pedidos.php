@@ -252,13 +252,13 @@ $seccion = 'Eliminar Pedidos';
 
         <form id="form-busqueda-eliminar">
             <input 
-            type="text"
-            id="clave-pedido"
-            class="form-control"
-            pattern="^PED-\d{8}-[A-Z0-9]{3,12}-[A-Z0-9]{3,12}-[A-F0-9]{6}$"
-            placeholder="PED-20260118-CPOAX01-CDIST01-A9F3C2"
-            title="Formato: PED-YYYY-XXX (ej: PED-2024-010)"
-        >
+                type="text"
+                id="clave-pedido"
+                class="form-control"
+                pattern="^PED-\d{8}-[A-Z0-9]{3,12}-[A-Z0-9]{3,12}-[A-F0-9]{6}$"
+                placeholder="PED-20260118-CPOAX01-CDIST01-A9F3C2"
+                title="Formato: PED-YYYYMMDD-CÓDIGO1-CÓDIGO2-HEX (ej: PED-20260118-CPOAX01-CDIST01-A9F3C2)"
+            >
 
             <button type="submit" class="btn-buscar" id="btn-buscar-eliminar">Buscar</button>
         </form>
