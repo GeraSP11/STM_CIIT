@@ -16,6 +16,7 @@ function inicializarEventos() {
     // Formulario de registro
     if (document.getElementById('formRegistroProductos')) {
         establecerFechaActual();
+        limpiarSelectsLocalidades();
         cargarLocalidadesRegistro();
         configurarVistaProductos();
         document.getElementById('formRegistroProductos').addEventListener('submit', function (e) {
@@ -266,7 +267,7 @@ function configurarRestriccionFechaEntrega() {
 // Cargar Productos para la vista de seleccion en el registro
 function cargarProductos(filtro = '') {
 
-    const destino = document.getElementById('localidad-destino').value;
+    const destino = document.getElementById('localidad-origen').value;
     if (!destino) return;
 
     const formData = new FormData();
@@ -391,6 +392,20 @@ function manejarCambioDestino() {
     if (contenedor) contenedor.style.display = 'none';
     ocultarBotonesRegistro();
 }
+
+function limpiarSelectsLocalidades() {
+    const selectOrigen = document.getElementById('localidad-origen');
+    const selectDestino = document.getElementById('localidad-destino');
+
+    if (selectOrigen) {
+        selectOrigen.innerHTML = '<option value="">Seleccione origen</option>';
+    }
+
+    if (selectDestino) {
+        selectDestino.innerHTML = '<option value="">Seleccione destino</option>';
+    }
+}
+
 
 function sincronizarSelectsLocalidades() {
 
