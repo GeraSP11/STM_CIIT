@@ -95,21 +95,28 @@ class PedidosModel
         ============================ */
 
             $sqlDetalle = "
-            INSERT INTO pedidos_detalles (
-                identificador_producto,
-                cantidad_producto,
-                observaciones
-            ) VALUES (
-                :producto,
-                :cantidad,
-                :observaciones
-            )
-        ";
+                INSERT INTO pedidos_detalles 
+                (
+                    pedido,
+                    identificador_producto,
+                    cantidad_producto,
+                    observaciones
+                ) VALUES (
+                    :pedido,
+                    :producto,
+                    :cantidad,
+                    :observaciones
+                )
+            ";
+
 
             $stmtDetalle = $conn->prepare($sqlDetalle);
 
+            
+
             foreach ($productos as $p) {
                 $stmtDetalle->execute([
+                    ':pedido'        => $idPedido,
                     ':producto'      => $p['id_producto'],
                     ':cantidad'      => $p['cantidad'],
                     ':observaciones' => $p['observaciones']
