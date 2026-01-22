@@ -62,6 +62,10 @@ try {
             ]);
             break;
 
+        case 'obtener_localidad_sesion':
+            $controller::obtenerLocalidadUsuario();
+            break;
+
         case 'obtener_localidades':
             obtenerLocalidades($controller);
             break;

@@ -30,6 +30,24 @@ class PedidosController
         }
     }
 
+    // Obteneer el id para seleccionar la localidad del usuario en sison
+    public static function obtenerLocalidadUsuario()
+    {
+        session_start();
+
+        if (!isset($_SESSION['id_personal'])) {
+            echo json_encode(null);
+            return;
+        }
+
+        $idPersonal = $_SESSION['id_personal'];
+
+        $idLocalidad = PedidosModel::obtenerIdLocalidadUsuario($idPersonal);
+
+        echo json_encode([
+            'id_localidad' => $idLocalidad
+        ]);
+    }
 
     /**
      * Obtener todas las localidades
@@ -156,9 +174,9 @@ class PedidosController
             }
 
             $model = new PedidosModel();
-            
+
             $pedidos = $model->obtenerPedidos($clavePedido, $origen, $destino);
-            
+
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
@@ -180,7 +198,8 @@ class PedidosController
      * WORKAROUND: Como pedidos_detalles no tiene id_pedido,
      * retornamos todos los detalles disponibles
      */
-    public function obtenerDetallePedido($data){
+    public function obtenerDetallePedido($data)
+    {
         try {
             $model = new PedidosModel();
 
@@ -196,8 +215,7 @@ class PedidosController
                         break;
                     }
                 }
-            } 
-            elseif ($clavePedido) {
+            } elseif ($clavePedido) {
                 $pedidoArray = $model->obtenerPedidos($clavePedido);
                 $pedido = $pedidoArray[0] ?? null;
             }
@@ -218,7 +236,6 @@ class PedidosController
                 'pedido' => $pedido,
                 'detalles' => $detalles
             ]);
-
         } catch (Exception $e) {
             echo json_encode([
                 'success' => false,
@@ -251,5 +268,4 @@ class PedidosController
 
         echo json_encode($resultado);
     }
-
 }

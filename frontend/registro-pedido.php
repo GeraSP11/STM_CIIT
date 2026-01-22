@@ -259,14 +259,14 @@ $seccion = 'Registrar pedidos';
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label for="origen" class="form-label">Localidad origen:</label>
-                                <select class="form-control" id="localidad-origen">
+                                <select class="form-control" id="localidad-origen-registro">
                                     <option value="">Seleccione una Localidad</option>
                                 </select>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="destino" class="form-label">Localidad destino:</label>
-                                <select class="form-control" id="localidad-destino">
+                                <select class="form-control" id="localidad-destino-registro">
                                     <option value="">Seleccione una Localidad</option>
                                 </select>
                             </div>

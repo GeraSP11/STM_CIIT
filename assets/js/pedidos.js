@@ -18,6 +18,7 @@ function inicializarEventos() {
         establecerFechaActual();
         limpiarSelectsLocalidades();
         cargarLocalidadesRegistro();
+        seleccionarLocalidadDestinoUsuario();
         configurarVistaProductos();
         document.getElementById('formRegistroProductos').addEventListener('submit', function (e) {
             e.preventDefault();
@@ -48,8 +49,8 @@ function configurarVistaProductos() {
     const inputBuscarProducto = document.getElementById('buscarProducto');
     const fechaEntrega = document.getElementById('fechaEntrega');
     const fechaSolicitud = document.getElementById('fechaSolicitud');
-    const selectOrigen = document.getElementById('localidad-origen');
-    const selectDestino = document.getElementById('localidad-destino');
+    const selectOrigen = document.getElementById('localidad-origen-registro');
+    const selectDestino = document.getElementById('localidad-destino-registro');
 
     if (btnAgregarProducto) {
         btnAgregarProducto.addEventListener('click', mostrarVistaProductos);
@@ -86,8 +87,8 @@ function configurarVistaProductos() {
 }
 
 function actualizarEstadoBotonAgregarProducto() {
-    const selectOrigen = document.getElementById('localidad-origen');
-    const selectDestino = document.getElementById('localidad-destino');
+    const selectOrigen = document.getElementById('localidad-origen-registro');
+    const selectDestino = document.getElementById('localidad-destino-registro');
     const btnAgregarProducto = document.getElementById('btnAgregarProducto');
 
     if (!selectOrigen || !selectDestino || !btnAgregarProducto) return;
@@ -267,7 +268,7 @@ function configurarRestriccionFechaEntrega() {
 // Cargar Productos para la vista de seleccion en el registro
 function cargarProductos(filtro = '') {
 
-    const destino = document.getElementById('localidad-origen').value;
+    const destino = document.getElementById('localidad-origen-registro').value;
     if (!destino) return;
 
     const formData = new FormData();
@@ -394,8 +395,8 @@ function manejarCambioDestino() {
 }
 
 function limpiarSelectsLocalidades() {
-    const selectOrigen = document.getElementById('localidad-origen');
-    const selectDestino = document.getElementById('localidad-destino');
+    const selectOrigen = document.getElementById('localidad-origen-registro');
+    const selectDestino = document.getElementById('localidad-destino-registro');
 
     if (selectOrigen) {
         selectOrigen.innerHTML = '<option value="">Seleccione origen</option>';
@@ -409,8 +410,8 @@ function limpiarSelectsLocalidades() {
 
 function sincronizarSelectsLocalidades() {
 
-    const selectOrigen = document.getElementById('localidad-origen');
-    const selectDestino = document.getElementById('localidad-destino');
+    const selectOrigen = document.getElementById('localidad-origen-registro');
+    const selectDestino = document.getElementById('localidad-destino-registro');
 
     const origenSeleccionado = selectOrigen.value;
     const destinoSeleccionado = selectDestino.value;
@@ -440,16 +441,44 @@ function cargarLocalidadesRegistro() {
             }
         })
         .catch(() => {
-            mostrarAlerta('error', 'Error al cargar localidades');
+            alerta(data.mensaje);
         });
 }
+
+// Seleccion automatica de la localidad destino para el usuario en sesion
+function seleccionarLocalidadDestinoUsuario() {
+    const formData = new FormData();
+    formData.append('accion', 'obtener_localidad_sesion');
+
+    fetch('/ajax/pedidos-ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (!data || !data.id_localidad) return;
+
+            const selectDestino = document.getElementById('localidad-destino-registro');
+            if (!selectDestino) return;
+
+            // Buscar la opción y seleccionarla
+            [...selectDestino.options].forEach(option => {
+                if (option.value == data.id_localidad) {
+                    option.selected = true;
+                    sincronizarSelectsLocalidades();
+                }
+            });
+        })
+        .catch(err => {console.error('Error:', err); alerta(data.mensaje);});
+}
+
 
 // Inicio de operaciones para registro de pedido
 function validarFormularioPedido() {
 
     const fechaEntrega = document.getElementById('fechaEntrega').value;
-    const origen = document.getElementById('localidad-origen').value;
-    const destino = document.getElementById('localidad-destino').value;
+    const origen = document.getElementById('localidad-origen-registro').value;
+    const destino = document.getElementById('localidad-destino-registro').value;
 
     if (!fechaEntrega || !origen || !destino) {
         mostrarAlerta('warning', 'Todos los campos del pedido son obligatorios');
@@ -486,8 +515,8 @@ function registrarPedido() {
     const formData = new FormData(form);
     formData.append('accion', 'registrarPedido');
     formData.append('fecha_entrega', document.getElementById('fechaEntrega').value);
-    formData.append('localidad_origen', document.getElementById('localidad-origen').value);
-    formData.append('localidad_destino', document.getElementById('localidad-destino').value);
+    formData.append('localidad_origen', document.getElementById('localidad-origen-registro').value);
+    formData.append('localidad_destino', document.getElementById('localidad-destino-registro').value);
 
     const productos = [];
 
@@ -516,14 +545,10 @@ function registrarPedido() {
         })
         .then(data => {
             if (!data.success) {
-                mostrarAlerta('error', data.message);
+                alerta(data.mensaje);
                 return;
             }
-
-            mostrarAlerta(
-                'success',
-                `Pedido ${data.clave_pedido} registrado correctamente`
-            );
+            alerta("Éxito", `Pedido ${data.clave_pedido} registrado correctamente`, "success");
 
             actualizarEstatusVista('En preparación');
             limpiarTodoRegistro();
@@ -555,8 +580,8 @@ function limpiarTodoRegistro() {
     /* ==========================
        LOCALIDADES
     ========================== */
-    const selectOrigen = document.getElementById('localidad-origen');
-    const selectDestino = document.getElementById('localidad-destino');
+    const selectOrigen = document.getElementById('localidad-origen-registro');
+    const selectDestino = document.getElementById('localidad-destino-registro');
 
     if (selectOrigen) selectOrigen.value = '';
     if (selectDestino) selectDestino.value = '';
@@ -1191,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Listener: al cambiar de producto, actualizar cantidad y unidad
-        selectProducto.addEventListener('change', function() {
+        selectProducto.addEventListener('change', function () {
             const seleccionado = selectProducto.selectedOptions[0];
             if (seleccionado && seleccionado.value !== "") {
                 detalleCampos.cantidad.textContent = seleccionado.dataset.cantidad;
@@ -1303,7 +1328,7 @@ document.addEventListener('DOMContentLoaded', function () {
     formEliminar.addEventListener('submit', function (e) {
         e.preventDefault();
         const clavePedido = inputClavePedido.value.trim();
-        
+
         if (!clavePedido) {
             alerta("Aviso", "Ingresa una clave para buscar.", "info");
             return;
@@ -1426,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             alerta("Éxito", data.message, "success");
             //setTimeout(() => window.location.href = "/eliminar-pedidos.php", 1500);
-            
+
             setTimeout(() => {
                 window.location.reload();
             }, 1500);

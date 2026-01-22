@@ -186,6 +186,23 @@ class PedidosModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Obtener la localidad del usuario en sesion
+    public static function obtenerIdLocalidadUsuario($idPersonal)
+    {
+        $conn = self::getConnection();
+
+        $sql = "
+            SELECT afiliacion_laboral
+            FROM personal
+            WHERE id_personal = :idPersonal
+        ";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':idPersonal', $idPersonal, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchColumn(); // devuelve solo el id_localidad
+    }
 
     /**
      * Obtener todas las localidades
