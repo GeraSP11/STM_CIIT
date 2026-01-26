@@ -362,6 +362,12 @@ Consulta de Pedidos
 </div>
 
 <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Tus scripts -->
+<script src="/assets/js/alertas.js"></script>
 <script src="/assets/js/pedidos.js"></script>
 </body>
 </html>

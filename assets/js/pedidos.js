@@ -865,26 +865,62 @@ function mostrarVistaActualizar(pedido) {
 }
 
 // Guardar cambios
+// Guardar cambios
 function guardarCambios() {
-    const idPedido = document.getElementById('detalle-id').textContent;
-    const estatus = document.getElementById('detalle-estatus').value;
-    const fechaSolicitud = document.getElementById('detalle-fecha-solicitud').value;
-    const fechaEntrega = document.getElementById('detalle-fecha-entrega').value;
-    const observaciones = document.getElementById('detalle-observaciones').value;
+    const idPedido = document.getElementById('detalle-id')?.textContent.trim();
+    const estatus = document.getElementById('detalle-estatus')?.value;
+    const fechaSolicitud = document.getElementById('detalle-fecha-solicitud')?.value;
+    const fechaEntrega = document.getElementById('detalle-fecha-entrega')?.value;
+    const observaciones = document.getElementById('detalle-observaciones')?.value.trim();
 
-    // Validaciones
-    if (!estatus || !fechaSolicitud) {
-        mostrarAlerta('warning', 'Por favor complete los campos requeridos');
+    // 🔴 Validaciones
+    if (!idPedido) {
+        alerta("Error", "No se pudo identificar el pedido.", "error");
         return;
     }
 
+    if (!estatus) {
+        alerta("Error", "Debes seleccionar un estatus.", "warning");
+        return;
+    }
+
+    if (!fechaSolicitud) {
+        alerta("Error", "La fecha de solicitud es obligatoria.", "warning");
+        return;
+    }
+
+    if (!fechaEntrega) {
+        alerta("Error", "La fecha de entrega es obligatoria.", "warning");
+        return;
+    }
+
+    if (fechaEntrega && fechaEntrega < fechaSolicitud) {
+        alerta(
+            "Error",
+            "La fecha de entrega no puede ser menor a la fecha de solicitud.",
+            "warning"
+        );
+        return;
+    }
+
+    if (!observaciones) {
+        alerta(
+            "Error",
+            "Debes agregar una observación para actualizar el pedido.",
+            "warning"
+        );
+        return;
+    }
+
+
+    // 📦 FormData
     const formData = new FormData();
     formData.append('accion', 'actualizar');
     formData.append('id_pedido', idPedido);
     formData.append('estatus_pedido', estatus);
     formData.append('fecha_solicitud', fechaSolicitud);
-    formData.append('fecha_entrega', fechaEntrega);
-    formData.append('observaciones', observaciones);
+    formData.append('fecha_entrega', fechaEntrega || '');
+    formData.append('observaciones', observaciones || '');
 
     mostrarLoading(true);
 
@@ -892,25 +928,38 @@ function guardarCambios() {
         method: 'POST',
         body: formData
     })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
             mostrarLoading(false);
 
             if (data.success) {
-                mostrarAlerta('success', 'Pedido actualizado exitosamente');
-                setTimeout(() => {
+                // 🟢 Alerta de éxito con SweetAlert
+                alerta(
+                    "Éxito",
+                    `Pedido ${idPedido} actualizado correctamente.`,
+                    "success"
+                ).then(() => {
                     volverAInicio();
-                }, 2000);
+                });
             } else {
-                mostrarAlerta('error', data.message || 'Error al actualizar el pedido');
+                alerta(
+                    "Error",
+                    data.message || "No se pudo actualizar el pedido.",
+                    "error"
+                );
             }
         })
         .catch(error => {
             mostrarLoading(false);
             console.error('Error:', error);
-            mostrarAlerta('error', 'Error de conexión al actualizar el pedido');
+            alerta(
+                "Error",
+                "Error de conexión al actualizar el pedido.",
+                "error"
+            );
         });
 }
+
 
 // Volver a inicio
 function volverAInicio() {
