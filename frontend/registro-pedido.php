@@ -291,7 +291,7 @@ $seccion = 'Registrar pedidos';
                                     <tr>
                                         <th>Producto</th>
                                         <th style="width:120px;">Cantidad</th>
-                                        <th style="width:120px;">Unidad</th>
+                                        <th style="width:120px;">Disponibilidad</th>
                                         <th>Observaciones</th>
                                         <th style="width:40px;"></th>
                                     </tr>
