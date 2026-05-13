@@ -857,8 +857,8 @@ function mostrarVistaActualizar(pedido) {
     document.getElementById('detalle-estatus').value = pedido.estatus_pedido;
     document.getElementById('detalle-fecha-solicitud').value = pedido.fecha_solicitud;
     document.getElementById('detalle-fecha-entrega').value = pedido.fecha_entrega || '';
-    document.getElementById('detalle-localidad-origen').textContent = pedido.localidad_origen_nombre;
-    document.getElementById('detalle-localidad-destino').textContent = pedido.localidad_destino_nombre;
+    llenarSelectLocalidadActualizar('detalle-localidad-origen', pedido.localidad_origen);
+    llenarSelectLocalidadActualizar('detalle-localidad-destino', pedido.localidad_destino)
     document.getElementById('detalle-observaciones').value = pedido.observaciones || '';
 
     // NUEVO: Cargar productos del pedido
@@ -912,6 +912,22 @@ function cargarProductosPedido(idPedido) {
         .catch(() => {
             tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Error al cargar productos</td></tr>';
         });
+}
+
+function llenarSelectLocalidadActualizar(selectId, valorSeleccionado) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '<option value="">Seleccione una localidad</option>';
+
+    // Reutiliza el array global 'localidades' que ya se carga al inicio
+    localidades.forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc.id_localidad;
+        option.textContent = loc.nombre_completo;
+        if (loc.id_localidad == valorSeleccionado) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
 }
 
 function eliminarDetalleProducto(icono, idDetalle) {
@@ -988,6 +1004,8 @@ function guardarCambios() {
     formData.append('fecha_solicitud', fechaSolicitud);
     formData.append('fecha_entrega', fechaEntrega || '');
     formData.append('observaciones', observaciones || '');
+    formData.append('localidad_origen', document.getElementById('detalle-localidad-origen').value);
+    formData.append('localidad_destino', document.getElementById('detalle-localidad-destino').value);
 
     mostrarLoading(true);
 

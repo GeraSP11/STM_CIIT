@@ -216,6 +216,8 @@ function actualizarPedido($controller)
         $fechaSolicitud = isset($_POST['fecha_solicitud']) ? trim($_POST['fecha_solicitud']) : '';
         $fechaEntrega = isset($_POST['fecha_entrega']) ? trim($_POST['fecha_entrega']) : null;
         $observaciones = isset($_POST['observaciones']) ? trim($_POST['observaciones']) : null;
+        $localidadOrigen  = isset($_POST['localidad_origen'])  ? intval($_POST['localidad_origen'])  : null;
+        $localidadDestino = isset($_POST['localidad_destino']) ? intval($_POST['localidad_destino']) : null;
 
         // Validaciones
         if ($idPedido <= 0) {
@@ -252,7 +254,10 @@ function actualizarPedido($controller)
             return;
         }
 
-        $resultado = $controller->actualizarPedido($idPedido, $estatusPedido, $fechaSolicitud, $fechaEntrega, $observaciones);
+        $resultado = $controller->actualizarPedido(
+            $idPedido, $estatusPedido, $fechaSolicitud, $fechaEntrega, $observaciones,
+            $localidadOrigen, $localidadDestino 
+        );
 
         if ($resultado) {
             echo json_encode([

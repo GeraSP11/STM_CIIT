@@ -98,7 +98,7 @@ class PedidosController
     /**
      * Actualizar un pedido
      */
-    public function actualizarPedido($idPedido, $estatusPedido, $fechaSolicitud, $fechaEntrega = null, $observaciones = null)
+    public function actualizarPedido($idPedido, $estatusPedido, $fechaSolicitud, $fechaEntrega = null, $observaciones = null, $localidadOrigen = null, $localidadDestino = null)
     {
         try {
             // Validaciones
@@ -129,10 +129,12 @@ class PedidosController
             }
 
             $datos = [
-                'estatus_pedido' => $estatusPedido,
-                'fecha_solicitud' => $fechaSolicitud,
-                'fecha_entrega' => $fechaEntrega,
-                'observaciones' => $observaciones
+                'estatus_pedido'    => $estatusPedido,
+                'fecha_solicitud'   => $fechaSolicitud,
+                'fecha_entrega'     => $fechaEntrega,
+                'observaciones'     => $observaciones,
+                'localidad_origen'  => $localidadOrigen,   // <-- nuevo
+                'localidad_destino' => $localidadDestino   // <-- nuevo
             ];
 
             return PedidosModel::actualizarPedido($idPedido, $datos);

@@ -336,12 +336,16 @@ Consulta de Pedidos
         <div class="fila-campos">
             <div class="campo-detalle">
                 <label>Localidad origen:</label>
-                <div class="texto-info" id="detalle-localidad-origen"></div>
+                <select id="detalle-localidad-origen" class="form-control">
+                    <option value="">Cargando...</option>
+                </select>
             </div>
             
             <div class="campo-detalle">
                 <label>Localidad destino:</label>
-                <div class="texto-info" id="detalle-localidad-destino"></div>
+                <select id="detalle-localidad-destino" class="form-control">
+                    <option value="">Cargando...</option>
+                </select>
             </div>
         </div>
 

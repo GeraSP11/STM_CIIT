@@ -345,11 +345,13 @@ class PedidosModel
             $conn = self::getConnection();
 
             $query = "UPDATE pedidos 
-                     SET estatus_pedido = :estatus_pedido,
-                         fecha_solicitud = :fecha_solicitud,
-                         fecha_entrega = :fecha_entrega,
-                         observaciones = :observaciones
-                     WHERE id_pedido = :id_pedido";
+                    SET estatus_pedido    = :estatus_pedido,
+                        fecha_solicitud   = :fecha_solicitud,
+                        fecha_entrega     = :fecha_entrega,
+                        observaciones     = :observaciones,
+                        localidad_origen  = :localidad_origen,
+                        localidad_destino = :localidad_destino
+                    WHERE id_pedido = :id_pedido";
 
             $stmt = $conn->prepare($query);
 
@@ -368,6 +370,18 @@ class PedidosModel
                 $stmt->bindParam(':observaciones', $datos['observaciones'], PDO::PARAM_STR);
             } else {
                 $stmt->bindValue(':observaciones', null, PDO::PARAM_NULL);
+            }
+
+            if ($datos['localidad_origen']) {
+                $stmt->bindParam(':localidad_origen',  $datos['localidad_origen'],  PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue(':localidad_origen',  null, PDO::PARAM_NULL);
+            }
+
+            if ($datos['localidad_destino']) {
+                $stmt->bindParam(':localidad_destino', $datos['localidad_destino'], PDO::PARAM_INT);
+            } else {
+                $stmt->bindValue(':localidad_destino', null, PDO::PARAM_NULL);
             }
 
             return $stmt->execute();
