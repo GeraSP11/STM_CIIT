@@ -29,17 +29,17 @@ function inicializarEventos() {
         });
     }
 
-    // Formulario de búsqueda
-    document.getElementById('form-busqueda').addEventListener('submit', buscarPedidos);
+const formBusqueda = document.getElementById('form-busqueda');
+if (formBusqueda) formBusqueda.addEventListener('submit', buscarPedidos);
 
-    // Botón actualizar
-    document.getElementById('btn-actualizar').addEventListener('click', irAActualizar);
+const btnActualizar = document.getElementById('btn-actualizar');
+if (btnActualizar) btnActualizar.addEventListener('click', irAActualizar);
 
-    // Botón guardar
-    document.getElementById('btn-guardar').addEventListener('click', guardarCambios);
+const btnGuardar = document.getElementById('btn-guardar');
+if (btnGuardar) btnGuardar.addEventListener('click', guardarCambios);
 
-    // Navegación breadcrumb
-    document.getElementById('breadcrumb-nav').addEventListener('click', manejarNavegacion);
+const breadcrumb = document.getElementById('breadcrumb-nav');
+if (breadcrumb) breadcrumb.addEventListener('click', manejarNavegacion);
 }
 
 // Iniciar la dinamica de vistas entre registro de pedido y lista de productos
@@ -844,16 +844,14 @@ function irAActualizar() {
         });
 }
 
-// Mostrar vista actualizar
+
 function mostrarVistaActualizar(pedido) {
-    // Ocultar vista de resultados y mostrar vista de actualización
     document.getElementById('vista-resultados').style.display = 'none';
     document.getElementById('vista-actualizar').style.display = 'block';
 
-    // Actualizar breadcrumb
     actualizarBreadcrumb('actualizar');
 
-    // Llenar campos
+    // Llenar campos del pedido (igual que antes)
     document.getElementById('detalle-id').textContent = pedido.id_pedido;
     document.getElementById('detalle-clave').textContent = pedido.clave_pedido;
     document.getElementById('detalle-estatus').value = pedido.estatus_pedido;
@@ -862,10 +860,79 @@ function mostrarVistaActualizar(pedido) {
     document.getElementById('detalle-localidad-origen').textContent = pedido.localidad_origen_nombre;
     document.getElementById('detalle-localidad-destino').textContent = pedido.localidad_destino_nombre;
     document.getElementById('detalle-observaciones').value = pedido.observaciones || '';
+
+    // NUEVO: Cargar productos del pedido
+    cargarProductosPedido(pedido.id_pedido);
 }
 
-// Guardar cambios
-// Guardar cambios
+function cargarProductosPedido(idPedido) {
+    const tbody = document.getElementById('tbody-productos-actualizar');
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>';
+
+    const formData = new FormData();
+    formData.append('accion', 'detalle-pedido');
+    formData.append('idPedido', idPedido);
+
+    fetch('/ajax/pedidos-ajax.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success || !data.detalles || data.detalles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Sin productos registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.detalles.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.dataset.idDetalle = d.id_pedido_detalles;
+                tr.innerHTML = `
+                    <td>${d.producto}</td>
+                    <td>
+                        <input type="number" class="form-control input-cantidad-actualizar"
+                               min="1" max="${d.unidad}"
+                               value="${d.cantidad}"
+                               data-max="${d.unidad}">
+                    </td>
+                    <td>${d.unidad}</td>
+                    <td>
+                        <input type="text" class="form-control input-obs-actualizar"
+                               value="${d.observaciones || ''}"
+                               placeholder="Observaciones">
+                    </td>
+                    <td class="text-center">
+                        <i class="fas fa-trash text-danger"
+                           style="cursor:pointer"
+                           onclick="eliminarDetalleProducto(this, ${d.id_pedido_detalles})">
+                        </i>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(() => {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Error al cargar productos</td></tr>';
+        });
+}
+
+function eliminarDetalleProducto(icono, idDetalle) {
+    const formData = new FormData();
+    formData.append('accion', 'eliminar-detalle');
+    formData.append('id_detalle', idDetalle);
+
+    fetch('/ajax/pedidos-ajax.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Quitar la fila visualmente
+                icono.closest('tr').remove();
+            } else {
+                alerta("Error", data.message || "No se pudo eliminar el producto.", "error");
+            }
+        })
+        .catch(() => alerta("Error", "Error de conexión al eliminar.", "error"));
+}
+
+
 function guardarCambios() {
     const idPedido = document.getElementById('detalle-id')?.textContent.trim();
     const estatus = document.getElementById('detalle-estatus')?.value;
@@ -903,17 +970,17 @@ function guardarCambios() {
         return;
     }
 
-    if (!observaciones) {
-        alerta(
-            "Error",
-            "Debes agregar una observación para actualizar el pedido.",
-            "warning"
-        );
-        return;
-    }
 
+// Recolectar detalles de la tabla
+    const detalles = [];
+    document.querySelectorAll('#tbody-productos-actualizar tr[data-id-detalle]').forEach(tr => {
+        detalles.push({
+            id_detalle: tr.dataset.idDetalle,
+            cantidad:   tr.querySelector('.input-cantidad-actualizar')?.value || 1,
+            observaciones: tr.querySelector('.input-obs-actualizar')?.value || ''
+        });
+    });
 
-    // 📦 FormData
     const formData = new FormData();
     formData.append('accion', 'actualizar');
     formData.append('id_pedido', idPedido);
@@ -924,40 +991,37 @@ function guardarCambios() {
 
     mostrarLoading(true);
 
-    fetch('/ajax/pedidos-ajax.php', {
-        method: 'POST',
-        body: formData
-    })
-        .then(res => res.json())
-        .then(data => {
-            mostrarLoading(false);
+    // Primero actualizar detalles si hay, luego el pedido
+    const promesaDetalles = detalles.length > 0
+        ? fetch('/ajax/pedidos-ajax.php', {
+            method: 'POST',
+            body: (() => {
+                const fd = new FormData();
+                fd.append('accion', 'actualizar-detalles');
+                fd.append('detalles', JSON.stringify(detalles));
+                return fd;
+            })()
+          }).then(r => r.json())
+        : Promise.resolve({ success: true });
 
-            if (data.success) {
-                // 🟢 Alerta de éxito con SweetAlert
-                alerta(
-                    "Éxito",
-                    `Pedido ${idPedido} actualizado correctamente.`,
-                    "success"
-                ).then(() => {
-                    volverAInicio();
-                });
-            } else {
-                alerta(
-                    "Error",
-                    data.message || "No se pudo actualizar el pedido.",
-                    "error"
-                );
-            }
-        })
-        .catch(error => {
-            mostrarLoading(false);
-            console.error('Error:', error);
-            alerta(
-                "Error",
-                "Error de conexión al actualizar el pedido.",
-                "error"
-            );
-        });
+    promesaDetalles.then(() => {
+        fetch('/ajax/pedidos-ajax.php', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                mostrarLoading(false);
+                if (data.success) {
+                    alerta("Éxito", `Pedido ${idPedido} actualizado correctamente.`, "success")
+                        .then(() => volverAInicio());
+                } else {
+                    alerta("Error", data.message || "No se pudo actualizar el pedido.", "error");
+                }
+            })
+            .catch(error => {
+                mostrarLoading(false);
+                console.error('Error:', error);
+                alerta("Error", "Error de conexión al actualizar el pedido.", "error");
+            });
+    });
 }
 
 

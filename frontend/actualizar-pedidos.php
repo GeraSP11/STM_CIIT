@@ -344,12 +344,32 @@ Consulta de Pedidos
                 <div class="texto-info" id="detalle-localidad-destino"></div>
             </div>
         </div>
-        
+
+        <!-- Observaciones -->
         <div class="campo-detalle">
             <label>Observaciones:</label>
             <textarea id="detalle-observaciones" class="form-control" placeholder="Agregar observaciones"></textarea>
         </div>
+        
+<!-- Productos del pedido -->
+<div class="campo-detalle" style="margin-top: 10px;">
+    <label>Productos del pedido:</label>
+    <div id="contenedor-productos-actualizar">
+        <table class="table table-bordered mt-2" id="tabla-productos-actualizar">
+            <thead style="background-color:#4d2132; color:white;">
+                <tr>
+                    <th>Producto</th>
+                    <th style="width:130px;">Cantidad</th>
+                    <th>Disponibilidad</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-productos-actualizar">
+                <tr><td colspan="4" class="text-center text-muted">Cargando productos...</td></tr>
+            </tbody>
+        </table>
     </div>
+</div>
     
     <button type="button" class="btn-guardar" id="btn-guardar">Guardar cambios</button>
 </div>

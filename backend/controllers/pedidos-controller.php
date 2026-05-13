@@ -268,4 +268,22 @@ class PedidosController
 
         echo json_encode($resultado);
     }
+
+    public function actualizarDetallesPedido($detalles)
+    {
+        try {
+            return PedidosModel::actualizarDetallesPedido($detalles);
+        } catch (Exception $e) {
+            throw new Exception("Error al actualizar detalles: " . $e->getMessage());
+        }
+    }
+
+    public function eliminarDetallePedido($idDetalle)
+    {
+        try {
+            return PedidosModel::eliminarDetallePedido($idDetalle);
+        } catch (Exception $e) {
+            throw new Exception("Error al eliminar detalle: " . $e->getMessage());
+        }
+    }
 }

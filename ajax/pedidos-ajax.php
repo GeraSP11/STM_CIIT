@@ -81,6 +81,13 @@ try {
         case 'actualizar':
             actualizarPedido($controller);
             break;
+        case 'actualizar-detalles':
+            actualizarDetallesPedido($controller);
+            break;
+
+        case 'eliminar-detalle':
+            eliminarDetallePedido($controller);
+            break;
         case 'consultar-pedidos':
             $controller->consultarPedido($_POST);
             break;
@@ -262,6 +269,62 @@ function actualizarPedido($controller)
         echo json_encode([
             'success' => false,
             'message' => 'Error al actualizar pedido: ' . $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+function actualizarDetallesPedido($controller)
+{
+    try {
+        $detalles = json_decode($_POST['detalles'] ?? '[]', true);
+
+        if (empty($detalles)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'No hay detalles para actualizar'
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $resultado = $controller->actualizarDetallesPedido($detalles);
+
+        echo json_encode([
+            'success' => $resultado,
+            'message' => $resultado ? 'Detalles actualizados' : 'Error al actualizar detalles'
+        ], JSON_UNESCAPED_UNICODE);
+
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+function eliminarDetallePedido($controller)
+{
+    try {
+        $idDetalle = isset($_POST['id_detalle']) ? intval($_POST['id_detalle']) : 0;
+
+        if ($idDetalle <= 0) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID de detalle inválido'
+            ], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $resultado = $controller->eliminarDetallePedido($idDetalle);
+
+        echo json_encode([
+            'success' => $resultado,
+            'message' => $resultado ? 'Producto eliminado del pedido' : 'Error al eliminar'
+        ], JSON_UNESCAPED_UNICODE);
+
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
         ], JSON_UNESCAPED_UNICODE);
     }
 }

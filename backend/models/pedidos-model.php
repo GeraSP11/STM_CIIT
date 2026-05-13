@@ -545,4 +545,38 @@ class PedidosModel
         }
     }
 
+    public static function actualizarDetallesPedido($detalles)
+    {
+        $conn = self::getConnection();
+
+        $stmt = $conn->prepare("
+            UPDATE pedidos_detalles
+            SET cantidad_producto = :cantidad,
+                observaciones = :observaciones
+            WHERE id_pedido_detalles = :id
+        ");
+
+        foreach ($detalles as $d) {
+            $stmt->execute([
+                ':cantidad'      => intval($d['cantidad']),
+                ':observaciones' => $d['observaciones'] ?: null,
+                ':id'            => intval($d['id_detalle'])
+            ]);
+        }
+
+        return true;
+    }
+
+    public static function eliminarDetallePedido($idDetalle)
+    {
+        $conn = self::getConnection();
+
+        $stmt = $conn->prepare("
+            DELETE FROM pedidos_detalles
+            WHERE id_pedido_detalles = :id
+        ");
+
+        return $stmt->execute([':id' => $idDetalle]);
+    }
+
 }
