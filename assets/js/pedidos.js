@@ -931,6 +931,15 @@ function llenarSelectLocalidadActualizar(selectId, valorSeleccionado) {
 }
 
 function eliminarDetalleProducto(icono, idDetalle) {
+
+    const tbody = document.getElementById('tbody-productos-actualizar');
+    const filasActuales = tbody.querySelectorAll('tr[data-id-detalle]');
+
+    if (filasActuales.length <= 1) {
+        alerta("Aviso", "El pedido debe tener al menos un producto. No es posible eliminarlo.", "warning");
+        return;
+    }
+
     const formData = new FormData();
     formData.append('accion', 'eliminar-detalle');
     formData.append('id_detalle', idDetalle);
