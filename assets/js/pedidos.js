@@ -965,46 +965,60 @@ function guardarCambios() {
     const fechaEntrega = document.getElementById('detalle-fecha-entrega')?.value;
     const observaciones = document.getElementById('detalle-observaciones')?.value.trim();
 
-    // 🔴 Validaciones
     if (!idPedido) {
         alerta("Error", "No se pudo identificar el pedido.", "error");
         return;
     }
-
     if (!estatus) {
         alerta("Error", "Debes seleccionar un estatus.", "warning");
         return;
     }
-
     if (!fechaSolicitud) {
         alerta("Error", "La fecha de solicitud es obligatoria.", "warning");
         return;
     }
-
     if (!fechaEntrega) {
         alerta("Error", "La fecha de entrega es obligatoria.", "warning");
         return;
     }
-
-    if (fechaEntrega && fechaEntrega < fechaSolicitud) {
-        alerta(
-            "Error",
-            "La fecha de entrega no puede ser menor a la fecha de solicitud.",
-            "warning"
-        );
+    if (fechaEntrega < fechaSolicitud) {
+        alerta("Error", "La fecha de entrega no puede ser menor a la fecha de solicitud.", "warning");
         return;
     }
 
+    // Validar cantidades
+    let cantidadInvalida = false;
+    [...document.querySelectorAll('#tbody-productos-actualizar tr')]
+        .filter(tr => tr.dataset.idDetalle)
+        .forEach(tr => {
+            const input = tr.querySelector('.input-cantidad-actualizar');
+            const max = parseInt(input.dataset.max);
+            const valor = parseInt(input.value);
 
-// Recolectar detalles de la tabla
-    const detalles = [];
-    document.querySelectorAll('#tbody-productos-actualizar tr[data-id-detalle]').forEach(tr => {
-        detalles.push({
-            id_detalle: tr.dataset.idDetalle,
-            cantidad:   tr.querySelector('.input-cantidad-actualizar')?.value || 1,
-            observaciones: tr.querySelector('.input-obs-actualizar')?.value || ''
+            if (valor > max || valor < 1 || isNaN(valor)) {
+                cantidadInvalida = true;
+                input.style.border = '2px solid red';
+            } else {
+                input.style.border = '';
+            }
         });
-    });
+
+    if (cantidadInvalida) {
+        alerta("Error", "Una o más cantidades superan la existencia disponible o son inválidas.", "warning");
+        return;
+    }
+
+    // Recolectar detalles
+    const detalles = [];
+    [...document.querySelectorAll('#tbody-productos-actualizar tr')]
+        .filter(tr => tr.dataset.idDetalle)
+        .forEach(tr => {
+            detalles.push({
+                id_detalle:    tr.dataset.idDetalle,
+                cantidad:      tr.querySelector('.input-cantidad-actualizar')?.value || 1,
+                observaciones: tr.querySelector('.input-obs-actualizar')?.value || ''
+            });
+        });
 
     const formData = new FormData();
     formData.append('accion', 'actualizar');
@@ -1018,7 +1032,6 @@ function guardarCambios() {
 
     mostrarLoading(true);
 
-    // Primero actualizar detalles si hay, luego el pedido
     const promesaDetalles = detalles.length > 0
         ? fetch('/ajax/pedidos-ajax.php', {
             method: 'POST',
@@ -1031,7 +1044,17 @@ function guardarCambios() {
           }).then(r => r.json())
         : Promise.resolve({ success: true });
 
-    promesaDetalles.then(() => {
+    console.log('detalles a enviar:', detalles);
+    console.log('cantidad detalles:', detalles.length);
+
+    promesaDetalles.then(resDetalles => {
+        console.log('respuesta detalles:', resDetalles);
+        if (!resDetalles.success) {
+            mostrarLoading(false);
+            alerta("Error", resDetalles.message || "Error al actualizar productos.", "error");
+            return;
+        }
+
         fetch('/ajax/pedidos-ajax.php', { method: 'POST', body: formData })
             .then(res => res.json())
             .then(data => {
@@ -1680,3 +1703,18 @@ function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
         alerta("Error", respuesta, "error");
     }
 }
+
+document.addEventListener('input', function (e) {
+    if (!e.target.classList.contains('input-cantidad-actualizar')) return;
+
+    const max = parseInt(e.target.dataset.max);
+    const min = 1;
+    let valor = parseInt(e.target.value);
+
+    if (isNaN(valor) || valor < min) {
+        e.target.value = min;
+    } else if (valor > max) {
+        e.target.value = max;
+        alerta("Aviso", `La cantidad no puede superar la existencia disponible (${max}).`, "warning");
+    }
+});
