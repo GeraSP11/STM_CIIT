@@ -68,6 +68,7 @@ $seccion = 'Actualizar Rutas';
             border-radius: 4px 0 0 4px;
             min-width: 180px;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .buscador-rutas .input-group {
@@ -105,29 +106,33 @@ $seccion = 'Actualizar Rutas';
         }
 
         /* CHECKBOX ESTILO SISTEMA */
-        .tabla-rutas input[type="radio"] {
+        .tabla-rutas input[type="checkbox"] {
             appearance: none;
             width: 16px;
             height: 16px;
             border: 2px solid var(--vino);
-            border-radius: 50%;
+            border-radius: 3px;
             cursor: pointer;
             position: relative;
+            display: block;
+            margin: auto;
         }
 
-        .tabla-rutas input[type="radio"]:checked::before {
-            content: "";
-            width: 8px;
-            height: 8px;
+        .tabla-rutas input[type="checkbox"]:checked {
             background: var(--vino);
-            border-radius: 50%;
+        }
+
+        .tabla-rutas input[type="checkbox"]:checked::before {
+            content: "✓";
+            color: white;
+            font-size: 11px;
             position: absolute;
-            top: 2px;
+            top: -1px;
             left: 2px;
         }
 
         .fila-seleccionada {
-            background-color: #f5eef2;
+            background-color: #f5eef2 !important;
         }
 
         /* BOTONES */
@@ -166,7 +171,7 @@ $seccion = 'Actualizar Rutas';
 
 <body>
 
-     <!-- Header dinámico -->
+    <!-- Header dinámico -->
     <?php include('includes/header-dinamico.php'); ?>
 
     <!-- Breadcrumb -->
@@ -180,15 +185,17 @@ $seccion = 'Actualizar Rutas';
             </li>
         </ol>
     </nav>
+
     <!-- TITULO -->
-    <h2 class="page-title">
-        Actualización de Rutas
-    </h2>
+    <h2 class="page-title">Actualización de Rutas</h2>
 
     <!-- CONTENIDO -->
     <div class="container-fluid pb-5">
 
-        <div class="card card-custom">
+        <!-- ==============================
+             SECCIÓN 1: BÚSQUEDA
+        =============================== -->
+        <div class="card card-custom" id="seccion-busqueda-actualizar">
 
             <div class="card-header-custom">
                 Actualización de rutas
@@ -199,109 +206,163 @@ $seccion = 'Actualizar Rutas';
                 <!-- BUSCADOR -->
                 <div class="buscador-rutas">
 
-                    <label>
+                    <label for="input-id-ruta-actualizar">
                         Filtro de búsqueda
                     </label>
 
                     <div class="input-group">
-
                         <input
                             type="text"
+                            id="input-id-ruta-actualizar"
                             class="form-control"
                             placeholder="Ingrese ID de ruta">
-
+                        <button
+                            class="btn btn-vino"
+                            id="btn-filtro-actualizar"
+                            type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
 
                 </div>
 
                 <!-- RESULTADOS -->
-                <h6 class="mb-3 fw-bold">
-                    Resultados obtenidos:
-                </h6>
+                <h6 class="mb-3 fw-bold">Resultados obtenidos:</h6>
 
-                <div class="tabla-rutas">
-
+                <div class="tabla-rutas" id="tabla-resultados-actualizar">
                     <div class="tabla-scroll">
-
                         <table class="table table-bordered mb-0">
-
                             <thead>
                                 <tr>
                                     <th width="60"></th>
                                     <th>ID Ruta</th>
-                                    <th>Descripción</th>
+                                    <th>Modalidad</th>
                                 </tr>
                             </thead>
-
                             <tbody>
-
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="radio" name="ruta">
-                                    </td>
-                                    <td>1001</td>
-                                    <td>Ruta 1</td>
-                                </tr>
-
-                                <tr class="fila-seleccionada">
-                                    <td class="text-center">
-                                        <input type="radio" name="ruta" checked>
-                                    </td>
-                                    <td>1002</td>
-                                    <td>Ruta 2</td>
-                                </tr>
-
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="radio" name="ruta">
-                                    </td>
-                                    <td>1003</td>
-                                    <td>Ruta 3</td>
-                                </tr>
-
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="radio" name="ruta">
-                                    </td>
-                                    <td>1004</td>
-                                    <td>Ruta 4</td>
-                                </tr>
-
-                                <tr>
-                                    <td class="text-center">
-                                        <input type="radio" name="ruta">
-                                    </td>
-                                    <td>1005</td>
-                                    <td>Ruta 5</td>
-                                </tr>
-
+                                <!-- JS renderiza aquí -->
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
 
                 <!-- BOTONES -->
                 <div class="acciones">
-
-                    <button class="btn btn-gris">
+                    <button class="btn btn-gris" id="btn-cancelar-busqueda" type="button">
                         Cancelar
                     </button>
-
-                    <button class="btn btn-vino">
+                    <button class="btn btn-vino" id="btn-actualizar" type="button">
                         Actualizar
                     </button>
-
                 </div>
 
             </div>
+        </div>
 
+        <!-- ==============================
+             SECCIÓN 2: FORMULARIO EDICIÓN
+        =============================== -->
+        <div class="card card-custom mt-4 d-none" id="seccion-form-actualizar">
+
+            <div class="card-header-custom">
+                Actualización de Rutas
+            </div>
+
+            <div class="card-body">
+
+                <form id="form-actualizar-ruta">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Identificador de ruta</label>
+                            <input
+                                type="text"
+                                id="act-id-ruta"
+                                name="id_ruta"
+                                class="form-control"
+                                readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Localidad origen</label>
+                            <select id="act-localidad-origen" name="localidad_origen" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <!-- Opciones dinámicas o estáticas según catálogo -->
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Localidad destino</label>
+                            <select id="act-localidad-destino" name="localidad_destino" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <!-- Opciones dinámicas o estáticas según catálogo -->
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Modalidad</label>
+                            <select id="act-modalidad" name="modalidad" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="Carretera">Carretera</option>
+                                <option value="Ferroviaria">Ferroviaria</option>
+                                <option value="Marítima">Marítima</option>
+                                <option value="Aérea">Aérea</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Distancia</label>
+                            <div class="input-group">
+                                <input
+                                    type="number"
+                                    id="act-distancia"
+                                    name="distancia"
+                                    class="form-control"
+                                    placeholder="0"
+                                    min="0">
+                                <span class="input-group-text">km</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Peso soportado</label>
+                            <input
+                                type="number"
+                                id="act-peso-soportado"
+                                name="peso_soportado"
+                                class="form-control"
+                                placeholder="0"
+                                min="0">
+                        </div>
+
+                    </div>
+
+                    <!-- BOTONES -->
+                    <div class="acciones mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-gris"
+                            id="btn-cancelar-form-actualizar">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-vino">
+                            Guardar
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
         </div>
 
     </div>
 
+    <link rel="stylesheet" href="/assets/libs/swal/sweetalert2.min.css">
+    <script src="/assets/libs/swal/sweetalert2.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/rutas.js"></script>
+    <script src="/assets/js/alertas.js"></script>
 </body>
 
 </html>
