@@ -1,6 +1,6 @@
 // =====================================================
 //  CRUD DE Rutas
-//  Secciones: 
+//  Secciones:
 //      1. Registrar
 //      2. Consultar
 //      3. Actualizar
@@ -10,60 +10,191 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     // ---- 1. Registrar ----
-    
 
     // ---- 2. Consultar ----
-    
+    consultarRutas();
 
     // ---- 3. Actualizar ----
     actualizarRutas();
 
     // ---- 4. Eliminar ----
-    
 });
 
 
+// =====================================================
+// FUNCIONALIDAD CONSULTAR RUTA
+// =====================================================
+function consultarRutas() {
 
+    // Verificar que estamos en la página de consulta
+    const selOrigen  = document.getElementById("sel-origen");
+    const selDestino = document.getElementById("sel-destino");
+    if (!selOrigen || !selDestino) return;
 
+    // --- 2.1 Cargar localidades en ambos selects ---
+    apiRequest("obtener_localidades")
+        .then(res => res.json())
+        .then(localidades => {
+            if (!Array.isArray(localidades)) {
+                alerta("Error", "No se pudieron cargar las localidades.", "error");
+                return;
+            }
+            localidades.forEach(loc => {
+                const texto = loc.nombre_centro_trabajo
+                    ? `${loc.nombre_centro_trabajo} — ${loc.localidad}, ${loc.estado}`
+                    : `${loc.localidad}, ${loc.estado}`;
 
+                const optOrigen  = new Option(texto, loc.id_localidad);
+                const optDestino = new Option(texto, loc.id_localidad);
+                selOrigen.appendChild(optOrigen);
+                selDestino.appendChild(optDestino);
+            });
+        })
+        .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
 
+    // --- 2.2 Botón Consultar ---
+    const btnConsultar = document.getElementById("btn-consultar");
 
+    if (btnConsultar) {
+        btnConsultar.addEventListener("click", function () {
+            const idOrigen  = selOrigen.value;
+            const idDestino = selDestino.value;
 
+            if (!idOrigen && !idDestino) {
+                alerta("Advertencia", "Seleccione al menos una localidad para filtrar.", "warning");
+                return;
+            }
 
+            apiRequest("buscar_rutas_consulta", {
+                id_origen:  idOrigen,
+                id_destino: idDestino
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alerta("Error", data.error, "error");
+                        return;
+                    }
+                    renderizarResultadosConsulta(data);
+                    mostrarSeccion("seccion-resultados");
+                })
+                .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
+        });
+    }
 
+    // --- 2.3 Botón Ver detalle ---
+    const btnVerDetalle = document.getElementById("btn-ver-detalle");
 
+    if (btnVerDetalle) {
+        btnVerDetalle.addEventListener("click", function () {
+            const seleccionado = document.querySelector(".radio-ruta-consulta:checked");
 
+            if (!seleccionado) {
+                alerta("Advertencia", "Debe seleccionar una ruta para ver el detalle.", "warning");
+                return;
+            }
 
+            apiRequest("obtener_ruta_detalle", { id_ruta: seleccionado.value })
+                .then(res => res.json())
+                .then(ruta => {
+                    if (ruta.error) {
+                        alerta("Error", ruta.error, "error");
+                        return;
+                    }
+                    precargarDetalleConsulta(ruta);
+                    mostrarSeccion("seccion-detalle");
+                })
+                .catch(() => alerta("Error", "No se pudieron cargar los datos de la ruta.", "error"));
+        });
+    }
 
+    // --- 2.4 Regresar a filtros ---
+    const btnRegresarFiltros = document.getElementById("btn-regresar-filtros");
 
+    if (btnRegresarFiltros) {
+        btnRegresarFiltros.addEventListener("click", function () {
+            mostrarSeccion("seccion-filtros");
+        });
+    }
 
+    // --- 2.5 Regresar a resultados ---
+    const btnRegresarResultados = document.getElementById("btn-regresar-resultados");
 
+    if (btnRegresarResultados) {
+        btnRegresarResultados.addEventListener("click", function () {
+            mostrarSeccion("seccion-resultados");
+        });
+    }
+}
 
+// --- Renderizar tabla de resultados ---
+function renderizarResultadosConsulta(rutas) {
+    const tbody = document.getElementById("tbody-resultados");
+    if (!tbody) return;
 
+    tbody.innerHTML = "";
 
+    if (!rutas || rutas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">
+                    No se encontraron rutas con los filtros seleccionados.
+                </td>
+            </tr>`;
+        return;
+    }
 
+    rutas.forEach(ruta => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="text-center">
+                <input type="radio" name="ruta-consulta" class="radio-ruta-consulta" value="${ruta.id_ruta}">
+            </td>
+            <td>${ruta.id_ruta}</td>
+            <td>${ruta.nombre_origen ?? "—"}</td>
+            <td>${ruta.nombre_destino ?? "—"}</td>
+            <td>${ruta.modalidad_ruta ?? "—"}</td>
+            <td>${ruta.tipo_ruta ?? "—"}</td>
+            <td>${ruta.distancia != null ? ruta.distancia : "—"}</td>
+        `;
 
+        // Seleccionar fila al hacer clic en cualquier parte
+        tr.addEventListener("click", function () {
+            document.querySelectorAll("#tbody-resultados tr").forEach(r => r.classList.remove("tr-seleccionada"));
+            tr.classList.add("tr-seleccionada");
+            tr.querySelector(".radio-ruta-consulta").checked = true;
+        });
 
+        tbody.appendChild(tr);
+    });
+}
 
+// --- Precargar campos de detalle ---
+function precargarDetalleConsulta(ruta) {
+    document.getElementById("det-id-ruta").value    = ruta.id_ruta          ?? "—";
+    document.getElementById("det-origen").value     = ruta.nombre_origen    ?? "—";
+    document.getElementById("det-destino").value    = ruta.nombre_destino   ?? "—";
+    document.getElementById("det-modalidad").value  = ruta.modalidad_ruta   ?? "—";
+    document.getElementById("det-tipo").value       = ruta.tipo_ruta        ?? "—";
+    document.getElementById("det-distancia").value  = ruta.distancia        ?? "—";
+    document.getElementById("det-peso").value       = ruta.peso_soportado   ?? "—";
+    document.getElementById("det-descripcion").value = ruta.descripcion     ?? "";
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// --- Mostrar sección y ocultar las demás ---
+function mostrarSeccion(idSeccion) {
+    const secciones = ["seccion-filtros", "seccion-resultados", "seccion-detalle"];
+    secciones.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === idSeccion) {
+            el.classList.remove("hidden");
+        } else {
+            el.classList.add("hidden");
+        }
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 
 // =====================================================
@@ -71,10 +202,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // =====================================================
 function actualizarRutas() {
 
-    // --- 3.1 Filtro de búsqueda ---
     const btnFiltroActualizar       = document.getElementById("btn-filtro-actualizar");
     const inputIdRutaActualizar     = document.getElementById("input-id-ruta-actualizar");
-    const tablaResultadosActualizar = document.getElementById("tabla-resultados-actualizar");
 
     if (btnFiltroActualizar) {
         btnFiltroActualizar.addEventListener("click", function () {
@@ -87,7 +216,6 @@ function actualizarRutas() {
         });
     }
 
-    // --- 3.2 Botón Actualizar (abre formulario con datos precargados) ---
     const btnActualizar = document.getElementById("btn-actualizar");
 
     if (btnActualizar) {
@@ -109,7 +237,6 @@ function actualizarRutas() {
         });
     }
 
-    // --- 3.3 Guardar cambios ---
     const formActualizar = document.getElementById("form-actualizar-ruta");
 
     if (formActualizar) {
@@ -131,7 +258,6 @@ function actualizarRutas() {
         });
     }
 
-    // --- 3.4 Botón Cancelar del formulario ---
     const btnCancelarFormActualizar = document.getElementById("btn-cancelar-form-actualizar");
 
     if (btnCancelarFormActualizar) {
@@ -141,8 +267,6 @@ function actualizarRutas() {
     }
 }
 
-
-// --- Renderizar resultados de búsqueda ---
 function renderizarResultadosActualizar(rutas) {
     const tablaResultadosActualizar = document.getElementById("tabla-resultados-actualizar");
     const tbody = tablaResultadosActualizar?.querySelector("tbody");
@@ -165,7 +289,6 @@ function renderizarResultadosActualizar(rutas) {
         tbody.appendChild(tr);
     });
 
-    // Solo una selección a la vez
     tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(cb => {
         cb.addEventListener("change", function () {
             tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(other => {
@@ -175,7 +298,6 @@ function renderizarResultadosActualizar(rutas) {
     });
 }
 
-// --- Precargar formulario ---
 function precargarFormularioActualizar(ruta) {
     document.getElementById("act-id-ruta").value            = ruta.id_ruta           ?? "";
     document.getElementById("act-localidad-origen").value   = ruta.localidad_origen  ?? "";
@@ -185,7 +307,6 @@ function precargarFormularioActualizar(ruta) {
     document.getElementById("act-peso-soportado").value     = ruta.peso_soportado    ?? "";
 }
 
-// --- Validación del formulario ---
 function validarFormularioActualizar() {
     const idRuta           = document.getElementById("act-id-ruta").value.trim();
     const localidadOrigen  = document.getElementById("act-localidad-origen").value.trim();
@@ -223,20 +344,11 @@ function validarFormularioActualizar() {
 }
 
 
-
-
-
-
-
 /* =====================================================
    5. FUNCIONES REUTILIZABLES
    ===================================================== */
 
-/**
- * Envía una petición POST al backend con una acción y datos.
- */
 function apiRequest(accion, datos = null) {
-
     const formData = datos instanceof HTMLFormElement
         ? new FormData(datos)
         : new FormData();
@@ -255,18 +367,22 @@ function apiRequest(accion, datos = null) {
     });
 }
 
-/**
- * Maneja respuestas del backend para cualquier operación del CRUD.
- */
 function manejarRespuestaCRUD(respuesta, mensajeExito, redireccion = null) {
-
     if (respuesta.trim() === "OK") {
         alerta("Éxito", mensajeExito, "success")
             .then(() => {
                 if (redireccion) window.location.href = redireccion;
             });
-
     } else {
         alerta("Error", respuesta, "error");
     }
+}
+
+function alerta(titulo, mensaje, tipo) {
+    return Swal.fire({
+        title: titulo,
+        text: mensaje,
+        icon: tipo,
+        confirmButtonColor: "#5a1e2d"
+    });
 }

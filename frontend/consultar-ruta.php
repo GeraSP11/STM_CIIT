@@ -25,10 +25,8 @@ $seccion = 'Consultar Rutas';
             margin-bottom: 30px;
         }
 
-
-        /* Tarjetas */
         .card-container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             background: #f7f7f7;
             padding: 30px;
@@ -36,10 +34,18 @@ $seccion = 'Consultar Rutas';
         }
 
         .ruta-card {
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             background: #f7f7f7;
             padding: 40px;
+            border-radius: 6px;
+        }
+
+        .tabla-card {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #f7f7f7;
+            padding: 30px;
             border-radius: 6px;
         }
 
@@ -57,7 +63,7 @@ $seccion = 'Consultar Rutas';
             height: 42px;
         }
 
-        .readonly {
+        .readonly-field {
             background-color: #e5e5e5;
         }
 
@@ -71,35 +77,37 @@ $seccion = 'Consultar Rutas';
 
         .btn-maroon:hover {
             background-color: #471624;
-        }
-
-        .or-divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .or-divider::before,
-        .or-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #aaa;
-        }
-
-        .or-divider span {
-            padding: 0 10px;
-            font-weight: bold;
+            color: #fff;
         }
 
         .hidden {
             display: none;
         }
+
+        .table thead {
+            background-color: #5a1e2d;
+            color: #fff;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f0e6e9;
+            cursor: pointer;
+        }
+
+        .tr-seleccionada {
+            background-color: #e0c8ce !important;
+        }
+
+        .label-campo {
+            font-weight: 600;
+            color: #4a1026;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Header dinámico -->
     <?php include('includes/header-dinamico.php'); ?>
 
     <!-- Breadcrumb -->
@@ -108,110 +116,131 @@ $seccion = 'Consultar Rutas';
             <li class="breadcrumb-item">
                 <a href="/dashboard.php"><i class="fas fa-home" style="color: #4D2132;"></i></a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                <?php echo $seccion; ?>
-            </li>
+            <li class="breadcrumb-item active" aria-current="page"><?php echo $seccion; ?></li>
         </ol>
     </nav>
 
-    <!-- Título de sección -->
     <h2><?php echo $seccion; ?></h2>
 
-    <!-- ================= FILTROS ================= -->
-    <div id="filtros" class="card-container">
+    <!-- ===================== SECCIÓN 1: FILTROS ===================== -->
+    <div id="seccion-filtros" class="card-container">
 
-        <span class="badge-filter">Filtro de búsqueda: *</span>
-
-        <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Identificador de Ruta">
-        </div>
-
-        <div class="or-divider">
-            <span>o</span>
-        </div>
+        <span class="badge-filter">Filtro de búsqueda</span>
 
         <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Localidad Origen">
+            <label class="label-campo">Localidad Origen</label>
+            <select id="sel-origen" class="form-select">
+                <option value="">-- Seleccionar --</option>
+            </select>
         </div>
 
         <div class="mb-4">
-            <input type="text" class="form-control" placeholder="Localidad Destino">
+            <label class="label-campo">Localidad Destino</label>
+            <select id="sel-destino" class="form-select">
+                <option value="">-- Seleccionar --</option>
+            </select>
         </div>
 
         <div class="text-center">
-            <button class="btn btn-maroon" onclick="mostrarDetalle()">Consultar</button>
-        </div>
-
-    </div>
-
-    <!-- ================= DETALLE ================= -->
-    <div id="detalle" class="ruta-card hidden">
-
-        <form>
-
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <label>Identificador de ruta:</label>
-                    <input type="text" class="form-control readonly" readonly value="RT-001">
-                </div>
-
-                <div class="col-md-4">
-                    <label>Localidad origen:</label>
-                    <input type="text" class="form-control readonly" readonly value="Salina Cruz">
-                </div>
-
-                <div class="col-md-4">
-                    <label>Localidad destino:</label>
-                    <input type="text" class="form-control readonly" readonly value="Coatzacoalcos">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <label>Modalidad:</label>
-                    <input type="text" class="form-control readonly" readonly value="Terrestre">
-                </div>
-
-                <div class="col-md-4">
-                    <label>Distancia:</label>
-                    <input type="text" class="form-control readonly" readonly value="308 km">
-                </div>
-
-                <div class="col-md-4">
-                    <label>Peso soportado:</label>
-                    <input type="text" class="form-control readonly" readonly value="25 Toneladas">
-                </div>
-            </div>
-
-        </form>
-
-        <div class="text-center mt-4">
-            <button type="button" class="btn btn-maroon" onclick="regresarFiltros()">
-                Regresar a filtros
+            <button id="btn-consultar" class="btn btn-maroon">
+                <i class="fas fa-search me-2"></i>Consultar
             </button>
         </div>
+
     </div>
 
+    <!-- ===================== SECCIÓN 2: RESULTADOS ===================== -->
+    <div id="seccion-resultados" class="tabla-card hidden mt-4">
+
+        <span class="badge-filter">Resultados encontrados</span>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>ID Ruta</th>
+                        <th>Localidad Origen</th>
+                        <th>Localidad Destino</th>
+                        <th>Modalidad</th>
+                        <th>Tipo</th>
+                        <th>Distancia (km)</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-resultados">
+                    <!-- Llenado dinámico -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button id="btn-regresar-filtros" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Regresar a filtros
+            </button>
+            <button id="btn-ver-detalle" class="btn btn-maroon">
+                <i class="fas fa-eye me-2"></i>Ver detalle
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ===================== SECCIÓN 3: DETALLE ===================== -->
+    <div id="seccion-detalle" class="ruta-card hidden mt-4">
+
+        <span class="badge-filter">Detalle de Ruta</span>
+
+        <div class="row mb-4 mt-3">
+            <div class="col-md-4 mb-3">
+                <label class="label-campo">ID de Ruta</label>
+                <input type="text" id="det-id-ruta" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="label-campo">Localidad Origen</label>
+                <input type="text" id="det-origen" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="label-campo">Localidad Destino</label>
+                <input type="text" id="det-destino" class="form-control readonly-field" readonly>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <label class="label-campo">Modalidad</label>
+                <input type="text" id="det-modalidad" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="label-campo">Tipo de Ruta</label>
+                <input type="text" id="det-tipo" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="label-campo">Distancia (km)</label>
+                <input type="text" id="det-distancia" class="form-control readonly-field" readonly>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="label-campo">Peso Soportado (ton)</label>
+                <input type="text" id="det-peso" class="form-control readonly-field" readonly>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <label class="label-campo">Descripción</label>
+                <textarea id="det-descripcion" class="form-control readonly-field" rows="3" readonly></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-2">
+            <button id="btn-regresar-resultados" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Regresar a resultados
+            </button>
+        </div>
+
+    </div>
 
     <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- scripts -->
-    <script>
-        function mostrarDetalle() {
-            document.getElementById('filtros').classList.add('hidden');
-            document.getElementById('detalle').classList.remove('hidden');
-        }
-
-        function regresarFiltros() {
-            document.getElementById('detalle').classList.add('hidden');
-            document.getElementById('filtros').classList.remove('hidden');
-        }
-    </script>
-
+    <script src="/assets/js/rutas.js"></script>
 
 </body>
-
 </html>
