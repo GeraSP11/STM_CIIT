@@ -9,6 +9,22 @@ $controller = new RutasController();
 
 switch ($action) {
 
+// ------ Registrar ------
+
+    case "registrar_ruta":
+        $datos = [
+            "localidad_origen"  => $_POST["localidad_origen"]  ?? "",
+            "localidad_destino" => $_POST["localidad_destino"] ?? "",
+            "modalidad_ruta"    => $_POST["modalidad_ruta"]    ?? "",
+            "tipo_ruta"         => $_POST["tipo_ruta"]         ?? "",
+            "distancia"         => $_POST["distancia"]         ?? "",
+            "peso_soportado"    => $_POST["peso_soportado"]    ?? "",
+            "descripcion"       => $_POST["descripcion"]       ?? "",
+        ];
+        header("Content-Type: text/plain; charset=UTF-8");
+        echo $controller->registrarRuta($datos);
+        break;
+
     case "obtener_localidades":
         echo json_encode($controller->obtenerLocalidades());
         break;

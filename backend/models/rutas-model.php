@@ -1,13 +1,71 @@
 <?php
 require_once __DIR__ . "/../config/conexion.php";
 
-class RutasModel {
+class RutasModel
+{
+
+
+// ------------------------------------------------------------------
+    // REGISTRAR
+    // ------------------------------------------------------------------
+
+    /**
+     * Inserta una nueva ruta en la base de datos.
+     * El id_ruta es SERIAL (auto-generado por PostgreSQL).
+     * Retorna true si se insertó correctamente, false en caso de error.
+     */
+    public function registrarRuta(array $datos): bool
+    {
+        global $pdo;
+
+        $sql = "INSERT INTO rutas (
+                    localidad_origen,
+                    localidad_destino,
+                    modalidad_ruta,
+                    tipo_ruta,
+                    distancia,
+                    peso_soportado,
+                    descripcion
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([
+            (int)$datos["localidad_origen"],
+            (int)$datos["localidad_destino"],
+            $datos["modalidad_ruta"],
+            $datos["tipo_ruta"]      !== "" ? $datos["tipo_ruta"]      : null,
+            $datos["distancia"]      !== "" ? (float)$datos["distancia"]      : null,
+            $datos["peso_soportado"] !== "" ? (float)$datos["peso_soportado"] : null,
+            $datos["descripcion"]    !== "" ? $datos["descripcion"]    : null,
+        ]);
+    }
+
+    /**
+     * Verifica si ya existe una ruta con el mismo origen, destino y modalidad.
+     * Evita duplicados lógicos aunque id_ruta sea SERIAL.
+     */
+    public function existeRuta(string $origen, string $destino, string $modalidad): bool
+    {
+        global $pdo;
+
+        $sql = "SELECT 1
+                FROM   rutas
+                WHERE  localidad_origen  = ?
+                  AND  localidad_destino = ?
+                  AND  modalidad_ruta    = ?
+                LIMIT  1";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([(int)$origen, (int)$destino, $modalidad]);
+        return (bool)$stmt->fetchColumn();
+    }
 
     // ------------------------------------------------------------------
     // CONSULTAR
     // ------------------------------------------------------------------
 
-    public function obtenerLocalidades(): array {
+    public function obtenerLocalidades(): array
+    {
         global $pdo;
 
         $sql = "SELECT id_localidad,
@@ -20,7 +78,8 @@ class RutasModel {
         return $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function buscarRutasConsulta(string $idOrigen, string $idDestino): array {
+    public function buscarRutasConsulta(string $idOrigen, string $idDestino): array
+    {
         global $pdo;
 
         $condiciones = [];
@@ -74,7 +133,8 @@ class RutasModel {
         return $rutas;
     }
 
-    public function obtenerRutaDetalle(string $idRuta) {
+    public function obtenerRutaDetalle(string $idRuta)
+    {
         global $pdo;
 
         $sql = "SELECT r.id_ruta,
@@ -118,7 +178,8 @@ class RutasModel {
     // ACTUALIZAR
     // ------------------------------------------------------------------
 
-    public function buscarRutas(string $idRuta): array {
+    public function buscarRutas(string $idRuta): array
+    {
         global $pdo;
 
         $sql = "SELECT r.id_ruta,
@@ -133,7 +194,8 @@ class RutasModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function obtenerRuta(string $idRuta) {
+    public function obtenerRuta(string $idRuta)
+    {
         global $pdo;
 
         $sql = "SELECT id_ruta,
@@ -152,7 +214,8 @@ class RutasModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function actualizarRuta(array $datos): bool {
+    public function actualizarRuta(array $datos): bool
+    {
         global $pdo;
 
         $sql = "UPDATE rutas
@@ -182,7 +245,8 @@ class RutasModel {
     // HELPER
     // ------------------------------------------------------------------
 
-    private function formatearNombre(?string $nombreCT, ?string $localidad, ?string $estado): string {
+    private function formatearNombre(?string $nombreCT, ?string $localidad, ?string $estado): string
+    {
         if ($nombreCT) {
             return "{$nombreCT} — {$localidad}, {$estado}";
         }

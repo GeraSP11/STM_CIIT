@@ -9,8 +9,15 @@
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", function () {
-    // ---- 1. Registrar ----
+    
+    // Inicializar tooltips de Bootstrap
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
 
+    // ---- 1. Registrar ----
+    registrarRuta();
+    
     // ---- 2. Consultar ----
     consultarRutas();
 
@@ -20,6 +27,214 @@ document.addEventListener("DOMContentLoaded", function () {
     // ---- 4. Eliminar ----
 });
 
+// =====================================================
+// FUNCIONALIDAD REGISTRAR RUTA
+// =====================================================
+function registrarRuta() {
+
+    const formRegistrar = document.getElementById("form-registrar-ruta");
+    if (!formRegistrar) return;
+
+    const selOrigen    = document.getElementById("reg-localidad-origen");
+    const selDestino   = document.getElementById("reg-localidad-destino");
+    const selModalidad = document.getElementById("reg-modalidad");
+    const selTipoRuta  = document.getElementById("reg-tipo-ruta");
+    const grupoTipo    = document.getElementById("grupo-tipo-ruta");
+    const inputPeso    = document.getElementById("reg-peso-soportado");
+    const btnLimpiar   = document.getElementById("btn-limpiar-ruta");
+
+    // --- 1.1 Cargar localidades en ambos selects ---
+    apiRequest("obtener_localidades")
+        .then(res => res.json())
+        .then(localidades => {
+            if (!Array.isArray(localidades)) {
+                alerta("Error", "No se pudieron cargar las localidades.", "error");
+                return;
+            }
+
+            // Opción vacía inicial
+            selOrigen.innerHTML  = '<option value="" selected disabled>Seleccione origen...</option>';
+            selDestino.innerHTML = '<option value="" selected disabled>Seleccione destino...</option>';
+
+            localidades.forEach(loc => {
+                const texto = loc.nombre_centro_trabajo
+                    ? `${loc.nombre_centro_trabajo} — ${loc.localidad}, ${loc.estado}`
+                    : `${loc.localidad}, ${loc.estado}`;
+
+                selOrigen.appendChild(new Option(texto, loc.id_localidad));
+                selDestino.appendChild(new Option(texto, loc.id_localidad));
+            });
+        })
+        .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
+
+    // --- 1.2 Mostrar/ocultar Tipo de Ruta según Modalidad ---
+    selModalidad.addEventListener("change", function () {
+        const modalidad = this.value;
+
+        if (modalidad === "Carretera") {
+            grupoTipo.style.display = "block";
+            selTipoRuta.required    = true;
+        } else {
+            grupoTipo.style.display = "none";
+            selTipoRuta.required    = false;
+            selTipoRuta.value       = "";
+        }
+
+        // Limpiar peso al cambiar modalidad para evitar inconsistencias
+        inputPeso.value = "";
+        inputPeso.removeAttribute("max");
+    });
+
+    // --- 1.3 Validar peso según tipo de ruta al cambiar tipo ---
+    selTipoRuta.addEventListener("change", function () {
+        const tipo = this.value;
+        inputPeso.removeAttribute("max");
+
+        if (tipo === "B") {
+            inputPeso.setAttribute("max", "38");
+            inputPeso.placeholder = "Máx. 38 ton";
+        } else if (tipo === "C") {
+            inputPeso.setAttribute("max", "25.5");
+            inputPeso.placeholder = "Máx. 25.5 ton";
+        } else {
+            inputPeso.placeholder = "Ej. 38";
+        }
+
+        // Si ya hay un peso ingresado, re-validar en tiempo real
+        if (inputPeso.value !== "") {
+            validarPesoTipoRuta(tipo, parseFloat(inputPeso.value));
+        }
+    });
+
+    // --- 1.4 Validar peso en tiempo real al escribir ---
+    inputPeso.addEventListener("input", function () {
+        const tipo = selTipoRuta.value;
+        const peso = parseFloat(this.value);
+        if (tipo && !isNaN(peso)) {
+            validarPesoTipoRuta(tipo, peso, /* silencioso */ true);
+        }
+    });
+
+    // --- 1.5 Envío del formulario ---
+    formRegistrar.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        if (!validarFormularioRegistro()) return;
+
+        apiRequest("registrar_ruta", formRegistrar)
+            .then(res => res.text())
+            .then(respuesta => {
+                manejarRespuestaCRUD(
+                    respuesta,
+                    "Ruta registrada correctamente.",
+                    null
+                );
+                
+                formRegistrar.reset();
+            })
+            .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
+    });
+
+    // --- 1.6 Botón Limpiar ---
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener("click", function () {
+            formRegistrar.reset();
+            selOrigen.value    = "";
+            selDestino.value   = "";
+            selModalidad.value = "";
+            selTipoRuta.value  = "";
+            grupoTipo.style.display = "none";
+            inputPeso.removeAttribute("max");
+            inputPeso.placeholder = "Ej. 38";
+        });
+    }
+}
+
+// --- Validación completa del formulario de registro ---
+function validarFormularioRegistro() {
+    const localidadOrigen  = document.getElementById("reg-localidad-origen").value;
+    const localidadDestino = document.getElementById("reg-localidad-destino").value;
+    const modalidad        = document.getElementById("reg-modalidad").value;
+    const tipoRuta         = document.getElementById("reg-tipo-ruta").value;
+    const distancia        = document.getElementById("reg-distancia").value.trim();
+    const peso             = document.getElementById("reg-peso-soportado").value.trim();
+
+    // Localidad origen obligatoria
+    if (!localidadOrigen) {
+        alerta("Error", "La localidad de origen es obligatoria.", "error");
+        return false;
+    }
+
+    // Localidad destino obligatoria y diferente al origen
+    if (!localidadDestino) {
+        alerta("Error", "La localidad de destino es obligatoria.", "error");
+        return false;
+    }
+    if (localidadOrigen === localidadDestino) {
+        alerta("Error", "La localidad de destino debe ser distinta a la de origen.", "error");
+        return false;
+    }
+
+    // Modalidad obligatoria
+    if (!modalidad) {
+        alerta("Error", "Debe seleccionar una modalidad válida.", "error");
+        return false;
+    }
+
+    // Tipo de ruta obligatorio solo si la modalidad es Carretera
+    if (modalidad === "Carretera" && !tipoRuta) {
+        alerta("Error", "El tipo de ruta es obligatorio para modalidad Carretera.", "error");
+        return false;
+    }
+
+    // Distancia: mayor a 0 si se ingresa
+    if (distancia !== "") {
+        const distNum = parseFloat(distancia);
+        if (isNaN(distNum) || distNum <= 0) {
+            alerta("Error", "La distancia debe ser un número mayor a 0.", "error");
+            return false;
+        }
+    }
+
+    // Peso soportado: mayor a 0 y respetando límites por tipo de ruta
+    if (peso !== "") {
+        const pesoNum = parseFloat(peso);
+        if (isNaN(pesoNum) || pesoNum <= 0) {
+            alerta("Error", "El peso soportado debe ser un valor válido mayor a 0.", "error");
+            return false;
+        }
+        if (!validarPesoTipoRuta(tipoRuta, pesoNum)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// --- Valida el peso según tipo de ruta; retorna true si es válido ---
+function validarPesoTipoRuta(tipoRuta, peso, silencioso = false) {
+    let limiteMax = null;
+
+    if (tipoRuta === "B") {
+        limiteMax = 38;
+    } else if (tipoRuta === "C") {
+        limiteMax = 25.5;
+    }
+
+    if (limiteMax !== null && peso > limiteMax) {
+        if (!silencioso) {
+            alerta(
+                "Error",
+                `El peso del vehículo excede el límite permitido para la ruta seleccionada. ` +
+                `Rutas tipo ${tipoRuta} permiten un máximo de ${limiteMax} toneladas.`,
+                "error"
+            );
+        }
+        return false;
+    }
+
+    return true;
+}
 
 // =====================================================
 // FUNCIONALIDAD CONSULTAR RUTA
