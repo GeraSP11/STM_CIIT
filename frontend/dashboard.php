@@ -261,7 +261,7 @@ $page_title = 'MARINA Corredor Interoceánico';
                                 <li><a class="dropdown-item" href="/registrar-ruta.php">Registrar</a></li>
                                 <li><a class="dropdown-item" href="/consultar-ruta.php">Consultar</a></li>
                                 <li><a class="dropdown-item" href="/actualizar-ruta.php">Actualizar</a></li>
-                                <li><a class="dropdown-item" href="/eliminar-rutas.php">Actualizar</a></li>
+                                <li><a class="dropdown-item" href="/eliminar-rutas.php">Eliminar</a></li>
                                
                                
                             </ul>
