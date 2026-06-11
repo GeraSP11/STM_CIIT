@@ -417,8 +417,8 @@ function mostrarSeccion(idSeccion) {
 // =====================================================
 function actualizarRutas() {
 
-    const btnFiltroActualizar       = document.getElementById("btn-filtro-actualizar");
-    const inputIdRutaActualizar     = document.getElementById("input-id-ruta-actualizar");
+    const btnFiltroActualizar   = document.getElementById("btn-filtro-actualizar");
+    const inputIdRutaActualizar = document.getElementById("input-id-ruta-actualizar");
 
     if (btnFiltroActualizar) {
         btnFiltroActualizar.addEventListener("click", function () {
@@ -446,7 +446,7 @@ function actualizarRutas() {
                 .then(res => res.json())
                 .then(ruta => {
                     precargarFormularioActualizar(ruta);
-                    mostrarSeccion("seccion-form-actualizar");
+                    mostrarSeccionActualizar("seccion-form-actualizar");
                 })
                 .catch(() => alerta("Error", "No se pudieron cargar los datos de la ruta.", "error"));
         });
@@ -457,7 +457,6 @@ function actualizarRutas() {
     if (formActualizar) {
         formActualizar.addEventListener("submit", function (e) {
             e.preventDefault();
-
             if (!validarFormularioActualizar()) return;
 
             apiRequest("actualizar_ruta", formActualizar)
@@ -477,9 +476,31 @@ function actualizarRutas() {
 
     if (btnCancelarFormActualizar) {
         btnCancelarFormActualizar.addEventListener("click", function () {
-            mostrarSeccion("seccion-busqueda-actualizar");
+            mostrarSeccionActualizar("seccion-busqueda-actualizar");
         });
     }
+}
+
+// Muestra una sección y oculta la otra (exclusivo para actualizar)
+function mostrarSeccionActualizar(idSeccion) {
+    const secciones = ["seccion-busqueda-actualizar", "seccion-form-actualizar"];
+
+    secciones.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === idSeccion) {
+            el.classList.remove("d-none");
+        } else {
+            el.classList.add("d-none");
+        }
+    });
+
+    // Si regresamos a búsqueda, limpiamos los resultados
+    if (idSeccion === "seccion-busqueda-actualizar") {
+        ocultarResultados();
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function renderizarResultadosActualizar(rutas) {
@@ -491,26 +512,43 @@ function renderizarResultadosActualizar(rutas) {
 
     if (!rutas || rutas.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No se encontraron resultados.</td></tr>`;
-        return;
-    }
+    } else {
+        rutas.forEach(ruta => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><input type="checkbox" class="checkbox-ruta-actualizar" value="${ruta.id_ruta}"></td>
+                <td>${ruta.id_ruta}</td>
+                <td>${ruta.modalidad}</td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-    rutas.forEach(ruta => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td><input type="checkbox" class="checkbox-ruta-actualizar" value="${ruta.id_ruta}"></td>
-            <td>${ruta.id_ruta}</td>
-            <td>${ruta.modalidad}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-
-    tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(cb => {
-        cb.addEventListener("change", function () {
-            tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(other => {
-                if (other !== cb) other.checked = false;
+        tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(cb => {
+            cb.addEventListener("change", function () {
+                tbody.querySelectorAll(".checkbox-ruta-actualizar").forEach(other => {
+                    if (other !== cb) other.checked = false;
+                });
             });
         });
-    });
+    }
+
+    // Mostrar tabla y botones tras la búsqueda
+    document.getElementById("label-resultados")?.classList.remove("d-none");
+    tablaResultadosActualizar.classList.remove("d-none");
+    document.getElementById("acciones-busqueda")?.classList.remove("d-none");
+}
+
+// Oculta y resetea la tabla/botones (para cuando se abre el form o se cancela)
+function ocultarResultados() {
+    document.getElementById("label-resultados")?.classList.add("d-none");
+    document.getElementById("tabla-resultados-actualizar")?.classList.add("d-none");
+    document.getElementById("acciones-busqueda")?.classList.add("d-none");
+
+    const tbody = document.querySelector("#tabla-resultados-actualizar tbody");
+    if (tbody) tbody.innerHTML = "";
+
+    const input = document.getElementById("input-id-ruta-actualizar");
+    if (input) input.value = "";
 }
 
 function precargarFormularioActualizar(ruta) {
