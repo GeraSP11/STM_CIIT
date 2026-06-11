@@ -3,8 +3,8 @@ require_once "../backend/middleware/role.php";
 require_once "../backend/middleware/no-cache.php";
 requireRole(["Autoridad", "Administrador del TMS", "Operador Logístico", "Jefe de Almacén"]);
 $page_title = 'MARINA Corredor Interoceánico';
-$titulo_seccion = 'Gestión de Vehículos';
-$seccion = 'Eliminar Vehículos';
+$titulo_seccion = 'Gestión de Rutas';
+$seccion = 'Eliminar Rutas';
 ?>
 <!DOCTYPE html>
 <html lang="esp">
@@ -116,7 +116,7 @@ $seccion = 'Eliminar Vehículos';
         </select>
 
         <button id="btn-buscar-vehiculo" class="btn-buscar">
-            Buscar Vehículo
+            Buscar Rutas
         </button>
     </div>
 
