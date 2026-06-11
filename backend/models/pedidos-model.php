@@ -563,6 +563,26 @@ class PedidosModel
     {
         $conn = self::getConnection();
 
+        // Verificar existencia antes de actualizar
+        $stmtCheck = $conn->prepare("
+            SELECT p.unidades_existencia 
+            FROM productos p
+            JOIN pedidos_detalles pd ON pd.identificador_producto = p.id_producto
+            WHERE pd.id_pedido_detalles = :id
+        ");
+
+        foreach ($detalles as $d) {
+            $stmtCheck->execute([':id' => intval($d['id_detalle'])]);
+            $existencia = $stmtCheck->fetchColumn();
+
+            if ($existencia !== false && intval($d['cantidad']) > intval($existencia)) {
+                throw new Exception(
+                    "La cantidad ({$d['cantidad']}) supera la existencia disponible ({$existencia})"
+                );
+            }
+        }
+
+        // Si todo está bien, actualizar
         $stmt = $conn->prepare("
             UPDATE pedidos_detalles
             SET cantidad_producto = :cantidad,

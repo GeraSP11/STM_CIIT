@@ -72,6 +72,130 @@ try {
     }
 
     /* ============================================================
+        INSERTAR RUTAS
+    ============================================================ */
+
+    $sql_rutas = "INSERT INTO rutas
+        (localidad_origen, localidad_destino, modalidad_ruta,
+        tipo_ruta, distancia, peso_soportado, descripcion)
+        VALUES
+        (:origen, :destino, :modalidad,
+        :tipo_ruta, :distancia, :peso_soportado, :descripcion)
+        RETURNING id_ruta";
+
+    $stmt_rutas = $pdo->prepare($sql_rutas);
+
+    $rutas = [
+
+    // Oaxaca → Istmo
+    [
+        $ids_localidades[0],
+        $ids_localidades[1],
+        'Carretera',
+        'A',
+        280,
+        30000,
+        'Ruta principal Oaxaca - Salina Cruz'
+    ],
+
+    // Istmo → Huatulco
+    [
+        $ids_localidades[1],
+        $ids_localidades[2],
+        'Carretera',
+        'B',
+        220,
+        25000,
+        'Ruta costera Salina Cruz - Huatulco'
+    ],
+
+    // Puebla → Oaxaca
+    [
+        $ids_localidades[3],
+        $ids_localidades[0],
+        'Carretera',
+        'A',
+        340,
+        30000,
+        'Corredor logístico Puebla - Oaxaca'
+    ],
+
+    // Oaxaca → Puebla
+    [
+        $ids_localidades[0],
+        $ids_localidades[3],
+        'Carretera',
+        'A',
+        340,
+        30000,
+        'Retorno Oaxaca - Puebla'
+    ],
+
+    // Huatulco → Puebla
+    [
+        $ids_localidades[2],
+        $ids_localidades[3],
+        'Carretera',
+        'C',
+        560,
+        25000,
+        'Ruta larga Huatulco - Puebla'
+    ],
+
+    // Puebla → Huatulco
+    [
+        $ids_localidades[3],
+        $ids_localidades[2],
+        'Carretera',
+        'C',
+        560,
+        25000,
+        'Distribución Puebla - Huatulco'
+    ],
+
+    // Istmo → Puebla
+    [
+        $ids_localidades[1],
+        $ids_localidades[3],
+        'Carretera',
+        'B',
+        620,
+        28000,
+        'Ruta comercial Salina Cruz - Puebla'
+    ],
+
+    // Puebla → Istmo
+    [
+        $ids_localidades[3],
+        $ids_localidades[1],
+        'Carretera',
+        'B',
+        620,
+        28000,
+        'Ruta comercial Puebla - Salina Cruz'
+    ]
+    ];
+
+    $ids_rutas = [];
+
+    foreach ($rutas as $ruta) {
+
+        $stmt_rutas->execute([
+            ':origen'         => $ruta[0],
+            ':destino'        => $ruta[1],
+            ':modalidad'      => $ruta[2],
+            ':tipo_ruta'      => $ruta[3],
+            ':distancia'      => $ruta[4],
+            ':peso_soportado' => $ruta[5],
+            ':descripcion'    => $ruta[6]
+        ]);
+
+        $ids_rutas[] = $stmt_rutas->fetchColumn();
+    }
+
+    echo "✅ Se insertaron " . count($ids_rutas) . " rutas.\n";
+
+    /* ============================================================
         3️⃣ INSERTAR USUARIOS
     ============================================================ */
     /*
