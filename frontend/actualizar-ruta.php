@@ -257,16 +257,13 @@ $seccion = 'Actualizar Rutas';
 
                     <div class="row g-3">
 
+                        <!-- ID (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Identificador de ruta</label>
-                            <input
-                                type="text"
-                                id="act-id-ruta"
-                                name="id_ruta"
-                                class="form-control"
-                                readonly>
+                            <input type="text" id="act-id-ruta" name="id_ruta" class="form-control" readonly>
                         </div>
 
+                        <!-- Localidad origen (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Localidad origen</label>
                             <select id="act-localidad-origen" name="localidad_origen" class="form-select">
@@ -274,6 +271,7 @@ $seccion = 'Actualizar Rutas';
                             </select>
                         </div>
 
+                        <!-- Localidad destino (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Localidad destino</label>
                             <select id="act-localidad-destino" name="localidad_destino" class="form-select">
@@ -281,9 +279,10 @@ $seccion = 'Actualizar Rutas';
                             </select>
                         </div>
 
+                        <!-- Modalidad (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Modalidad</label>
-                            <select id="act-modalidad" name="modalidad" class="form-select">
+                            <select id="act-modalidad" name="modalidad_ruta" class="form-select">
                                 <option value="">Seleccione...</option>
                                 <option value="Carretera">Carretera</option>
                                 <option value="Ferroviaria">Ferroviaria</option>
@@ -292,38 +291,61 @@ $seccion = 'Actualizar Rutas';
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <!-- Tipo de ruta: solo Carretera -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera">
+                            <label class="form-label fw-semibold">Tipo de ruta</label>
+                            <select id="act-tipo-ruta" name="tipo_ruta" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="ET">ET – Sin restricción de peso</option>
+                                <option value="A">A – Sin restricción de peso</option>
+                                <option value="B">B – Máx. 38 ton</option>
+                                <option value="C">C – Máx. 25.5 ton</option>
+                            </select>
+                        </div>
+
+                        <!-- Distancia: Carretera, Ferroviaria, Marítima, Aérea -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera Ferroviaria Marítima Aérea">
                             <label class="form-label fw-semibold">Distancia</label>
                             <div class="input-group">
-                                <input
-                                    type="number"
-                                    id="act-distancia"
-                                    name="distancia"
-                                    class="form-control"
-                                    placeholder="0"
-                                    min="0">
+                                <input type="number" id="act-distancia" name="distancia"
+                                    class="form-control" placeholder="0" min="0" step="0.01">
                                 <span class="input-group-text">km</span>
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Peso soportado</label>
-                            <input
-                                type="number"
-                                id="act-peso-soportado"
-                                name="peso_soportado"
-                                class="form-control"
-                                placeholder="0"
-                                min="0">
+                        <!-- Peso soportado: Carretera, Ferroviaria, Marítima -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera Ferroviaria Marítima">
+                            <label class="form-label fw-semibold">Peso soportado (ton)</label>
+                            <input type="number" id="act-peso-soportado" name="peso_soportado"
+                                class="form-control" placeholder="0" min="0" step="0.01">
+                        </div>
+
+                        <!-- Capacidad TEUs: solo Marítima -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Marítima">
+                            <label class="form-label fw-semibold">Capacidad (TEUs)</label>
+                            <input type="number" id="act-teus" name="teus"
+                                class="form-control" placeholder="0" min="0">
+                        </div>
+
+                        <!-- Carga máxima: solo Aérea -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Aérea">
+                            <label class="form-label fw-semibold">Carga máxima (kg)</label>
+                            <input type="number" id="act-carga-max" name="carga_max"
+                                class="form-control" placeholder="0" min="0">
+                        </div>
+
+                        <!-- Descripción: siempre visible -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            <textarea id="act-descripcion" name="descripcion"
+                                class="form-control" rows="3" maxlength="200"
+                                placeholder="Descripción opcional de la ruta..."></textarea>
                         </div>
 
                     </div>
 
                     <div class="acciones mt-4">
-                        <button
-                            type="button"
-                            class="btn btn-gris"
-                            id="btn-cancelar-form-actualizar">
+                        <button type="button" class="btn btn-gris" id="btn-cancelar-form-actualizar">
                             Cancelar
                         </button>
                         <button type="submit" class="btn btn-vino">
