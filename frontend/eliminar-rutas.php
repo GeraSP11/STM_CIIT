@@ -3,8 +3,8 @@ require_once "../backend/middleware/role.php";
 require_once "../backend/middleware/no-cache.php";
 requireRole(["Autoridad", "Administrador del TMS", "Operador Logístico", "Jefe de Almacén"]);
 $page_title = 'MARINA Corredor Interoceánico';
-$titulo_seccion = 'Gestión de Rutas';
-$seccion = 'Eliminar Rutas';
+$titulo_seccion = 'Gestión de Vehículos';
+$seccion = 'Eliminar Vehículos';
 ?>
 <!DOCTYPE html>
 <html lang="esp">
@@ -20,51 +20,69 @@ $seccion = 'Eliminar Rutas';
         h2 {
             text-align: center;
             color: #4a1026;
-            margin-top: 10px;
+            font-weight: 700;
+            margin-top: 20px;
             margin-bottom: 30px;
         }
 
-        /* Contenedor principal */
-        .ruta-card {
-            background-color: #f7f7f7;
+        /* Tarjeta principal del formulario */
+        .vehiculo-card {
+            background-color: #f2f2f2;
             border-radius: 6px;
-            padding: 40px 50px;
-            max-width: 900px;
+            padding: 35px 45px 45px 45px;
+            max-width: 820px;
             margin: 0 auto;
         }
 
-        label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-control,
-        .form-select {
-            height: 42px;
-        }
-
-        .form-control[readonly] {
-            background-color: #e5e5e5;
-        }
-
-        /* Botones */
-        .btn-maroon {
+        /* Etiqueta "Filtro de búsqueda:" */
+        .filtro-label {
+            display: inline-block;
             background-color: #5a1e2d;
             color: #fff;
-            padding: 8px 35px;
-            border-radius: 5px;
-            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 5px 14px;
+            border-radius: 4px;
+            margin-bottom: 14px;
         }
 
-        .btn-maroon:hover {
+        /* Select del filtro */
+        #filtro-select {
+            width: 100%;
+            height: 42px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            color: #555;
+            font-size: 14px;
+            padding: 0 12px;
+            appearance: auto;
+        }
+
+        /* Botón buscar */
+        .btn-buscar {
+            display: block;
+            margin: 28px auto 0 auto;
+            background-color: #5a1e2d;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 9px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-buscar:hover {
             background-color: #471624;
         }
 
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 30px;
+        /* Área de resultados (oculta por defecto, la lógica la mostrará) */
+        #resultado-container {
+            max-width: 820px;
+            margin: 30px auto 0 auto;
+            display: none;
         }
     </style>
 </head>
@@ -85,8 +103,26 @@ $seccion = 'Eliminar Rutas';
         </ol>
     </nav>
 
-    <body>
-        <h1>Modulo eliminar en desarollo </h1>
-        <a href="/dashboard.php">Regresar</a>
-    </body>
+    <!-- Título de sección -->
+    <h2><?php echo $seccion; ?></h2>
+
+    <!-- Tarjeta de búsqueda -->
+    <div class="vehiculo-card">
+        <span class="filtro-label">Filtro de búsqueda:</span>
+
+        <select id="filtro-select">
+            <option value="" disabled selected>Seleccione un filtro</option>
+
+        </select>
+
+        <button id="btn-buscar-vehiculo" class="btn-buscar">
+            Buscar Vehículo
+        </button>
+    </div>
+
+    <!-- Contenedor para resultados (la lógica irá aquí) -->
+    <div id="resultado-container">
+        <!-- Se llenará dinámicamente -->
+    </div>
+</body>
 </html>
