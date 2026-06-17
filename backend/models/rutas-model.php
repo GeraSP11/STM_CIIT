@@ -240,6 +240,24 @@ class RutasModel
             $datos["id_ruta"],
         ]);
     }
+    // ------------------------------------------------------------------
+    // ELIMINAR
+    // ------------------------------------------------------------------
+
+    public function eliminarRutas(array $ids): bool
+    {
+        global $pdo;
+
+        if (empty($ids)) return false;
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $sql  = "DELETE FROM rutas WHERE id_ruta IN ($placeholders)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_map('intval', $ids));
+
+        return $stmt->rowCount() > 0;
+    }
 
     // ------------------------------------------------------------------
     // HELPER

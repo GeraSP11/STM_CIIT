@@ -106,23 +106,55 @@ $seccion = 'Eliminar Rutas';
     <!-- Título de sección -->
     <h2><?php echo $seccion; ?></h2>
 
-    <!-- Tarjeta de búsqueda -->
-    <div class="vehiculo-card">
-        <span class="filtro-label">Filtro de búsqueda:</span>
+<!-- Tarjeta de búsqueda -->
+<div class="vehiculo-card">
+    <span class="filtro-label">Filtro de búsqueda:</span>
 
-        <select id="filtro-select">
-            <option value="" disabled selected>Seleccione un filtro</option>
+    <div class="row g-3 align-items-end">
+        <div class="col-12">
+            <label class="form-label fw-semibold" style="color:#5a1e2d;">ID de Ruta</label>
+            <input type="text" id="input-id-ruta-eliminar" class="form-control"
+                   placeholder="Ingrese ID de ruta (vacío para ver todas)">
+        </div>
+    </div>
 
-        </select>
+    <button id="btn-buscar-eliminar" class="btn-buscar">
+        <i class="bi bi-search me-1"></i> Buscar Rutas
+    </button>
+</div>
 
-        <button id="btn-buscar-vehiculo" class="btn-buscar">
-            Buscar Rutas
+<!-- Resultados -->
+<div id="resultado-container">
+
+    <div id="label-resultados-eliminar" class="d-none">
+        <span class="filtro-label">Resultados:</span>
+    </div>
+
+    <table id="tabla-resultados-eliminar" class="table table-bordered table-hover d-none">
+        <thead style="background-color:#5a1e2d; color:#fff;">
+            <tr>
+                <th class="text-center" style="width:50px;">
+                    <input type="checkbox" id="check-todos" title="Seleccionar todos">
+                </th>
+                <th>ID</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Modalidad</th>
+                <th>Tipo</th>
+                <th>Distancia (km)</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-eliminar"></tbody>
+    </table>
+
+    <div id="acciones-eliminar" class="d-none text-center mt-3 d-flex gap-2 justify-content-center">
+        <button id="btn-confirmar-eliminar" class="btn btn-danger px-4">
+            <i class="bi bi-trash3 me-1"></i> Eliminar seleccionadas
+        </button>
+        <button id="btn-cancelar-eliminar" class="btn btn-secondary px-4">
+            <i class="bi bi-x-circle me-1"></i> Cancelar
         </button>
     </div>
-
-    <!-- Contenedor para resultados (la lógica irá aquí) -->
-    <div id="resultado-container">
-        <!-- Se llenará dinámicamente -->
-    </div>
+</div>
 </body>
 </html>

@@ -262,7 +262,31 @@ class RutasController
         return is_numeric($valor) ? (float)$valor : null;
     }
 
-    // ------------------------------------------------------------------
-    // Eliminar
-    // ------------------------------------------------------------------
+// ------------------------------------------------------------------
+// ELIMINAR
+// ------------------------------------------------------------------
+
+/**
+ * Valida y elimina una o varias rutas.
+ * $idsRaw es la cadena "1,2,3" que viene del POST.
+ */
+public function eliminarRutas(string $idsRaw): string
+{
+    if (trim($idsRaw) === '') {
+        return 'Debe indicar al menos un ID de ruta a eliminar.';
+    }
+
+    // Filtrar solo enteros positivos
+    $ids = array_filter(
+        array_map('intval', explode(',', $idsRaw)),
+        fn($id) => $id > 0
+    );
+
+    if (empty($ids)) {
+        return 'Los identificadores de ruta no son válidos.';
+    }
+
+    $ok = $this->model->eliminarRutas(array_values($ids));
+    return $ok ? 'OK' : 'No se pudo eliminar la(s) ruta(s). Intente nuevamente.';
+}
 }

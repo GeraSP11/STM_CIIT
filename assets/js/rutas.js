@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
     actualizarRutas();
 
     // ---- 4. Eliminar ----
+    eliminarRutas();
 });
 
 // =====================================================
@@ -735,9 +736,162 @@ function _error(mensaje) {
 
 
 /* =====================================================
-   Eliminar Ruta
+   4. Eliminar Ruta
    ===================================================== */
 
+function eliminarRutas() {
+
+    const btnBuscar   = document.getElementById("btn-buscar-eliminar");
+    const btnEliminar = document.getElementById("btn-confirmar-eliminar");
+    const btnCancelar = document.getElementById("btn-cancelar-eliminar");
+    const checkTodos  = document.getElementById("check-todos");
+
+    if (!btnBuscar) return;
+
+    // ── 4.1 Buscar rutas ─────────────────────────────────────────────
+    btnBuscar.addEventListener("click", function () {
+        const idRuta = document.getElementById("input-id-ruta-eliminar").value.trim();
+
+        apiRequest("buscar_rutas", { id_ruta: idRuta })
+            .then(res => res.json())
+            .then(data => renderizarResultadosEliminar(data))
+            .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
+    });
+
+    // ── 4.2 Seleccionar / deseleccionar todos ────────────────────────
+    if (checkTodos) {
+        checkTodos.addEventListener("change", function () {
+            document.querySelectorAll(".checkbox-ruta-eliminar")
+                .forEach(cb => cb.checked = this.checked);
+        });
+    }
+
+    // ── 4.3 Confirmar eliminación ────────────────────────────────────
+    if (btnEliminar) {
+        btnEliminar.addEventListener("click", function () {
+            const seleccionados = [
+                ...document.querySelectorAll(".checkbox-ruta-eliminar:checked")
+            ].map(cb => cb.value);
+
+            if (seleccionados.length === 0) {
+                alerta("Advertencia", "Debe seleccionar al menos una ruta para eliminar.", "warning");
+                return;
+            }
+
+            const cantidad = seleccionados.length;
+            const mensaje  = cantidad === 1
+                ? "¿Está seguro de eliminar la ruta seleccionada? Esta acción no se puede deshacer."
+                : `¿Está seguro de eliminar las ${cantidad} rutas seleccionadas? Esta acción no se puede deshacer.`;
+
+            Swal.fire({
+                title: "Confirmar eliminación",
+                text: mensaje,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#5a1e2d",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                apiRequest("eliminar_rutas", { ids_rutas: seleccionados.join(",") })
+                    .then(res => res.text())
+                    .then(respuesta => {
+                        if (respuesta.trim() === "OK") {
+                            alerta("Éxito", "Ruta(s) eliminada(s) correctamente.", "success")
+                                .then(() => ocultarResultadosEliminar());
+                        } else {
+                            alerta("Error", respuesta, "error");
+                        }
+                    })
+                    .catch(() => alerta("Error", "No se pudo conectar con el servidor.", "error"));
+            });
+        });
+    }
+
+    // ── 4.4 Cancelar ─────────────────────────────────────────────────
+    if (btnCancelar) {
+        btnCancelar.addEventListener("click", ocultarResultadosEliminar);
+    }
+}
+
+// ── Renderizar tabla de resultados para eliminar ───────────────────────────────
+function renderizarResultadosEliminar(rutas) {
+    const tbody  = document.getElementById("tbody-eliminar");
+    const tabla  = document.getElementById("tabla-resultados-eliminar");
+    const check  = document.getElementById("check-todos");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    if (check) check.checked = false;
+
+    if (!rutas || rutas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">
+                    No se encontraron rutas con ese filtro.
+                </td>
+            </tr>`;
+    } else {
+        rutas.forEach(ruta => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="text-center">
+                    <input type="checkbox" class="checkbox-ruta-eliminar" value="${ruta.id_ruta}">
+                </td>
+                <td>${ruta.id_ruta}</td>
+                <td>${ruta.nombre_origen  ?? "—"}</td>
+                <td>${ruta.nombre_destino ?? "—"}</td>
+                <td>${ruta.modalidad_ruta ?? ruta.modalidad ?? "—"}</td>
+                <td>${ruta.tipo_ruta      ?? "—"}</td>
+                <td>${ruta.distancia      ?? "—"}</td>
+            `;
+
+            // Clic en fila marca el checkbox
+            tr.addEventListener("click", function (e) {
+                if (e.target.type === "checkbox") return;
+                const cb = tr.querySelector(".checkbox-ruta-eliminar");
+                cb.checked = !cb.checked;
+                sincronizarCheckTodos();
+            });
+
+            // Clic en checkbox sincroniza el "seleccionar todos"
+            tr.querySelector(".checkbox-ruta-eliminar")
+                .addEventListener("change", sincronizarCheckTodos);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.getElementById("label-resultados-eliminar")?.classList.remove("d-none");
+    tabla?.classList.remove("d-none");
+    document.getElementById("acciones-eliminar")?.classList.remove("d-none");
+    document.getElementById("resultado-container").style.display = "block";
+}
+
+function sincronizarCheckTodos() {
+    const todos      = document.querySelectorAll(".checkbox-ruta-eliminar");
+    const marcados   = document.querySelectorAll(".checkbox-ruta-eliminar:checked");
+    const checkTodos = document.getElementById("check-todos");
+    if (checkTodos) checkTodos.checked = todos.length > 0 && todos.length === marcados.length;
+}
+
+function ocultarResultadosEliminar() {
+    ["label-resultados-eliminar", "tabla-resultados-eliminar", "acciones-eliminar"]
+        .forEach(id => document.getElementById(id)?.classList.add("d-none"));
+
+    const tbody = document.getElementById("tbody-eliminar");
+    if (tbody) tbody.innerHTML = "";
+
+    const input = document.getElementById("input-id-ruta-eliminar");
+    if (input) input.value = "";
+
+    const check = document.getElementById("check-todos");
+    if (check) check.checked = false;
+
+    document.getElementById("resultado-container").style.display = "none";
+}
 
 
 
