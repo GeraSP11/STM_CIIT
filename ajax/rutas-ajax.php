@@ -67,6 +67,12 @@ switch ($action) {
         echo $controller->actualizarRuta($datos);
         break;
 
+    case "eliminar_rutas":
+        $idsRaw = $_POST["ids_rutas"] ?? "";
+        header("Content-Type: text/plain; charset=UTF-8");
+        echo $controller->eliminarRutas($idsRaw);
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(["error" => "Acción no reconocida."]);

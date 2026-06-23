@@ -32,7 +32,6 @@ $seccion = 'Actualizar Rutas';
             font-family: "Segoe UI", sans-serif;
         }
 
-        /* TITULO */
         .page-title {
             text-align: center;
             color: var(--vino-dark);
@@ -40,7 +39,6 @@ $seccion = 'Actualizar Rutas';
             font-weight: 600;
         }
 
-        /* CARD */
         .card-custom {
             max-width: 1100px;
             margin: auto;
@@ -54,7 +52,6 @@ $seccion = 'Actualizar Rutas';
             font-weight: bold;
         }
 
-        /* BUSCADOR */
         .buscador-rutas {
             display: flex;
             align-items: center;
@@ -79,7 +76,6 @@ $seccion = 'Actualizar Rutas';
             border-radius: 0;
         }
 
-        /* TABLA */
         .tabla-rutas {
             border: 1px solid var(--borde);
             border-radius: 4px;
@@ -105,7 +101,6 @@ $seccion = 'Actualizar Rutas';
             overflow-y: auto;
         }
 
-        /* CHECKBOX ESTILO SISTEMA */
         .tabla-rutas input[type="checkbox"] {
             appearance: none;
             width: 16px;
@@ -135,7 +130,6 @@ $seccion = 'Actualizar Rutas';
             background-color: #f5eef2 !important;
         }
 
-        /* BOTONES */
         .acciones {
             display: flex;
             justify-content: flex-end;
@@ -171,10 +165,8 @@ $seccion = 'Actualizar Rutas';
 
 <body>
 
-    <!-- Header dinámico -->
     <?php include('includes/header-dinamico.php'); ?>
 
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mt-2" style="padding-left: 15px; font-size: 18px;">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -186,15 +178,11 @@ $seccion = 'Actualizar Rutas';
         </ol>
     </nav>
 
-    <!-- TITULO -->
     <h2 class="page-title">Actualización de Rutas</h2>
 
-    <!-- CONTENIDO -->
     <div class="container-fluid pb-5">
 
-        <!-- ==============================
-             SECCIÓN 1: BÚSQUEDA
-        =============================== -->
+        <!-- SECCIÓN 1: BÚSQUEDA -->
         <div class="card card-custom" id="seccion-busqueda-actualizar">
 
             <div class="card-header-custom">
@@ -205,11 +193,9 @@ $seccion = 'Actualizar Rutas';
 
                 <!-- BUSCADOR -->
                 <div class="buscador-rutas">
-
                     <label for="input-id-ruta-actualizar">
                         Filtro de búsqueda
                     </label>
-
                     <div class="input-group">
                         <input
                             type="text"
@@ -223,13 +209,12 @@ $seccion = 'Actualizar Rutas';
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-
                 </div>
 
-                <!-- RESULTADOS -->
-                <h6 class="mb-3 fw-bold">Resultados obtenidos:</h6>
+                <!-- RESULTADOS (ocultos al inicio) -->
+                <h6 class="mb-3 fw-bold d-none" id="label-resultados">Resultados obtenidos:</h6>
 
-                <div class="tabla-rutas" id="tabla-resultados-actualizar">
+                <div class="tabla-rutas d-none" id="tabla-resultados-actualizar">
                     <div class="tabla-scroll">
                         <table class="table table-bordered mb-0">
                             <thead>
@@ -246,8 +231,8 @@ $seccion = 'Actualizar Rutas';
                     </div>
                 </div>
 
-                <!-- BOTONES -->
-                <div class="acciones">
+                <!-- BOTONES (ocultos al inicio) -->
+                <div class="acciones d-none" id="acciones-busqueda">
                     <button class="btn btn-gris" id="btn-cancelar-busqueda" type="button">
                         Cancelar
                     </button>
@@ -259,9 +244,7 @@ $seccion = 'Actualizar Rutas';
             </div>
         </div>
 
-        <!-- ==============================
-             SECCIÓN 2: FORMULARIO EDICIÓN
-        =============================== -->
+        <!-- SECCIÓN 2: FORMULARIO EDICIÓN -->
         <div class="card card-custom mt-4 d-none" id="seccion-form-actualizar">
 
             <div class="card-header-custom">
@@ -274,35 +257,32 @@ $seccion = 'Actualizar Rutas';
 
                     <div class="row g-3">
 
+                        <!-- ID (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Identificador de ruta</label>
-                            <input
-                                type="text"
-                                id="act-id-ruta"
-                                name="id_ruta"
-                                class="form-control"
-                                readonly>
+                            <input type="text" id="act-id-ruta" name="id_ruta" class="form-control" readonly>
                         </div>
 
+                        <!-- Localidad origen (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Localidad origen</label>
                             <select id="act-localidad-origen" name="localidad_origen" class="form-select">
                                 <option value="">Seleccione...</option>
-                                <!-- Opciones dinámicas o estáticas según catálogo -->
                             </select>
                         </div>
 
+                        <!-- Localidad destino (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Localidad destino</label>
                             <select id="act-localidad-destino" name="localidad_destino" class="form-select">
                                 <option value="">Seleccione...</option>
-                                <!-- Opciones dinámicas o estáticas según catálogo -->
                             </select>
                         </div>
 
+                        <!-- Modalidad (siempre visible) -->
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Modalidad</label>
-                            <select id="act-modalidad" name="modalidad" class="form-select">
+                            <select id="act-modalidad" name="modalidad_ruta" class="form-select">
                                 <option value="">Seleccione...</option>
                                 <option value="Carretera">Carretera</option>
                                 <option value="Ferroviaria">Ferroviaria</option>
@@ -311,39 +291,61 @@ $seccion = 'Actualizar Rutas';
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <!-- Tipo de ruta: solo Carretera -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera">
+                            <label class="form-label fw-semibold">Tipo de ruta</label>
+                            <select id="act-tipo-ruta" name="tipo_ruta" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="ET">ET – Sin restricción de peso</option>
+                                <option value="A">A – Sin restricción de peso</option>
+                                <option value="B">B – Máx. 38 ton</option>
+                                <option value="C">C – Máx. 25.5 ton</option>
+                            </select>
+                        </div>
+
+                        <!-- Distancia: Carretera, Ferroviaria, Marítima, Aérea -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera Ferroviaria Marítima Aérea">
                             <label class="form-label fw-semibold">Distancia</label>
                             <div class="input-group">
-                                <input
-                                    type="number"
-                                    id="act-distancia"
-                                    name="distancia"
-                                    class="form-control"
-                                    placeholder="0"
-                                    min="0">
+                                <input type="number" id="act-distancia" name="distancia"
+                                    class="form-control" placeholder="0" min="0" step="0.01">
                                 <span class="input-group-text">km</span>
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Peso soportado</label>
-                            <input
-                                type="number"
-                                id="act-peso-soportado"
-                                name="peso_soportado"
-                                class="form-control"
-                                placeholder="0"
-                                min="0">
+                        <!-- Peso soportado: Carretera, Ferroviaria, Marítima -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Carretera Ferroviaria Marítima">
+                            <label class="form-label fw-semibold">Peso soportado (ton)</label>
+                            <input type="number" id="act-peso-soportado" name="peso_soportado"
+                                class="form-control" placeholder="0" min="0" step="0.01">
+                        </div>
+
+                        <!-- Capacidad TEUs: solo Marítima -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Marítima">
+                            <label class="form-label fw-semibold">Capacidad (TEUs)</label>
+                            <input type="number" id="act-teus" name="teus"
+                                class="form-control" placeholder="0" min="0">
+                        </div>
+
+                        <!-- Carga máxima: solo Aérea -->
+                        <div class="col-md-4 campo-modal d-none" data-modalidad="Aérea">
+                            <label class="form-label fw-semibold">Carga máxima (kg)</label>
+                            <input type="number" id="act-carga-max" name="carga_max"
+                                class="form-control" placeholder="0" min="0">
+                        </div>
+
+                        <!-- Descripción: siempre visible -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            <textarea id="act-descripcion" name="descripcion"
+                                class="form-control" rows="3" maxlength="200"
+                                placeholder="Descripción opcional de la ruta..."></textarea>
                         </div>
 
                     </div>
 
-                    <!-- BOTONES -->
                     <div class="acciones mt-4">
-                        <button
-                            type="button"
-                            class="btn btn-gris"
-                            id="btn-cancelar-form-actualizar">
+                        <button type="button" class="btn btn-gris" id="btn-cancelar-form-actualizar">
                             Cancelar
                         </button>
                         <button type="submit" class="btn btn-vino">
