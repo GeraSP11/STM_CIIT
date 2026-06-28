@@ -1,0 +1,458 @@
+/* =========================================================================
+   transporte.css
+   Estilos en CSS puro para el módulo de Programación de Envíos (CIIT TMS).
+   Paleta inspirada en cartografía de rutas: navy profundo + ámbar de carga.
+   ========================================================================= */
+
+:root {
+  --color-bg: #eef2f5;
+  --color-panel: #ffffff;
+  --color-primary: #0b3d59;
+  --color-primary-dark: #082c40;
+  --color-primary-light: #3f8fb0;
+  --color-accent: #ff8a3d;
+  --color-accent-dark: #d96f2c;
+  --color-success: #1f9d55;
+  --color-success-bg: #e6f7ec;
+  --color-danger: #c0392b;
+  --color-danger-bg: #fdecea;
+  --color-warning: #b9770e;
+  --color-warning-bg: #fff4e0;
+  --color-info: #1c6e8c;
+  --color-info-bg: #e7f3f7;
+  --color-border: #dbe3e8;
+  --color-text: #1f2933;
+  --color-text-muted: #5d6b74;
+  --radio-borde: 10px;
+  --fuente-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fuente-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sombra-panel: 0 1px 2px rgba(11, 61, 89, 0.06), 0 8px 24px rgba(11, 61, 89, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fuente-base);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* ---------- Encabezado ---------- */
+
+.app-header {
+  background: linear-gradient(120deg, var(--color-primary-dark) 0%, var(--color-primary) 55%, var(--color-primary-light) 100%);
+  color: #fff;
+  padding: 28px 32px 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85) 0px,
+    rgba(255, 255, 255, 0.85) 22px,
+    transparent 22px,
+    transparent 40px
+  );
+  opacity: 0.55;
+}
+
+.app-header__titulo {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.app-header__subtitulo {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 720px;
+}
+
+/* ---------- Layout general ---------- */
+
+.app-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+.vista { display: none; }
+.vista--activa { display: block; animation: aparecer 0.25s ease-out; }
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radio-borde);
+  box-shadow: var(--sombra-panel);
+  padding: 22px 24px;
+  margin-bottom: 22px;
+}
+
+.panel h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.panel h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0px,
+    var(--color-accent) 8px,
+    transparent 8px,
+    transparent 14px
+  );
+}
+
+.panel__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.panel__pie {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.texto-ayuda {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin: 4px 0 14px;
+}
+
+/* ---------- Formulario de filtros ---------- */
+
+.filtro-fechas {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+input[type="date"],
+input[type="text"],
+input[type="number"] {
+  font-family: var(--fuente-base);
+  font-size: 0.95rem;
+  padding: 9px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: var(--color-text);
+  min-width: 170px;
+}
+
+input[type="date"]:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px rgba(63, 143, 176, 0.18);
+}
+
+/* ---------- Botones ---------- */
+
+.btn {
+  font-family: var(--fuente-base);
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primario {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(11, 61, 89, 0.25);
+}
+.btn--primario:hover:not(:disabled) { background: var(--color-primary-dark); }
+
+.btn--exito {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 138, 61, 0.35);
+}
+.btn--exito:hover:not(:disabled) { background: var(--color-accent-dark); }
+
+.btn--secundario {
+  background: #fff;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-border);
+}
+.btn--secundario:hover:not(:disabled) {
+  border-color: var(--color-primary-light);
+  background: var(--color-info-bg);
+}
+
+/* ---------- Contador de selección ---------- */
+
+.contador {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: #f1f4f6;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.contador--listo {
+  color: #fff;
+  background: var(--color-success);
+}
+
+/* ---------- Tablas ---------- */
+
+.tabla-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.tabla-datos thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.tabla-datos tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.tabla-datos tbody tr:hover { background: #f6f9fb; }
+.tabla-datos tbody tr:last-child td { border-bottom: none; }
+
+.celda-vacia {
+  text-align: center;
+  padding: 28px 12px;
+  color: var(--color-text-muted);
+}
+
+.chk-pedido {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+/* ---------- Insignias de estatus ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge--neutro { background: #eceff1; color: #455a64; }
+.badge--info   { background: var(--color-info-bg); color: var(--color-info); }
+.badge--aviso  { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge--exito  { background: var(--color-success-bg); color: var(--color-success); }
+
+/* ---------- Alertas / mensajes de estado ---------- */
+
+.alerta {
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.88rem;
+  margin-bottom: 14px;
+  border-left: 4px solid transparent;
+}
+
+.alerta--info    { background: var(--color-info-bg);    color: var(--color-info);    border-color: var(--color-info); }
+.alerta--aviso    { background: var(--color-warning-bg); color: var(--color-warning); border-color: var(--color-warning); }
+.alerta--exito   { background: var(--color-success-bg); color: var(--color-success); border-color: var(--color-success); }
+.alerta--error   { background: var(--color-danger-bg);  color: var(--color-danger);  border-color: var(--color-danger); }
+
+/* ---------- Resumen de pedidos seleccionados ---------- */
+
+.lista-pedidos {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.lista-pedidos li { margin-bottom: 4px; }
+
+/* ---------- Spinner de carga ---------- */
+
+.cargando {
+  display: none;
+  text-align: center;
+  padding: 40px 0;
+  color: var(--color-text-muted);
+}
+
+.cargando--activa { display: block; }
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #dbe3e8;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: girar 0.9s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.contenido-programacion { display: none; }
+
+/* ---------- Tablas del problema de transporte ---------- */
+
+.tabla-transporte th,
+.tabla-transporte td {
+  border: 1px solid var(--color-border);
+  padding: 10px 12px;
+  text-align: center;
+  font-family: var(--fuente-mono);
+  font-size: 0.85rem;
+}
+
+.tabla-transporte thead th {
+  background: var(--color-primary);
+  color: #fff;
+  font-family: var(--fuente-base);
+  font-weight: 600;
+}
+
+.tabla-transporte tbody th {
+  background: #f1f4f6;
+  font-family: var(--fuente-base);
+  font-weight: 600;
+  text-align: left;
+  color: var(--color-primary-dark);
+}
+
+.tabla-transporte .fila-demanda th,
+.tabla-transporte .fila-demanda td {
+  background: var(--color-info-bg);
+  font-weight: 700;
+}
+
+.celda-oferta {
+  background: var(--color-warning-bg) !important;
+  font-weight: 700;
+}
+
+.celda-bloqueada {
+  background: repeating-linear-gradient(
+    45deg,
+    #fbecea,
+    #fbecea 6px,
+    #f6d8d4 6px,
+    #f6d8d4 12px
+  );
+  color: var(--color-danger);
+  font-style: italic;
+  font-family: var(--fuente-base);
+  font-size: 0.78rem;
+}
+
+.celda-asignada {
+  background: var(--color-success-bg) !important;
+  font-weight: 700;
+}
+
+.celda-costo { font-size: 0.82rem; color: var(--color-text-muted); }
+.celda-cantidad { margin-top: 2px; font-weight: 700; color: var(--color-success); }
+
+.costo-total {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-primary-dark);
+  background: var(--color-info-bg);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 720px) {
+  .app-header { padding: 22px 18px; }
+  .panel { padding: 18px; }
+  .filtro-fechas { flex-direction: column; align-items: stretch; }
+  .panel__encabezado { flex-direction: column; align-items: flex-start; }
+  .tabla-transporte th, .tabla-transporte td { padding: 6px 8px; font-size: 0.75rem; }
+}
