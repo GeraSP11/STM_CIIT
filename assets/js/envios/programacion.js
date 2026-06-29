@@ -1,13 +1,16 @@
 /**
  * programacion.js
  *
- * Lógica de la vista "Programación de envíos":
+ * Lógica de la vista "Solución de transporte":
  *  1) Toma los pedidos elegidos en la vista de selección.
  *  2) Pide al backend (action=generar_problema) que construya orígenes,
  *     destinos, oferta, demanda y la matriz de costos/distancias.
- *  3) Pinta la tabla del problema ORIGINAL.
- *  4) Resuelve el problema reutilizando TransporteSolverJS (Esquina
- *     Noroeste + MODI) y pinta la tabla RESUELTA + resultados.
+ *  3) Resuelve el problema reutilizando TransporteSolverJS (Esquina
+ *     Noroeste + MODI). El resultado se expresa en distancia (km), no en
+ *     costos monetarios.
+ *  4) Pinta los KPIs, la matriz de asignación y el detalle de distancias por ruta.
+ *  5) Al confirmar, llama a action=confirmar_programacion para que el backend
+ *     cambie el estatus de los pedidos seleccionados a 'En recolección'.
  */
 
 (function () {
@@ -17,15 +20,26 @@
     const vistaProgramacion = document.getElementById('vista-programacion');
     const btnProgramar = document.getElementById('btn-programar-envios');
     const btnVolver = document.getElementById('btn-volver-seleccion');
+    const btnVolverTexto = document.getElementById('btn-volver-seleccion-texto');
+    const btnCancelar = document.getElementById('btn-cancelar-programacion');
+    const btnConfirmar = document.getElementById('btn-confirmar-programacion');
     const estadoProgramacion = document.getElementById('estado-programacion');
     const cargando = document.getElementById('cargando-programacion');
     const contenido = document.getElementById('contenido-programacion');
     const resumenPedidos = document.getElementById('resumen-pedidos-seleccionados');
-    const tablaOriginalCont = document.getElementById('tabla-problema-original');
     const tablaResueltaCont = document.getElementById('tabla-problema-resuelto');
     const resultadosCont = document.getElementById('resultados-solucion');
 
+    const kpiTotalUnidades = document.getElementById('kpi-total-unidades');
+    const kpiRutasAsignadas = document.getElementById('kpi-rutas-asignadas');
+    const kpiCostoTotal = document.getElementById('kpi-costo-total');
+
     const solver = new TransporteSolverJS();
+
+    /** Última solución calculada, lista para confirmarse. */
+    let ultimoResultado = null;
+    let ultimosDatos = null;
+    let ultimaSeleccion = null;
 
     function mostrarEstado(contenedor, mensaje, tipo) {
         contenedor.innerHTML = mensaje ? `<div class="alerta alerta--${tipo}">${escaparHtml(mensaje)}</div>` : '';
@@ -40,6 +54,8 @@
     async function iniciarProgramacion() {
         const seleccion = window.PedidosTMS.obtenerSeleccionActual();
         if (seleccion.length < 3) return;
+
+        ultimaSeleccion = seleccion;
 
         cambiarVista(true);
         contenido.style.display = 'none';
@@ -90,38 +106,22 @@
         const nombresOrigenes = datos.origenes.map((o) => o.nombre);
         const nombresDestinos = datos.destinos.map((d) => d.nombre);
 
-        renderizarTablaOriginal(datos, nombresDestinos);
-
         const resultado = solver.resolver(datos.costos, datos.oferta, datos.demanda, nombresOrigenes, nombresDestinos);
 
+        ultimoResultado = resultado;
+        ultimosDatos = datos;
+
+        renderizarKpis(datos, resultado);
         renderizarTablaResuelta(datos, resultado, nombresOrigenes, nombresDestinos);
         renderizarResultados(datos, resultado);
 
         contenido.style.display = 'block';
     }
 
-    function renderizarTablaOriginal(datos, nombresDestinos) {
-        let html = '<table class="tabla-transporte"><thead><tr><th>Origen \\ Destino</th>';
-        nombresDestinos.forEach((nombre) => { html += `<th>${escaparHtml(nombre)}</th>`; });
-        html += '<th>Oferta</th></tr></thead><tbody>';
-
-        datos.origenes.forEach((origen, i) => {
-            html += `<tr><th>${escaparHtml(origen.nombre)}</th>`;
-            datos.destinos.forEach((destino, j) => {
-                const disponible = datos.rutas_disponibles[i][j];
-                const costo = datos.costos[i][j];
-                html += `<td class="${disponible ? '' : 'celda-bloqueada'}">
-                            ${disponible ? `${formatearNumero(costo)} km` : 'Sin ruta'}
-                          </td>`;
-            });
-            html += `<td class="celda-oferta">${formatearNumero(datos.oferta[i])}</td></tr>`;
-        });
-
-        html += '<tr class="fila-demanda"><th>Demanda</th>';
-        datos.demanda.forEach((demanda) => { html += `<td>${formatearNumero(demanda)}</td>`; });
-        html += '<td></td></tr></tbody></table>';
-
-        tablaOriginalCont.innerHTML = html;
+    function renderizarKpis(datos, resultado) {
+        kpiTotalUnidades.textContent = formatearNumero(resultado.total_oferta);
+        kpiRutasAsignadas.textContent = formatearNumero(resultado.envios.length);
+        kpiCostoTotal.textContent = `${formatearNumero(resultado.costo_total, 2)} km`;
     }
 
     function renderizarTablaResuelta(datos, resultado, nombresOrigenes, nombresDestinos) {
@@ -134,7 +134,7 @@
 
         let html = '<table class="tabla-transporte"><thead><tr><th>Origen \\ Destino</th>';
         nombresDestinos.forEach((nombre) => { html += `<th>${escaparHtml(nombre)}</th>`; });
-        html += '<th>Oferta</th></tr></thead><tbody>';
+        html += '<th class="celda-oferta-header">Oferta</th></tr></thead><tbody>';
 
         datos.origenes.forEach((origen, i) => {
             html += `<tr><th>${escaparHtml(origen.nombre)}</th>`;
@@ -147,8 +147,7 @@
                 else if (!disponible) clase = 'celda-bloqueada';
 
                 html += `<td class="${clase}">
-                            <div class="celda-costo">${disponible ? `${formatearNumero(datos.costos[i][j])} km` : 'Sin ruta'}</div>
-                            <div class="celda-cantidad">${tieneEnvio ? `📦 ${formatearNumero(cantidad)}` : '-'}</div>
+                            ${tieneEnvio ? formatearNumero(cantidad) : (disponible ? '—' : 'Sin ruta')}
                          </td>`;
             });
             html += `<td class="celda-oferta">${formatearNumero(datos.oferta[i])}</td></tr>`;
@@ -156,7 +155,7 @@
 
         html += '<tr class="fila-demanda"><th>Demanda</th>';
         datos.demanda.forEach((demanda) => { html += `<td>${formatearNumero(demanda)}</td>`; });
-        html += '<td></td></tr></tbody></table>';
+        html += `<td>${formatearNumero(datos.demanda.reduce((a, b) => a + b, 0))}</td></tr></tbody></table>`;
 
         tablaResueltaCont.innerHTML = html;
     }
@@ -169,16 +168,12 @@
         });
 
         let html = `
-            <div class="costo-total">
-                Distancia total ponderada de la solución: ${formatearNumero(resultado.costo_total, 2)} km
-            </div>
             <div class="alerta alerta--${resultado.balanceado ? 'info' : 'aviso'}">
                 Oferta total: ${formatearNumero(resultado.total_oferta)} unidades &nbsp;|&nbsp;
                 Demanda total: ${formatearNumero(resultado.total_demanda)} unidades &nbsp;|&nbsp;
                 ${resultado.balanceado
                     ? 'Problema balanceado (oferta = demanda).'
                     : 'Problema no balanceado: se agregó un nodo ficticio (dummy) para equilibrar oferta y demanda.'}
-                &nbsp;|&nbsp; Envíos en la solución: ${resultado.estadisticas.numero_envios}
                 &nbsp;|&nbsp; Iteraciones MODI: ${resultado.estadisticas.iteraciones_modi}
             </div>
             ${hayCeldaBloqueadaUsada ? `
@@ -191,20 +186,24 @@
                 <table class="tabla-transporte">
                     <thead>
                         <tr>
-                            <th>Origen</th><th>Destino</th><th>Distancia (km)</th>
-                            <th>Unidades asignadas</th><th>Distancia ponderada (km)</th>
+                            <th>Ruta</th><th>Unidades</th><th>Distancia (km)</th><th>Distancia ponderada (km)</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${resultado.envios.map((envio) => `
                             <tr>
-                                <td>${escaparHtml(envio.origen)}</td>
-                                <td>${escaparHtml(envio.destino)}</td>
-                                <td>${formatearNumero(envio.costo_unitario)}</td>
+                                <td style="text-align:left;">${escaparHtml(envio.origen)} → ${escaparHtml(envio.destino)}</td>
                                 <td><strong>${formatearNumero(envio.cantidad)}</strong></td>
+                                <td>${formatearNumero(envio.costo_unitario)}</td>
                                 <td>${formatearNumero(envio.costo_total, 2)}</td>
                             </tr>
                         `).join('')}
+                        <tr class="fila-demanda">
+                            <td style="text-align:left;"><strong>Total general</strong></td>
+                            <td><strong>${formatearNumero(resultado.envios.reduce((acc, e) => acc + e.cantidad, 0))}</strong></td>
+                            <td>—</td>
+                            <td><strong>${formatearNumero(resultado.costo_total, 2)} km</strong></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -213,6 +212,62 @@
         resultadosCont.innerHTML = html;
     }
 
+    async function confirmarProgramacion() {
+        if (!ultimoResultado || !ultimaSeleccion) return;
+
+        btnConfirmar.disabled = true;
+        btnCancelar.disabled = true;
+        mostrarEstado(estadoProgramacion, '', null);
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('action', 'confirmar_programacion');
+            ultimaSeleccion.forEach((pedido) => formData.append('pedidos[]', pedido.id_pedido));
+
+            const respuesta = await fetch(AJAX_URL, { method: 'POST', body: formData });
+            const json = await respuesta.json();
+
+            if (!json.success) {
+                throw new Error(json.message || 'No fue posible confirmar la programación de envíos.');
+            }
+
+            mostrarMensajeExito();
+        } catch (error) {
+            mostrarEstado(estadoProgramacion, error.message, 'error');
+        } finally {
+            btnConfirmar.disabled = false;
+            btnCancelar.disabled = false;
+        }
+    }
+
+    function mostrarMensajeExito() {
+        const alVolver = () => {
+            window.PedidosTMS.limpiarSeleccion();
+            window.PedidosTMS.recargarPedidos();
+            cambiarVista(false);
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Pedido confirmado exitosamente!',
+                text: 'La solución de transporte ha sido registrada y los pedidos pasaron a estatus ' +
+                    '"En recolección". Puedes dar seguimiento al pedido desde el panel de control.',
+                confirmButtonColor: '#6A0025',
+            }).then(alVolver);
+        } else {
+            alert('¡Pedido confirmado exitosamente! Los pedidos pasaron a estatus "En recolección".');
+            alVolver();
+        }
+    }
+
+    function cancelarProgramacion() {
+        cambiarVista(false);
+    }
+
     btnProgramar.addEventListener('click', iniciarProgramacion);
-    btnVolver.addEventListener('click', () => cambiarVista(false));
+    btnVolver.addEventListener('click', (evento) => { evento.preventDefault(); cambiarVista(false); });
+    btnVolverTexto.addEventListener('click', (evento) => { evento.preventDefault(); cambiarVista(false); });
+    btnCancelar.addEventListener('click', cancelarProgramacion);
+    btnConfirmar.addEventListener('click', confirmarProgramacion);
 })();

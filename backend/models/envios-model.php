@@ -3,7 +3,8 @@
  * TransporteModel.php
  *
  * Encapsula todo el acceso a datos necesario para:
- *  1) Listar pedidos registrados filtrados por rango de fechas.
+ *  1) Listar pedidos con estatus_pedido = 'En preparación' filtrados por
+ *     rango de fechas (hoy, semana actual o un rango personalizado).
  *  2) Construir la estructura de un problema de transporte (orígenes,
  *     destinos, oferta, demanda y matriz de costos/distancias) a partir
  *     de un conjunto de pedidos seleccionados por el usuario.
@@ -59,6 +60,9 @@ class TransporteModel
     /**
      * Devuelve los pedidos cuya fecha_solicitud cae dentro del rango indicado,
      * incluyendo el nombre de sus localidades y el total de unidades pedidas.
+     *
+     * Solo se devuelven pedidos con estatus_pedido = 'En preparación', ya que
+     * son los únicos elegibles para ser incluidos en una programación de envíos.
      */
     public function obtenerPedidosPorRangoFechas(string $fechaInicio, string $fechaFin): array
     {
@@ -79,6 +83,7 @@ class TransporteModel
             INNER JOIN localidades ld ON ld.id_localidad = p.localidad_destino
             LEFT JOIN pedidos_detalles pd ON pd.pedido = p.id_pedido
             WHERE p.fecha_solicitud BETWEEN :fecha_inicio AND :fecha_fin
+              AND p.estatus_pedido = 'En preparación'
             GROUP BY
                 p.id_pedido, p.clave_pedido, p.localidad_origen, lo.nombre_centro_trabajo,
                 p.localidad_destino, ld.nombre_centro_trabajo, p.estatus_pedido,
@@ -190,6 +195,58 @@ class TransporteModel
             'total_demanda' => array_sum($demanda),
             'costo_sin_ruta' => self::COSTO_SIN_RUTA,
         ];
+    }
+
+    /**
+     * Cambia el estatus de los pedidos indicados a 'En recolección' una vez que
+     * la programación de envíos fue confirmada por el usuario.
+     *
+     * Solo se actualizan pedidos que sigan en 'En preparación' (evita pisar
+     * un cambio de estatus hecho por otro proceso/usuario entre la consulta
+     * y la confirmación). Se ejecuta dentro de una transacción.
+     *
+     * @return int Número de pedidos efectivamente actualizados.
+     */
+    public function actualizarEstatusARecoleccion(array $idsPedidos): int
+    {
+        $idsPedidos = array_values(array_unique(array_map('intval', $idsPedidos)));
+
+        if (count($idsPedidos) < 3) {
+            throw new InvalidArgumentException(
+                'Se requieren al menos 3 pedidos para confirmar la programación de envíos.'
+            );
+        }
+
+        [$inSql, $params] = $this->construirClausulaIn($idsPedidos, 'conf');
+
+        $this->db->beginTransaction();
+        try {
+            $sql = "
+                UPDATE pedidos
+                SET estatus_pedido = 'En recolección'
+                WHERE id_pedido IN ($inSql)
+                  AND estatus_pedido = 'En preparación'
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
+            $filasActualizadas = $stmt->rowCount();
+
+            if ($filasActualizadas !== count($idsPedidos)) {
+                $this->db->rollBack();
+                throw new InvalidArgumentException(
+                    'Uno o más pedidos seleccionados ya no están en estatus "En preparación" ' .
+                    'y no pudieron pasar a "En recolección". Vuelve a generar la programación.'
+                );
+            }
+
+            $this->db->commit();
+            return $filasActualizadas;
+        } catch (Throwable $excepcion) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $excepcion;
+        }
     }
 
     private function obtenerPedidosPorIds(array $ids): array

@@ -2,9 +2,14 @@
  * pedidos.js
  *
  * Lógica de la vista "Selección de pedidos":
- *  - Filtra pedidos por rango de fechas vía AJAX (action=listar_pedidos).
+ *  - Filtra pedidos en preparación según el selector "Filtrar:":
+ *      hoy            -> pedidos con fecha_solicitud = hoy.
+ *      semana         -> pedidos con fecha_solicitud dentro de la semana actual.
+ *      personalizado  -> el usuario indica fecha de inicio / fecha de fin.
+ *  - El backend SIEMPRE filtra adicionalmente por estatus_pedido = 'En preparación';
+ *    el frontend no necesita repetir ese filtro porque la API ya lo garantiza.
  *  - Permite marcar pedidos con checkbox.
- *  - Habilita el botón "Programar envíos" cuando hay 3 o más seleccionados.
+ *  - Habilita el botón "Configurar carga" cuando hay 3 o más seleccionados.
  *
  * Expone window.PedidosTMS.obtenerSeleccionActual() para que
  * programacion.js pueda leer los pedidos elegidos.
@@ -13,7 +18,12 @@
 (function () {
     const AJAX_URL = '/ajax/envios-ajax.php';
 
-    const form = document.getElementById('form-filtro-fechas');
+    const selectTipoFiltro = document.getElementById('select-tipo-filtro');
+    const panelRangoPersonalizado = document.getElementById('panel-rango-personalizado');
+    const formFiltroFechas = document.getElementById('form-filtro-fechas');
+    const pillRangoActivo = document.getElementById('pill-rango-activo');
+    const textoConteoRango = document.getElementById('texto-conteo-rango');
+
     const cuerpoTabla = document.getElementById('cuerpo-tabla-pedidos');
     const estadoPedidos = document.getElementById('estado-pedidos');
     const contadorSeleccion = document.getElementById('contador-seleccion');
@@ -27,17 +37,6 @@
         return new Date().toISOString().slice(0, 10);
     }
 
-    function inicializarFechas() {
-        const inputFin = document.getElementById('fecha_fin');
-        const inputInicio = document.getElementById('fecha_inicio');
-        if (!inputFin.value) inputFin.value = hoyISO();
-        if (!inputInicio.value) {
-            const hace30Dias = new Date();
-            hace30Dias.setDate(hace30Dias.getDate() - 30);
-            inputInicio.value = hace30Dias.toISOString().slice(0, 10);
-        }
-    }
-
     function mostrarEstado(contenedor, mensaje, tipo) {
         contenedor.innerHTML = mensaje ? `<div class="alerta alerta--${tipo}">${escaparHtml(mensaje)}</div>` : '';
     }
@@ -49,26 +48,13 @@
         btnProgramar.disabled = total < 3;
     }
 
-    function claseEstatus(estatus) {
-        const mapa = {
-            'En captura': 'neutro',
-            'En preparación': 'info',
-            'En recolección': 'info',
-            'Enviado': 'aviso',
-            'En tránsito': 'aviso',
-            'En reparto': 'aviso',
-            'Entregado': 'exito',
-        };
-        return mapa[estatus] || 'neutro';
-    }
-
     function renderizarPedidos(pedidos) {
         pedidosCargados = pedidos;
 
         if (pedidos.length === 0) {
             cuerpoTabla.innerHTML = `
-                <tr><td colspan="8" class="celda-vacia">
-                    No se encontraron pedidos registrados en el rango de fechas indicado.
+                <tr><td colspan="6" class="celda-vacia">
+                    No hay pedidos en preparación en el periodo seleccionado.
                 </td></tr>`;
             return;
         }
@@ -81,10 +67,8 @@
                     <td>${escaparHtml(pedido.clave_pedido)}</td>
                     <td>${escaparHtml(pedido.nombre_origen)}</td>
                     <td>${escaparHtml(pedido.nombre_destino)}</td>
+                    <td>${formatearNumero(pedido.total_unidades)} productos</td>
                     <td>${formatearFecha(pedido.fecha_solicitud)}</td>
-                    <td>${formatearFecha(pedido.fecha_entrega)}</td>
-                    <td><span class="badge badge--${claseEstatus(pedido.estatus_pedido)}">${escaparHtml(pedido.estatus_pedido)}</span></td>
-                    <td>${formatearNumero(pedido.total_unidades)}</td>
                 </tr>
             `;
         }).join('');
@@ -105,30 +89,56 @@
         actualizarContador();
     }
 
-    async function buscarPedidos(evento) {
-        evento.preventDefault();
-
-        const fechaInicio = document.getElementById('fecha_inicio').value;
-        const fechaFin = document.getElementById('fecha_fin').value;
-
-        if (!fechaInicio || !fechaFin) {
-            mostrarEstado(estadoPedidos, 'Selecciona un rango de fechas completo.', 'error');
+    function actualizarPillRango(tipoFiltro, rango) {
+        if (tipoFiltro !== 'personalizado' || !rango) {
+            pillRangoActivo.classList.add('d-none');
+            pillRangoActivo.textContent = '';
             return;
         }
-        if (fechaInicio > fechaFin) {
-            mostrarEstado(estadoPedidos, 'La fecha "Desde" no puede ser posterior a la fecha "Hasta".', 'error');
+        pillRangoActivo.textContent = `${formatearFechaCorta(rango.fecha_inicio)} - ${formatearFechaCorta(rango.fecha_fin)}`;
+        pillRangoActivo.classList.remove('d-none');
+    }
+
+    function actualizarTextoConteo(tipoFiltro, totalPedidos) {
+        if (tipoFiltro !== 'personalizado') {
+            textoConteoRango.classList.add('d-none');
             return;
         }
+        textoConteoRango.textContent = `${totalPedidos} pedido${totalPedidos === 1 ? '' : 's'} en el rango seleccionado`;
+        textoConteoRango.classList.remove('d-none');
+    }
 
-        mostrarEstado(estadoPedidos, 'Buscando pedidos…', 'info');
+    function formatearFechaCorta(valorISO) {
+        if (!valorISO) return 'dd/mm/aa';
+        const [anio, mes, dia] = valorISO.split('-');
+        return `${dia}/${mes}/${anio.slice(2)}`;
+    }
+
+    async function buscarPedidos() {
+        const tipoFiltro = selectTipoFiltro.value;
+        const params = new URLSearchParams({ action: 'listar_pedidos', tipo_filtro: tipoFiltro });
+
+        if (tipoFiltro === 'personalizado') {
+            const fechaInicio = document.getElementById('fecha_inicio').value;
+            const fechaFin = document.getElementById('fecha_fin').value;
+
+            if (!fechaInicio || !fechaFin) {
+                mostrarEstado(estadoPedidos, 'Selecciona un rango de fechas completo.', 'error');
+                return;
+            }
+            if (fechaInicio > fechaFin) {
+                mostrarEstado(estadoPedidos, 'La fecha de inicio no puede ser posterior a la fecha de fin.', 'error');
+                return;
+            }
+
+            params.append('fecha_inicio', fechaInicio);
+            params.append('fecha_fin', fechaFin);
+        }
+
+        mostrarEstado(estadoPedidos, 'Buscando pedidos en preparación…', 'info');
         cuerpoTabla.innerHTML = '';
 
         try {
-            const params = new URLSearchParams({
-                action: 'listar_pedidos',
-                fecha_inicio: fechaInicio,
-                fecha_fin: fechaFin,
-            });
             const respuesta = await fetch(`${AJAX_URL}?${params.toString()}`);
             const json = await respuesta.json();
 
@@ -138,8 +148,43 @@
 
             mostrarEstado(estadoPedidos, '', null);
             renderizarPedidos(json.data);
+            actualizarPillRango(tipoFiltro, json.rango);
+            actualizarTextoConteo(tipoFiltro, json.data.length);
         } catch (error) {
             mostrarEstado(estadoPedidos, error.message, 'error');
+            actualizarTextoConteo(tipoFiltro, 0);
+        }
+    }
+
+    function onCambiarTipoFiltro() {
+        const tipoFiltro = selectTipoFiltro.value;
+        const esPersonalizado = tipoFiltro === 'personalizado';
+
+        panelRangoPersonalizado.classList.toggle('d-none', !esPersonalizado);
+
+        if (!esPersonalizado) {
+            // "Hoy" y "Esta semana" se calculan en el servidor y se aplican de inmediato.
+            buscarPedidos();
+        } else {
+            // Al entrar a "Rango personalizado" no se busca hasta que el usuario aplique el rango.
+            pillRangoActivo.classList.add('d-none');
+            textoConteoRango.classList.add('d-none');
+        }
+    }
+
+    function onSubmitRangoPersonalizado(evento) {
+        evento.preventDefault();
+        buscarPedidos();
+    }
+
+    function inicializarFechasPersonalizado() {
+        const inputFin = document.getElementById('fecha_fin');
+        const inputInicio = document.getElementById('fecha_inicio');
+        if (!inputFin.value) inputFin.value = hoyISO();
+        if (!inputInicio.value) {
+            const hace7Dias = new Date();
+            hace7Dias.setDate(hace7Dias.getDate() - 7);
+            inputInicio.value = hace7Dias.toISOString().slice(0, 10);
         }
     }
 
@@ -147,9 +192,21 @@
         return Array.from(seleccionados.values());
     }
 
-    // API expuesta a programacion.js
-    window.PedidosTMS = { obtenerSeleccionActual };
+    function limpiarSeleccion() {
+        seleccionados.clear();
+        actualizarContador();
+    }
 
-    form.addEventListener('submit', buscarPedidos);
-    inicializarFechas();
+    function recargarPedidos() {
+        return buscarPedidos();
+    }
+
+    // API expuesta a programacion.js
+    window.PedidosTMS = { obtenerSeleccionActual, limpiarSeleccion, recargarPedidos };
+
+    selectTipoFiltro.addEventListener('change', onCambiarTipoFiltro);
+    formFiltroFechas.addEventListener('submit', onSubmitRangoPersonalizado);
+
+    inicializarFechasPersonalizado();
+    buscarPedidos(); // Carga inicial: filtro por defecto "Hoy".
 })();

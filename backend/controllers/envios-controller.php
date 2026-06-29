@@ -37,6 +37,10 @@ class EnviosController
                     $this->generarProblema();
                     break;
 
+                case 'confirmar_programacion':
+                    $this->confirmarProgramacion();
+                    break;
+
                 default:
                     throw new InvalidArgumentException('Acción no reconocida.');
             }
@@ -50,27 +54,74 @@ class EnviosController
     }
 
     /**
-     * GET listar_pedidos?fecha_inicio=AAAA-MM-DD&fecha_fin=AAAA-MM-DD
+     * GET listar_pedidos?tipo_filtro=hoy|semana|personalizado&fecha_inicio=AAAA-MM-DD&fecha_fin=AAAA-MM-DD
+     *
+     * "tipo_filtro" determina cómo se calcula el rango de fechas en el servidor:
+     *   - hoy:           fecha_solicitud = fecha actual.
+     *   - semana:        fecha_solicitud dentro de la semana actual (lunes a domingo).
+     *   - personalizado: usa fecha_inicio y fecha_fin enviados por el cliente.
+     *
+     * En todos los casos solo se devuelven pedidos con estatus_pedido = 'En preparación'.
      */
     private function listarPedidos(): void
     {
-        $fechaInicio = $_GET['fecha_inicio'] ?? $_POST['fecha_inicio'] ?? null;
-        $fechaFin = $_GET['fecha_fin'] ?? $_POST['fecha_fin'] ?? null;
+        $tipoFiltro = $_GET['tipo_filtro'] ?? $_POST['tipo_filtro'] ?? 'hoy';
+        $tipoFiltro = (string) $tipoFiltro;
 
-        if (!$fechaInicio || !$fechaFin) {
-            throw new InvalidArgumentException('Debes indicar un rango de fechas (fecha_inicio y fecha_fin).');
+        [$fechaInicio, $fechaFin] = $this->resolverRangoFechas($tipoFiltro);
+
+        $pedidos = $this->model->obtenerPedidosPorRangoFechas($fechaInicio, $fechaFin);
+
+        echo json_encode([
+            'success' => true,
+            'data' => $pedidos,
+            'rango' => ['fecha_inicio' => $fechaInicio, 'fecha_fin' => $fechaFin],
+        ]);
+    }
+
+    /**
+     * Calcula el rango de fechas (fecha_inicio, fecha_fin) según el tipo de filtro solicitado.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function resolverRangoFechas(string $tipoFiltro): array
+    {
+        switch ($tipoFiltro) {
+            case 'hoy':
+                $hoy = (new DateTimeImmutable('today'))->format('Y-m-d');
+                return [$hoy, $hoy];
+
+            case 'semana':
+                $hoy = new DateTimeImmutable('today');
+                // ISO-8601: la semana inicia en lunes (1) y termina en domingo (7).
+                $inicioSemana = $hoy->modify('monday this week');
+                $finSemana = $hoy->modify('sunday this week');
+                return [$inicioSemana->format('Y-m-d'), $finSemana->format('Y-m-d')];
+
+            case 'personalizado':
+                $fechaInicio = $_GET['fecha_inicio'] ?? $_POST['fecha_inicio'] ?? null;
+                $fechaFin = $_GET['fecha_fin'] ?? $_POST['fecha_fin'] ?? null;
+
+                if (!$fechaInicio || !$fechaFin) {
+                    throw new InvalidArgumentException(
+                        'Para un rango personalizado debes indicar fecha_inicio y fecha_fin.'
+                    );
+                }
+
+                $this->validarFecha((string) $fechaInicio);
+                $this->validarFecha((string) $fechaFin);
+
+                if ($fechaInicio > $fechaFin) {
+                    throw new InvalidArgumentException('La fecha inicial no puede ser posterior a la fecha final.');
+                }
+
+                return [(string) $fechaInicio, (string) $fechaFin];
+
+            default:
+                throw new InvalidArgumentException(
+                    "Tipo de filtro no reconocido: {$tipoFiltro}. Usa 'hoy', 'semana' o 'personalizado'."
+                );
         }
-
-        $this->validarFecha((string) $fechaInicio);
-        $this->validarFecha((string) $fechaFin);
-
-        if ($fechaInicio > $fechaFin) {
-            throw new InvalidArgumentException('La fecha inicial no puede ser posterior a la fecha final.');
-        }
-
-        $pedidos = $this->model->obtenerPedidosPorRangoFechas((string) $fechaInicio, (string) $fechaFin);
-
-        echo json_encode(['success' => true, 'data' => $pedidos]);
     }
 
     /**
@@ -89,6 +140,31 @@ class EnviosController
         $problema = $this->model->construirProblemaTransporte($idsPedidos);
 
         echo json_encode(['success' => true, 'data' => $problema]);
+    }
+
+    /**
+     * POST confirmar_programacion  pedidos[]=1&pedidos[]=2&pedidos[]=3...
+     *
+     * Se llama cuando el usuario confirma la solución de transporte mostrada
+     * en pantalla. Cambia el estatus de los pedidos involucrados de
+     * 'En preparación' a 'En recolección'.
+     */
+    private function confirmarProgramacion(): void
+    {
+        $idsPedidos = $_POST['pedidos'] ?? [];
+
+        if (!is_array($idsPedidos) || count($idsPedidos) < 3) {
+            throw new InvalidArgumentException(
+                'Selecciona al menos 3 pedidos para confirmar la programación de envíos.'
+            );
+        }
+
+        $totalActualizados = $this->model->actualizarEstatusARecoleccion($idsPedidos);
+
+        echo json_encode([
+            'success' => true,
+            'data' => ['pedidos_actualizados' => $totalActualizados],
+        ]);
     }
 
     private function validarFecha(string $fecha): void

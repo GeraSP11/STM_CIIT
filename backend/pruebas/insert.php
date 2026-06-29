@@ -409,13 +409,13 @@ try {
     $pedidos = [
         'pedido_1' => [
             ':clave_pedido' => 'PED-20240115-CPOAX01-CDIST01-A1B2C3',
-            ':origen' => 'oaxaca', ':destino' => 'istmo', ':estatus_pedido' => 'Entregado',
+            ':origen' => 'oaxaca', ':destino' => 'istmo', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-15', ':fecha_entrega' => '2024-01-20',
             ':observaciones' => 'Envío de quesos frescos - Entrega exitosa',
         ],
         'pedido_2' => [
             ':clave_pedido' => 'PED-20240122-CDIST01-POHUA01-B2C3D4',
-            ':origen' => 'istmo', ':destino' => 'huatulco', ':estatus_pedido' => 'En tránsito',
+            ':origen' => 'istmo', ':destino' => 'huatulco', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-22', ':fecha_entrega' => '2024-01-25',
             ':observaciones' => 'Yogurt y productos lácteos - En camino',
         ],
@@ -427,25 +427,25 @@ try {
         ],
         'pedido_4' => [
             ':clave_pedido' => 'PED-20240120-CPOAX01-ALPUE01-D4E5F6',
-            ':origen' => 'oaxaca', ':destino' => 'puebla', ':estatus_pedido' => 'Enviado',
+            ':origen' => 'oaxaca', ':destino' => 'puebla', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-20', ':fecha_entrega' => '2024-01-26',
             ':observaciones' => 'Productos terminados para redistribución',
         ],
         'pedido_5' => [
             ':clave_pedido' => 'PED-20240124-POHUA01-CDIST01-E5F6A1',
-            ':origen' => 'huatulco', ':destino' => 'istmo', ':estatus_pedido' => 'En captura',
+            ':origen' => 'huatulco', ':destino' => 'istmo', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-24', ':fecha_entrega' => '2024-02-16',
             ':observaciones' => 'Solicitud de cajas corrugadas para operaciones de embalaje',
         ],
         'pedido_6' => [
             ':clave_pedido' => 'PED-20240123-CDIST01-ALPUE01-F6A1B2',
-            ':origen' => 'istmo', ':destino' => 'puebla', ':estatus_pedido' => 'En recolección',
+            ':origen' => 'istmo', ':destino' => 'puebla', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-23', ':fecha_entrega' => '2024-01-30',
             ':observaciones' => 'Productos perecederos - Urgente',
         ],
         'pedido_7' => [
             ':clave_pedido' => 'PED-20240121-ALPUE01-POHUA01-A1C2D3',
-            ':origen' => 'puebla', ':destino' => 'huatulco', ':estatus_pedido' => 'En reparto',
+            ':origen' => 'puebla', ':destino' => 'huatulco', ':estatus_pedido' => 'En preparación',
             ':fecha_solicitud' => '2024-01-21', ':fecha_entrega' => '2024-01-24',
             ':observaciones' => 'Último tramo de entrega',
         ],
