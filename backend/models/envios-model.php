@@ -155,12 +155,18 @@ class TransporteModel
 
         $costos = [];
         $rutasDisponibles = [];
+
         foreach ($origenesIds as $idOrigen) {
             $filaCostos = [];
             $filaDisponible = [];
+
             foreach ($destinosIds as $idDestino) {
                 $clave = $idOrigen . '-' . $idDestino;
-                if (isset($distanciasPorPar[$clave])) {
+
+                if ((int) $idOrigen === (int) $idDestino) {
+                    $filaCostos[] = 0.0;
+                    $filaDisponible[] = true;
+                } elseif (isset($distanciasPorPar[$clave])) {
                     $filaCostos[] = (float) $distanciasPorPar[$clave];
                     $filaDisponible[] = true;
                 } else {
@@ -168,9 +174,10 @@ class TransporteModel
                     $filaDisponible[] = false;
                 }
             }
+
             $costos[] = $filaCostos;
             $rutasDisponibles[] = $filaDisponible;
-        }
+        }   
 
         $pedidosSeleccionados = array_map(function (array $pedido) use ($nombresLocalidades) {
             return [

@@ -142,7 +142,7 @@ $seccion = 'Listado de pedidos';
 
                 <div class="resumen-kpis">
                     <div class="kpi-card">
-                        <span class="kpi-card__label">Total unidades</span>
+                        <span class="kpi-card__label">Oferta total disponible</span>
                         <span class="kpi-card__valor" id="kpi-total-unidades">—</span>
                     </div>
                     <div class="kpi-card">
